@@ -6,7 +6,7 @@ M = -0.5 * S * S
 xmax = 2.5
 
 
-setwd("/home/jdou557/Documents/Marsden2019/Months/January2020/ClockModelPaper/Figures")
+#setwd("/home/jdou557/Documents/Marsden2019/papers/ClockModelPaper/Figures")
 
 
 par(mfrow = c(2,3))
