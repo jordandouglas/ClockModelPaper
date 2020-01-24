@@ -639,31 +639,27 @@ Methodologies are benchmarked using an Intel(R) Xeon(R) Gold 6138 CPU (2.00 GHz)
 
 16  &  78  &  1/4/8/16  &  0.4/1.9/4.1/7.2  &  0.3/1.7/3.6/6.2  &  Cannon 2016 \cite{Cannon_2016} \\ 
 
-17  &  78  &  1/4/8/16  &  1/2.6/8/14.1  &  0.6/1.7/6.4/10.4  &  Lartillot 2012 \cite{Lartillot_2012} \\ 
+17  &  79  &  1/4/8/16  &  0.1/1.3/0.8/4.5  &  0/0.1/0.1/0.8  &  Oaks 2011 \cite{Oaks_2011} \\ 
 
-18  &  79  &  1/4/8/16  &  0.1/1.3/0.8/4.5  &  0/0.1/0.1/0.8  &  Oaks 2011 \cite{Oaks_2011} \\ 
+18  &  94  &  1/4/8/11  &  0.1/1.8/3/3.7  &  0.1/0.8/1.3/1.7  &  Rightmyer 2013 \cite{Rightmyer_2013} \\ 
 
-19  &  94  &  1/4/8/11  &  0.1/1.8/3/3.7  &  0.1/0.8/1.3/1.7  &  Rightmyer 2013 \cite{Rightmyer_2013} \\ 
+19  &  106  &  1/4/8/16  &  0.6/3.1/5.1/11.6  &  0.3/1.2/2/4.5  &  Moyle 2016 \cite{Moyle_2016} \\ 
 
-20  &  106  &  1/4/8/16  &  0.6/3.1/5.1/11.6  &  0.3/1.2/2/4.5  &  Moyle 2016 \cite{Moyle_2016} \\ 
+20  &  110  &  1/4/8/16  &  0.5/2.1/3.8/7.1  &  0.3/1.4/2.5/4.3  &  Fong 2012 \cite{Fong_2012} \\ 
 
-21  &  110  &  1/4/8/16  &  0.5/2.1/3.8/7.1  &  0.3/1.4/2.5/4.3  &  Fong 2012 \cite{Fong_2012} \\ 
+21  &  152  &  1/4/5  &  1/3.5/3.6  &  0.6/1.6/1.6  &  Day 2013 \cite{Day_2013} \\ 
 
-22  &  145  &  1/2  &  1.6/3  &  0.5/1  &  Anderson 2013 \cite{Anderson_2013} \\ 
+22  &  187  &  1/4/8/16  &  0.3/0.9/1.4/3.5  &  0.2/0.7/1.1/2.9  &  Branstetter 2017 \cite{Branstetter_2017} \\ 
 
-23  &  152  &  1/4/5  &  1/3.5/3.6  &  0.6/1.6/1.6  &  Day 2013 \cite{Day_2013} \\ 
+23  &  197  &  1/4/8/14  &  0.9/3.1/6.1/11.6  &  0.3/1.6/3.5/6.3  &  Horn 2014 \cite{Horn_2014} \\ 
 
-24  &  187  &  1/4/8/16  &  0.3/0.9/1.4/3.5  &  0.2/0.7/1.1/2.9  &  Branstetter 2017 \cite{Branstetter_2017} \\ 
+24  &  235  &  1/4/8/16  &  2.3/6.4/8.5/25.7  &  0.9/2.3/3.2/12.2  &  Reddy 2017 \cite{Reddy_2017} \\ 
 
-25  &  197  &  1/4/8/14  &  0.9/3.1/6.1/11.6  &  0.3/1.6/3.5/6.3  &  Horn 2014 \cite{Horn_2014} \\ 
+25  &  237  &  1/4/5  &  0.8/2.4/3.1  &  0.2/1.2/1.5  &  Murray 2013 \cite{Murray_2013} \\ 
 
-26  &  235  &  1/4/8/16  &  2.3/6.4/8.5/25.7  &  0.9/2.3/3.2/12.2  &  Reddy 2017 \cite{Reddy_2017} \\ 
+26  &  608  &  1/4/8/10  &  0.9/3.7/7.1/8.6  &  0.7/2.8/5.4/6.4  &  Near 2013 \cite{Near_2013} \\ 
 
-27  &  237  &  1/4/5  &  0.8/2.4/3.1  &  0.2/1.2/1.5  &  Murray 2013 \cite{Murray_2013} \\ 
 
-28  &  608  &  1/4/8/10  &  0.9/3.7/7.1/8.6  &  0.7/2.8/5.4/6.4  &  Near 2013 \cite{Near_2013} \\ 
-
-29  &  1171  &  1/4  &  0.8/3.9  &  0.8/2.4  &  Looney 2016 \cite{Looney_2016} \\ 
 
 
 
@@ -680,6 +676,27 @@ Methodologies are benchmarked using an Intel(R) Xeon(R) Gold 6138 CPU (2.00 GHz)
 
 
 \subsection*{Comparison of rate parameterisations}
+
+We compared the three rate parameterisations described in \textbf{\nameref{sect:rateparams}}. All three settings use the standard BEAST2 clock model operators from Drummond et al. 2006 \cite{drummond2006relaxed}. \textit{real} and \textit{quant} additionally use the constant-distance tree operators described by Zhang and Drummond 2020. To determine whether the difference in performance between \textit{real}/\textit{quant} versus \textit{cat} is because of the constant-distance tree operators or the parameterisation itself, we also included benchmarked two additional settings: \textit{real 2006} and \textit{quant 2006}, which do not used the constant-distance operators. These five settings are validated in \textbf{\nameref{sect:WCSS_appendix}}.
+
+
+\textbf{Fig. \ref{fig:parameterisationResults}} shows that the \textit{real 2006} performs considerably worse than any of the other settings. This is due to the poor sampling of the prior under this setting (ie. low ESS of $p(\theta)$). The failure of \textit{real 2006} thus highlights the appeal of 1) the \textit{cat} or \textit{quant} parameterisations, both of which have trivial contributions to the overall prior density (ie. uniform priors), and 2) the smarter operators used by \textit{real} (Zhang and Drummond 2020). Due to its computational burden, \textit{real 2006} was not benchmarked for all of the datasets in \textbf{Table \ref{table:datasets}}.
+
+
+
+
+\begin{figure}[!h]
+%\includegraphics[width=\textwidth]{Figures/tournament.pdf}
+\caption{\textbf{Rate parameterisation evaluation.} }
+\label{fig:parameterisationResults}
+\end{figure}
+
+
+
+
+% 1-3) the \textit{cat}, \textit{real}, and \textit{quant} parameterisations using the operators described by Drummond et al. 2006 \cite{drummond2006relaxed}; 3) the \textit{quant} parameteristion 
+
+
 
 
 \subsection*{Comparison of NER variants}
