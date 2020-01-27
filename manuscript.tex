@@ -403,8 +403,65 @@ Zhang and Drummond 2020 introduced several tree operators for the \textit{real} 
 
 
 
+\subsection*{Bactrian proposal kernel} \label{sect:randomwalks}
 
 
+%The proposal kernel $q(x^\prime|x)$ defines the conditional probability of proposing state $x^\prime$ given state $x$. 
+
+The step size of a proposal kernal $q(x^\prime|x)$ should be such that the proposed state $x^\prime$ is sufficiently far from the current state $x$ to explore vast areas of parameter space, but not so large that the proposal is rejected too often. Yang et al. have challenged the widely used uniform proposal kernel in place of the Bactrian kernel \cite{yang2013searching, thawornwattana2018designing}.
+The $\text{Bactrian}(m)$ distribution is defined as the sum of two Normal distributions:
+
+
+\begin{align}
+	\Sigma \sim \text{Bactrian}(m) \equiv \frac{1}{2}\text{Normal}(-m, 1-m^2) + \frac{1}{2}\text{Normal}(m, 1-m^2)
+\end{align}
+
+
+where $0 \leq m < 1$ describes the modality of the Bactrian distribution. When $m=0$, the Bactrian distribution is equivalent to a $\text{Normal}(0, 1)$ distribution. As $m \rightarrow 1$, the distribution becomes increasingly bimodal (\textbf{Fig. \ref{fig:bactrian}}). Yang et al. 2013 \cite{yang2013searching} suggest that $\text{Bactrian}(m=0.95)$ yields a proposal kernel superior to the uniform kernel, by placing minimal probability on steps which are too small or too large.
+
+
+
+\begin{figure}[!h]
+\includegraphics[width=\textwidth]{Figures/bactrian.pdf}
+\caption{\textbf{The Bactrian proposal kernel.} Y-axis corresponds to probability density $f(\Sigma|m)$.  }
+\label{fig:bactrian}
+\end{figure}
+
+
+
+
+
+In this article we compare the performance the uniform and Bactrian proposal kernels in the clock model. Three Bactrian distributions are compared($m=0.92$, $m=0.95$, and $m=0.98$). The clock model operators which are augmented by the Bactrian distribution are described in \textbf{Table \ref{table:kernels}}.
+
+
+
+% Give the equation of the Uniform + Bactrian kernals
+% Fig: Bactrian m=0, 0.92, 0.95, 0.98, + Uniform(-1,1)
+% In this article we compare the Uniform + Bactrian proposals in the clock model  
+
+% BRIEFLY describe three operators: random walk, scale, uniform + where the proposal kernal comes in + which parameters in the clock model it applies to
+
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l| l l l|} 
+ \hline
+ & Operator & Proposal & Parameters  \\
+ 1 & \textbf{Random walk operator} & $x^\prime \leftarrow x + s\Sigma$ & $t, \sigma, r, q$ \\
+ 2 & \textbf{Scale operator} & $x^\prime \leftarrow x \times e^{s\Sigma}$ & $\sigma, r$  \\
+ %3 & \textbf{Uniform operator} & $\begin{array} {rl} y &\leftarrow s\Sigma \times \frac{u - x}{x - l} \\ x^\prime &\leftarrow \frac{u + l * y}{y + 1}  \end{array}$ & $t, q$  \\
+ 3 & \textbf{Constant distance operators} & $x^\prime \leftarrow x + s\Sigma$ & $t$ \\
+ \hline
+\end{tabular}
+\caption{Summary of proposal kernels $q(x^\prime|x)$ of clock model operators. In each operator, $\Sigma$ is drawn from either a $\text{Noramlised-Bactrian}(m)$ or $\text{Uniform}(-\sqrt{3},\sqrt{3})$ distribution. The scale size $s$ is tunable. The proposal kernel may apply to node heights $t$, clock standard deviation $\sigma$, clock rates $r$ (\textit{real} only), and clock rate quantiles $q$ (\textit{quant} only). The Scale operator acts on parameters with non-negative domains. }
+\label{table:kernels}
+\end{table}
+
+
+% $x^\prime \leftarrow w \times \frac{u - x}{x - l}$
+
+
+\newpage
 % REMEMBER to define NNI and SPR acronyms in introduction preferably
 \subsection*{Narrow Exchange Rate} \label{sect:NER}
 
@@ -426,12 +483,18 @@ The \textbf{Narrow Exchange} operator \cite{drummond2002estimating}, widely used
 \end{figure}
 
 
-Lakner et al. 2008 \cite{lakner2008efficiency} found that tree operators which perterb topology (such as NNI and SPR) consistently perform better than those which also change branch lengths (such as LOCAL \cite{simon1998local} and Continuous Change \cite{jow2002bayesian}). If Narrow Exchange was adapted to the relaxed clock model by ensuring that genetic distances remain constant after the proposal, its performance may be improved even further.
+Lakner et al. 2008 \cite{lakner2008efficiency} found that tree operators which perterb topology (such as NNI and SPR) consistently perform better than those which also change branch lengths (such as LOCAL \cite{simon1998local} and Continuous Change \cite{jow2002bayesian}). If Narrow Exchange was adapted to the relaxed clock model by ensuring that genetic distances remain constant after the proposal, its performance may be improved even further, which may in turn permit proposing a new node height $t_D$ and therefore changing branch time lengths (without affecting branch distance lengths).
 
 %Therefore, it seems reasonable to adapt the Narrow Exchange operator for use with the relaxed clock model, such that genetic distances remain constant after performing the proposal $\mathcal{T} \rightarrow \mathcal{T}^\prime$.
 
 
-Here, we present the \textbf{Narrow Exchange Rate} (NER) operator. Let $r_A$, $r_B$, $r_C$, and $r_D$ be the clock rates of nodes $A$, $B$, $C$, and $D$, respectively. In addition to the modest topological change applied by Narrow Exchange, NER also proposes new clock rates ${r_A}^\prime$, ${r_B}^\prime$, ${r_C}^\prime$, and ${r_D}^\prime$. NER is compatible with both the \textit{real} and \textit{quant} parameterisations. Analagous to the Constant Distance operator, these rates are proposed such that genetic distances between nodes $A$, $B$, $C$, and $E$ are maintained. Thus, there are $\binom{4}{2} = 6$ pairwise distance constraints.
+Here, we present the \textbf{Narrow Exchange Rate} (NER) operator. Let $r_A$, $r_B$, $r_C$, and $r_D$ be the clock rates of nodes $A$, $B$, $C$, and $D$, respectively. In addition to the modest topological change applied by Narrow Exchange, NER also proposes new clock rates ${r_A}^\prime$, ${r_B}^\prime$, ${r_C}^\prime$, and ${r_D}^\prime$. We also consider a case of the NER operator which proposes a new node height:
+
+\begin{align}
+	{t_D}^\prime \leftarrow t_D + \Sigma
+\end{align}
+
+for random walk step size $\Sigma$ drawn from a uniform or \textbf{\nameref{sect:randomwalks}}. NER is compatible with both the \textit{real} and \textit{quant} parameterisations. Analagous to the Constant Distance operator, these rates are proposed such that genetic distances between nodes $A$, $B$, $C$, and $E$ are maintained. Thus, there are $\binom{4}{2} = 6$ pairwise distance constraints.
 
 
 \begin{align}
@@ -489,7 +552,7 @@ Computing the determinant $|J|$ invokes standard analytical differentiation and 
 
 \paragraph{3. Automated generation of BEAST2 operators.} Java class files are generated using string processing. Each class corresponds to a single operator, extends the class of a meta-NER-operator, and is comprised of the solutions found in \textbf{1} and the Jacobian determinant found in \textbf{2}. $|J|$ is further augmented if the \textit{quant} parameterisation is employed.
 
-The 48 operators generated by this pipeline are evaluated and compared in \textbf{\nameref{sect:results}}.
+The 48 operators generated by this pipeline are evaluated and compared in \textbf{\nameref{sect:results}}. Each operator is considered with and without a random walk on $t_D$ and thus there are 96 total settings.
 
 
 %Each NER variant differs by its a) proposals, which are the solutions found in step \textbf{1}, and b) its Jacobian $|J|$.  
@@ -499,64 +562,6 @@ The 48 operators generated by this pipeline are evaluated and compared in \textb
 
 
 
-
-\subsection*{Bactrian proposal kernel} \label{sect:randomwalks}
-
-
-%The proposal kernel $q(x^\prime|x)$ defines the conditional probability of proposing state $x^\prime$ given state $x$. 
-
-The step size of a proposal kernal $q(x^\prime|x)$ should be such that the proposed state $x^\prime$ is sufficiently far from the current state $x$ to explore vast areas of parameter space, but not so large that the proposal is rejected too often. Yang et al. have challenged the widely used uniform proposal kernel in place of the Bactrian kernel \cite{yang2013searching, thawornwattana2018designing}.
-The $\text{Bactrian}(m)$ distribution is defined as the sum of two Normal distributions:
-
-
-\begin{align}
-	\alpha \sim \text{Bactrian}(m) \equiv \frac{1}{2}\text{Normal}(-m, 1-m^2) + \frac{1}{2}\text{Normal}(m, 1-m^2)
-\end{align}
-
-
-where $0 \leq m < 1$ describes the modality of the Bactrian distribution. When $m=0$, the Bactrian distribution is equivalent to a $\text{Normal}(0, 1)$ distribution. As $m \rightarrow 1$, the distribution becomes increasingly bimodal (\textbf{Fig. \ref{fig:bactrian}}). Yang et al. 2013 \cite{yang2013searching} suggest that $\text{Bactrian}(m=0.95)$ yields a proposal kernel superior to the uniform kernel, by placing minimal probability on steps which are too small or too large.
-
-
-
-\begin{figure}[!h]
-\includegraphics[width=\textwidth]{Figures/bactrian.pdf}
-\caption{\textbf{The Bactrian proposal kernel.} Y-axis corresponds to probability density $f(\alpha|m)$.  }
-\label{fig:bactrian}
-\end{figure}
-
-
-
-
-
-In this article we compare the performance the uniform and Bactrian proposal kernels in the clock model. Three Bactrian distributions are compared($m=0.92$, $m=0.95$, and $m=0.98$). The clock model operators which are augmented by the Bactrian distribution are described in \textbf{Table \ref{table:kernels}}.
-
-
-
-% Give the equation of the Uniform + Bactrian kernals
-% Fig: Bactrian m=0, 0.92, 0.95, 0.98, + Uniform(-1,1)
-% In this article we compare the Uniform + Bactrian proposals in the clock model  
-
-% BRIEFLY describe three operators: random walk, scale, uniform + where the proposal kernal comes in + which parameters in the clock model it applies to
-
-
-\begin{table}[h!]
-\centering
-\begin{tabular}{|l| l l l|} 
- \hline
- & Operator & Proposal & Parameters  \\
- 1 & \textbf{Random walk operator} & $x^\prime \leftarrow x + s\alpha$ & $t, \sigma, r, q$ \\
- 2 & \textbf{Scale operator} & $x^\prime \leftarrow x \times e^{s\alpha}$ & $\sigma, r$  \\
- %3 & \textbf{Uniform operator} & $\begin{array} {rl} y &\leftarrow s\alpha \times \frac{u - x}{x - l} \\ x^\prime &\leftarrow \frac{u + l * y}{y + 1}  \end{array}$ & $t, q$  \\
- 3 & \textbf{Constant distance operators} & $x^\prime \leftarrow x + s\alpha$ & $t$ \\
- 4 & \textbf{NER operator} & $x^\prime \leftarrow x + s\alpha$ & $t$ \\
- \hline
-\end{tabular}
-\caption{Summary of proposal kernels $q(x^\prime|x)$ of clock model operators. In each operator, $\alpha$ is drawn from either a $\text{Bactrian}(m)$ or $\text{Uniform}(-1,1)$ distribution. The scale size $s$ is tunable. The proposal kernel may apply to on node heights $t$, clock standard deviation $\sigma$, clock rates $r$ (\textit{real} only), and clock rate quantiles $q$ (\textit{quant} only). The Scale operator acts on parameters with non-negative domains. NER applies the random walk to $t_D$. }
-\label{table:kernels}
-\end{table}
-
-
-% $x^\prime \leftarrow w \times \frac{u - x}{x - l}$
 
 \subsection*{Clock model averaging}
 
@@ -571,7 +576,7 @@ In this article we compare the performance the uniform and Bactrian proposal ker
 \subsection*{Assessment criteria and datasets}
 
 
-To avoid a cross-product explosion, the three targets for clock model improvement (\textbf{\nameref{sect:rateparams}}, \textbf{\nameref{sect:NER}}, and \textbf{\nameref{sect:randomwalks}}) are evaluated sequentially, in the order presented in this paper. The setting(s) which are considered to be the best in each step are then incorporated into the following step. This protocol and its outcomes are summarised in \textbf{Fig. \ref{fig:tournament}}.
+To avoid a cross-product explosion, the three targets for clock model improvement (\textbf{\nameref{sect:rateparams}}, \textbf{\nameref{sect:randomwalks}}, and \textbf{\nameref{sect:NER}}) are evaluated sequentially, in the order presented in this paper. The setting(s) which are considered to be the best in each step are then incorporated into the following step. This protocol and its outcomes are summarised in \textbf{Fig. \ref{fig:tournament}}.
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{Figures/tournament.pdf}
@@ -680,7 +685,7 @@ Methodologies are benchmarked using an Intel(R) Xeon(R) Gold 6138 CPU (2.00 GHz)
 We compared the three rate parameterisations described in \textbf{\nameref{sect:rateparams}}. All three settings use the standard BEAST2 clock model operators from Drummond et al. 2006 \cite{drummond2006relaxed}. \textit{real} and \textit{quant} additionally use the constant-distance tree operators described by Zhang and Drummond 2020. To determine whether the difference in performance between \textit{real}/\textit{quant} versus \textit{cat} is because of the constant-distance tree operators or the parameterisation itself, we also included benchmarked two additional settings: \textit{real 2006} and \textit{quant 2006}, which do not used the constant-distance operators. These five settings are validated in \textbf{\nameref{sect:WCSS_appendix}}.
 
 
-\textbf{Fig. \ref{fig:parameterisationResults}} shows that the \textit{real 2006} performs considerably worse than any of the other settings. This is due to the poor sampling of the prior under this setting (ie. low ESS of $p(\theta)$). The failure of \textit{real 2006} thus highlights the appeal of 1) the \textit{cat} or \textit{quant} parameterisations, both of which have trivial contributions to the overall prior density (ie. uniform priors), and 2) the smarter operators used by \textit{real} (Zhang and Drummond 2020). Due to its computational burden, \textit{real 2006} was not benchmarked for all of the datasets in \textbf{Table \ref{table:datasets}}.
+\textbf{Fig. \ref{fig:parameterisationResults}} shows that the \textit{real 2006} performs considerably worse than any of the other settings. This is due to the poor sampling of the prior under this setting (ie. low ESS of $p(\theta)$). The failure of \textit{real 2006} thus highlights the appeal of 1) the \textit{cat} or \textit{quant} parameterisations, both of which have trivial contributions to the prior density (ie. uniform priors), and 2) the smarter operators used by \textit{real} (Zhang and Drummond 2020). Due to its computational burden, \textit{real 2006} was not benchmarked for all of the datasets in \textbf{Table \ref{table:datasets}}.
 
 
 
