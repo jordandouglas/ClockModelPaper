@@ -7,7 +7,7 @@ setwd("/home/jdou557/Documents/Marsden2019/papers/ClockModelPaper/Figures")
 
 
 filename = "bactrian"
-cols = 1
+cols = 2
 rows = 1
 basewidth = 2.5
 
@@ -43,7 +43,10 @@ dbactrian = function(x, m){
 
 
 x = seq(from = -3, to = 3, by = 0.001)
-plot(0, 1, xlim = range(x), ylim = c(0,1.1), type = "n", xlab = "$\\alpha$", ylab = "", main = "Bactrian distribution", xaxs = "i", yaxs = "i", axes = F)
+
+
+# Bactrian
+plot(0, 1, xlim = range(x), ylim = c(0,1.1), type = "n", xlab = "$\\Sigma$", ylab = "", main = "Bactrian distribution", xaxs = "i", yaxs = "i", axes = F)
 
 
 mvals = c(0.92, 0.95, 0.98)
@@ -70,6 +73,9 @@ legend("topleft", paste0("$m=", mvals, "$"), col = cols, lwd = lwds, lty = ltys,
 axis(1)
 
 
+
+# Normalised Bactrian
+plot(0, 1, xlim = range(x), ylim = c(0,1.1), type = "n", xlab = "$\\Sigma$", ylab = "", main = "Proposal kernels", xaxs = "i", yaxs = "i", axes = F)
 
 
 

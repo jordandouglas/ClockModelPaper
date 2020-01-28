@@ -408,7 +408,7 @@ Zhang and Drummond 2020 introduced several tree operators for the \textit{real} 
 
 %The proposal kernel $q(x^\prime|x)$ defines the conditional probability of proposing state $x^\prime$ given state $x$. 
 
-The step size of a proposal kernal $q(x^\prime|x)$ should be such that the proposed state $x^\prime$ is sufficiently far from the current state $x$ to explore vast areas of parameter space, but not so large that the proposal is rejected too often. Yang et al. have challenged the widely used uniform proposal kernel in place of the Bactrian kernel \cite{yang2013searching, thawornwattana2018designing}.
+The step size of a proposal kernal $q(x^\prime|x)$ should be such that the proposed state $x^\prime$ is sufficiently far from the current state $x$ to explore vast areas of parameter space, but not so large that the proposal is rejected too often \cite{roberts1997weak}. Yang et al. have challenged the widely used uniform proposal kernel in place of the Bactrian kernel \cite{yang2013searching, thawornwattana2018designing}.
 The $\text{Bactrian}(m)$ distribution is defined as the sum of two Normal distributions:
 
 
@@ -431,7 +431,7 @@ where $0 \leq m < 1$ describes the modality of the Bactrian distribution. When $
 
 
 
-In this article we compare the performance the uniform and Bactrian proposal kernels in the clock model. Three Bactrian distributions are compared($m=0.92$, $m=0.95$, and $m=0.98$). The clock model operators which are augmented by the Bactrian distribution are described in \textbf{Table \ref{table:kernels}}.
+In this article we compare the performance of uniform and Bactrian proposal kernels in the clock model. Three Bactrian distributions are compared($m=0.92$, $m=0.95$, and $m=0.98$). The clock model operators which these proposal kernels apply to are described in \textbf{Table \ref{table:kernels}}.
 
 
 
@@ -453,7 +453,7 @@ In this article we compare the performance the uniform and Bactrian proposal ker
  3 & \textbf{Constant distance operators} & $x^\prime \leftarrow x + s\Sigma$ & $t$ \\
  \hline
 \end{tabular}
-\caption{Summary of proposal kernels $q(x^\prime|x)$ of clock model operators. In each operator, $\Sigma$ is drawn from either a $\text{Noramlised-Bactrian}(m)$ or $\text{Uniform}(-\sqrt{3},\sqrt{3})$ distribution. The scale size $s$ is tunable. The proposal kernel may apply to node heights $t$, clock standard deviation $\sigma$, clock rates $r$ (\textit{real} only), and clock rate quantiles $q$ (\textit{quant} only). The Scale operator acts on parameters with non-negative domains. }
+\caption{Summary of proposal kernels $q(x^\prime|x)$ of clock model operators. In each operator, $\Sigma$ is drawn from either a $\text{Bactrian}(m)$ or $\text{Uniform}$ distribution (distributions are normalised so that they have a mean of 0 and a variance of 1). The scale size $s$ is tunable. The proposal kernel may apply to node heights $t$, clock standard deviation $\sigma$, clock rates $r$ (\textit{real} only), and clock rate quantiles $q$ (\textit{quant} only). The Scale operator acts on parameters with non-negative domains. }
 \label{table:kernels}
 \end{table}
 
@@ -483,33 +483,33 @@ The \textbf{Narrow Exchange} operator \cite{drummond2002estimating}, widely used
 \end{figure}
 
 
-Lakner et al. 2008 \cite{lakner2008efficiency} found that tree operators which perterb topology (such as NNI and SPR) consistently perform better than those which also change branch lengths (such as LOCAL \cite{simon1998local} and Continuous Change \cite{jow2002bayesian}). If Narrow Exchange was adapted to the relaxed clock model by ensuring that genetic distances remain constant after the proposal, its performance may be improved even further, which may in turn permit proposing a new node height $t_D$ and therefore changing branch time lengths (without affecting branch distance lengths).
+Lakner et al. 2008 \cite{lakner2008efficiency} found that tree operators which perterb topology (such as NNI and SPR) consistently perform better than those which also change branch lengths (such as LOCAL \cite{simon1998local} and Continuous Change \cite{jow2002bayesian}). If Narrow Exchange was adapted to the relaxed clock model by ensuring that genetic distances remain constant after the proposal, its performance may be improved even further. This may in turn permit proposing a new node height $t_D$ and therefore changing branch (time) lengths.
 
 %Therefore, it seems reasonable to adapt the Narrow Exchange operator for use with the relaxed clock model, such that genetic distances remain constant after performing the proposal $\mathcal{T} \rightarrow \mathcal{T}^\prime$.
 
 
-Here, we present the \textbf{Narrow Exchange Rate} (NER) operator. Let $r_A$, $r_B$, $r_C$, and $r_D$ be the clock rates of nodes $A$, $B$, $C$, and $D$, respectively. In addition to the modest topological change applied by Narrow Exchange, NER also proposes new clock rates ${r_A}^\prime$, ${r_B}^\prime$, ${r_C}^\prime$, and ${r_D}^\prime$. We also consider a case of the NER operator which proposes a new node height:
+Here, we present the \textbf{Narrow Exchange Rate} (NER) operator. Let $r_A$, $r_B$, $r_C$, and $r_D$ be the clock rates of nodes $A$, $B$, $C$, and $D$, respectively. In addition to the modest topological change applied by Narrow Exchange, NER also proposes new clock rates ${r_A}^\prime$, ${r_B}^\prime$, ${r_C}^\prime$, and ${r_D}^\prime$. While NER does not alter $t_D$ (ie. ${t_D}^\prime \leftarrow t_D$), we also consider NERw - a special case of the NER operator which embarks $t_D$ on a random walk:
 
 \begin{align}
-	{t_D}^\prime \leftarrow t_D + \Sigma
+	{t_D}^\prime \leftarrow t_D + s\Sigma
 \end{align}
 
-for random walk step size $\Sigma$ drawn from a uniform or \textbf{\nameref{sect:randomwalks}}. NER is compatible with both the \textit{real} and \textit{quant} parameterisations. Analagous to the Constant Distance operator, these rates are proposed such that genetic distances between nodes $A$, $B$, $C$, and $E$ are maintained. Thus, there are $\binom{4}{2} = 6$ pairwise distance constraints.
+for random walk step size $s\Sigma$ where $s$ is a tunable scalar parameter and $\Sigma$ is drawn from a uniform or \textbf{\nameref{sect:randomwalks}}. NER (and NERw) are compatible with both the \textit{real} and \textit{quant} parameterisations. Analagous to the Constant Distance operator, new rates are proposed such that genetic distances between nodes $A$, $B$, $C$, and $E$ are maintained. Thus, there are $\binom{4}{2} = 6$ pairwise distance constraints.
 
 
 \begin{align}
 	\mathcal{D}_{AB}: \quad & r_A  (t_D - t_A) + r_B  (t_D - t_B) = \nonumber \\
-					 & {r_A}^\prime  (t_E - t_A) + {r_D}^\prime  (t_E - t_D) + {r_B}^\prime (t_D - t_B) \\
+					 & {r_A}^\prime  (t_E - t_A) + {r_D}^\prime  (t_E - {t_D}^\prime) + {r_B}^\prime ({t_D}^\prime - t_B) \\
 	\mathcal{D}_{AC}: \quad & r_A  (t_D - t_A) + r_D  (t_E - t_D) + r_C  (t_E - t_C) = \nonumber \\
-				 	  & {r_A}^\prime  (t_E - t_A) + {r_D}^\prime  (t_E - t_D) + {r_C}^\prime (t_D - t_C) \\
+				 	  & {r_A}^\prime  (t_E - t_A) + {r_D}^\prime  (t_E - {t_D}^\prime) + {r_C}^\prime ({t_D}^\prime - t_C) \\
  	\mathcal{D}_{AE}: \quad & r_A  (t_D - t_A) + r_D  (t_E - t_D)= \nonumber \\
 					  & {r_A}^\prime  (t_E - t_A) \\
   	\mathcal{D}_{BC}: \quad & r_B  (t_D - t_B) + r_D  (t_E - t_D) + r_C  (t_E - t_D)= \nonumber \\
-					  & {r_B}^\prime (t_D - t_B) + {r_C}^\prime (t_D - t_C) \\
+					  & {r_B}^\prime ({t_D}^\prime - t_B) + {r_C}^\prime ({t_D}^\prime - t_C) \\
    	\mathcal{D}_{BE}: \quad & r_B  (t_D - t_B) + r_D  (t_E - t_D)= \nonumber \\
-					  & {r_B}^\prime (t_D - t_B) + {r_D}^\prime (t_E - t_D) \\
+					  & {r_B}^\prime ({t_D}^\prime - t_B) + {r_D}^\prime (t_E - {t_D}^\prime) \\
 	\mathcal{D}_{CE}: \quad & r_C  (t_E - t_C)= \nonumber \\
-					  & {r_C}^\prime (t_D - t_C) + {r_D}^\prime (t_E - t_D) 
+					  & {r_C}^\prime ({t_D}^\prime - t_C) + {r_D}^\prime (t_E - {t_D}^\prime) 
 \end{align}
 
 
@@ -517,12 +517,13 @@ Further constraints are imposed by the model itself:
 
 
 \begin{align}
-	r_i > 0 \text{ and } {r_i}^\prime > 0 \text { for } i \in \{A,B,C,D\}.
+	r_i > 0 \text{ and } {r_i}^\prime > 0 \text { for } i \in \{A,B,C,D\} \\
+	\max\{t_B, t_C \} < {t_D}^\prime < t_E.
 \end{align}
 
 
 
-Unfortunately, it is not possible to solve all six $\mathcal{D}_{ij}$ constraints without permitting non-positive rates. Therefore rather than conserving all six pairwise distances, NER conserves a \textit{subset} of distances. It is not immediately clear which distances should be conserved. 
+Unfortunately, it is not possible to solve all six $\mathcal{D}_{ij}$ constraints without permitting non-positive rates or illegal trees. Therefore rather than conserving all six pairwise distances, NER conserves a \textit{subset} of distances. It is not immediately clear which distances should be conserved. 
 
 
 \subsubsection*{Automated generation of operators and constraint satisfaction}
