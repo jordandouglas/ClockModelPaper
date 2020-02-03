@@ -600,7 +600,7 @@ Methodologies are assessed according to the following criteria.
 \textbf{3. Mixing of parameters}. Key parameters are evaluated for the number of effective samples generated per hour (ESS/hr). \\
 
 
-For the latter two criteria, methodologies are benchmarked using 25 empirical datasets compiled and partitioned \cite{lanfear2016partitionfinder} by Lanfear \cite{lanfear2019Github} In order to explore the effects of sequence length, the partitions of each empirical dataset are randomly subsampled at varying sample sizes (\textbf{Table \ref{table:datasets}}). Datasets and BEAST2 .xml templates are provided in the GitHub repository accompanying this article.
+For the latter two criteria, methodologies are benchmarked using the empirical datasets compiled and partitioned \cite{lanfear2016partitionfinder} by Lanfear \cite{lanfear2019Github}. Two datasets (the turtle data by Crawford et al. 2012 \cite{Crawford_2012}; and the songbird data by Moyle et al. 2016 \cite{Moyle_2016}) are used during the optimisation stage, where each setting is run $15 \times$ and the average statistics across the $15 \times 2 = 30$ chains are reported. All 25 datasets presented in \textbf{Table \ref{table:datasets}} are benchmarked together $1 \times$ each at the end of the protocol. Datasets and BEAST2 .xml templates are provided in the GitHub repository accompanying this article.
 
 
 Methodologies are benchmarked using an Intel(R) Xeon(R) Gold 6138 CPU (2.00 GHz), with one two-threaded processing unit per pair of MCMC chains.
@@ -617,7 +617,7 @@ Methodologies are benchmarked using an Intel(R) Xeon(R) Gold 6138 CPU (2.00 GHz)
  
  1  &  6  &  1/4/8/16  &  0.4/2.1/10.2/13.7  &  0.1/0.5/1/1.1  &  Richart 2015 \cite{Richart_2016} \\ 
 
-2  &  10  &  1/4/8/16  &  0.4/1.5/3.1/6.7  &  0.1/0.3/0.5/0.9  &  Crawford 2012 \cite{Crawford_2012} \\ 
+\textbf{2}  &  \textbf{10}  &  1/4/8/\textbf{16}  &  0.4/1.5/3.1/\textbf{6.7}  &  0.1/0.3/0.5/\textbf{0.9}  &  \textbf{Crawford 2012} \cite{Crawford_2012} \\ 
 
 3  &  11  &  1/4/8/16  &  0.5/2.2/4.9/10.1  &  0.1/0.4/0.7/1.3  &  Leache 2015 \cite{Leache_2015} \\ 
 
@@ -651,7 +651,7 @@ Methodologies are benchmarked using an Intel(R) Xeon(R) Gold 6138 CPU (2.00 GHz)
 
 18  &  94  &  1/4/8/11  &  0.1/1.8/3/3.7  &  0.1/0.8/1.3/1.7  &  Rightmyer 2013 \cite{Rightmyer_2013} \\ 
 
-19  &  106  &  1/4/8/16  &  0.6/3.1/5.1/11.6  &  0.3/1.2/2/4.5  &  Moyle 2016 \cite{Moyle_2016} \\ 
+\textbf{19}  &  \textbf{106}  &  1/\textbf{4}/8/16  &  0.6/\textbf{3.1}/5.1/11.6  &  0.3/\textbf{1.2}/2/4.5  &  \textbf{Moyle 2016} \cite{Moyle_2016} \\ 
 
 20  &  110  &  1/4/8/16  &  0.5/2.1/3.8/7.1  &  0.3/1.4/2.5/4.3  &  Fong 2012 \cite{Fong_2012} \\ 
 
@@ -668,7 +668,7 @@ Methodologies are benchmarked using an Intel(R) Xeon(R) Gold 6138 CPU (2.00 GHz)
 
  \hline
 \end{tabular}
-\caption{Empirical datasets used during benchmarking. Number of taxa $N$, number of partitions $P$, total alignment length $L$, and number of patterns $L_\text{eff}$ are specified. Where a dataset is sampled more than once, the dimensions of its multiple samples are separated by `/'.  }
+\caption{Empirical datasets used during benchmarking, sorted in increasing order of taxa count $N$. Number of partitions $P$, total alignment length $L$, and number of patterns $L_\text{eff}$ are also specified. Where a dataset is sampled more than once, the dimensions of its multiple samples are separated by `/'. The datasets in bold (Crawford \cite{Crawford_2012} and Moyle \cite{Moyle_2016}) are used during the optimisation protocol. }
 \label{table:datasets}
 \end{table}
 
