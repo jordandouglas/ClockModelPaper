@@ -603,7 +603,7 @@ Methodologies are assessed according to the following criteria.
 For the latter two criteria, methodologies are benchmarked using the empirical datasets compiled and partitioned \cite{lanfear2016partitionfinder} by Lanfear \cite{lanfear2019Github}. Two datasets (the turtle data by Crawford et al. 2012 \cite{Crawford_2012}; and the songbird data by Moyle et al. 2016 \cite{Moyle_2016}) are used during the optimisation stage, where each setting is run $15 \times$ and the average statistics across the $15 \times 2 = 30$ chains are reported. All 25 datasets presented in \textbf{Table \ref{table:datasets}} are benchmarked together $1 \times$ each at the end of the protocol. Datasets and BEAST2 .xml templates are provided in the GitHub repository accompanying this article.
 
 
-Methodologies are benchmarked using an Intel(R) Xeon(R) Gold 6138 CPU (2.00 GHz), with one two-threaded processing unit per pair of MCMC chains.
+Methodologies are benchmarked using the Intel(R) Xeon(R) Gold 6138 CPU (2.00 GHz), with two processing units per pair of MCMC chains.
 
 
 
@@ -710,25 +710,62 @@ Overall, \textit{quant} yields a median ESS/hr approximately 150 \% faster with 
 
 
 
+\subsection*{Comparison of Bactrian and uniform proposal kernels on the clock model}
+
+
 
 \subsection*{Comparison of NER variants}
+
+We compared the Narrrow Exchange Rate (NER) operators described in \textbf{\nameref{sect:NER}}. This protocol selects the best among 48 NER (no random walk) and 48 NERw ($\text{Bactrian}(0.95)$ random walk) operators, and has two phases. First, the best of the 96 is selected by comparing operator acceptance rates on simulated data. Second, the selected operator is benchmarked with respect to convergence time and sampling rate on real data (\textbf{Table \ref{table:datasets}}). All the analyses in this section invoke the \textit{quant} parameterisation and $\text{Bactrian}(0.95)$ proposal kernels on clock model parameters.
+
 
 
 
 \subsubsection*{Initial screening by acceptance rate}
 
 
+We selected the best operator variant by performing MCMC on 100 simulated datasets, where each MCMC employed all 96 NER/NERw variants. The acceptance rate of each operator is compared to that of the null operator $\text{NER}\{\}$ (ie. Narrow Exchange). 
+
+
+\textbf{Fig. \ref{fig:acceptanceRateScreening}} shows that NER variants which satisfy the genetic distances between nodes $B$ and $A$ (ie. $\mathcal{D}_{AB}$) or between $B$ and $C$ (ie. $\mathcal{D}_{BC}$) consistently perform worse than the standard Narrow Exchange operator, where $B$ is the node being interchanged from the $A$ branch to the $C$ branch (\textbf{Fig. \ref{fig:narrowexchange}}). This is an intuitive result. If the posterior distribution is relatively flat, and the data presents high uncertainty in the positioning of $B$, with respect to $A$ and $C$, then the topological rearrangement performed by Narrow Exchange will be favoured. However, this uncertainty in the \textit{topology} is likely coupled with uncertainty in the \textit{distance} between $B$ and $A$ or between $B$ and $C$. Thus, in this case, respecting the $\mathcal{D}_{AB}$ and $\mathcal{D}_{BC}$ constraints (by proposing branch rates) makes too many unnecessary changes to the state and the operator performs worse.
+
+
+
+\begin{figure}[!h]
+\includegraphics[width=\textwidth]{Figures/acceptanceRates.pdf}
+\caption{\textbf{Screening of NER and NERw variants by acceptance rate.} Left: comparison of NER variants with the null operator $\text{NER}\{\}$ (ie. Narrow Exchange). Each of the 48 operators are represented by a single point, uniquely encoded by the point stylings. The number of times each operator is proposed and accepted is compared with that of $\text{NER}\{\}$, and a Z-test is performed to determine whether there is a significant difference in the two acceptance rates.  This process is repeated for each of $100$ simulated datasets. The axes of each plot are the proportion of these $100$ simulations for which there is significant evidence that the operator is better than $\text{NER}\{\}$ (x-axis) or worse than $\text{NER}\{\}$ (y-axis). Right: comparison of NER with NERw. Each point is one NER/NERw variant from a single simulation. This plot shows that the random walk hinders the acceptance rates of all NER variants, including $\text{NER}\{\}$.    }
+\label{fig:acceptanceRateScreening}
+\end{figure}
+
+
+
+
+
+\textbf{Fig. \ref{fig:acceptanceRateScreening}} also reveals a cluster of NER variants which -- under the conditions of the simulation --  performed better than the null operator $\text{NER}\{\}$ around 10\% of the time and performed worse around 40\% of the time. One such operator is  $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$. This variant conserves the genetic distance between all child nodes $A$, $B$, and $C$, and the grandparent node $E$. This is performed by proposing rates for $r_A$, $r_B$, and $r_C$ while obeying the distance constraints imposed by the operator. Exploring this operator further, we can see that $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ is at its best when there is a large variance in branch rate ie. when clock standard deviation $\sigma$ is high ($\sigma \gtrsim 0.3$), corresponding to data which is not clock-like. On the other hand, $\text{NER}\{\}$ is much preferred when the operator's acceptance rate is high ($\gtrsim 0.15$), which corresponds to poorer signal in the data.  Overall, $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ outperforms the standard Narrow Exchange operator provided that the data is not clock-like and contains strong signal. 
+
+
+
+
+Finally, \textbf{Fig. \ref{fig:acceptanceRateScreening}} shows that by applying a (Bactrian) random walk to $t_D$ -- the height of internal node $D$ -- the acceptance rate of NER plummets dramatically. This effect is most dominant for the NER variants which satisfy distance constraints (ie. the operators which are not $\text{NER}\{\}$). This result is unfortunate however not unexpected, and is consistent with Lakner et al. 2008 \cite{lakner2008efficiency}, who observed that tree operators perform best when they change either topology, or branch lengths, but not both.
+
+
+
+Although there are several operators tying for first place, we selected the $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ operator to proceed to the next round of optimisation.
+
+
+
+
+
 \subsubsection*{Advanced screening by congergence time}
 
 
-\subsection*{Comparison of random walk proposals}
 
 
 
 \section*{Conclusion}
 
 
-
+\newpage
 \section*{Supporting information}
 
 
