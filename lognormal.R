@@ -1,7 +1,7 @@
 
 library(tikzDevice)
 
-S = 0.3
+S = 0.01
 M = -0.5 * S * S
 xmax = 2.5
 
@@ -352,6 +352,82 @@ dev.off()
 
 tools::texi2pdf(paste0(filename, ".tex"))
 system(paste(getOption("pdfviewer"), paste0(filename, ".pdf")))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+plot(0, 0, type = "n", xlim = c(0, 1000), ylim = c(0, 5), xlab = "n pieces", ylab = "range of rates")
+
+
+for (S in c(0.01, 0.1, 0.5)) {
+
+
+	x = numeric(0)
+	yl = numeric(0)
+	yu = numeric(0)
+	for (nn in seq(from = 10, to = 1000, by = 10)) {
+
+		#
+		nquant = nn
+		qrates = numeric(0)
+		for (i in 1:(nquant)){
+
+
+			if (i == 1) {
+				qrates[i] = qlnorm(0.1 / (nquant -1), M, S)
+			}else if (i < nquant) {
+				qrates[i] = qlnorm((i-1) / (nquant -1), M, S)
+			}else{
+				qrates[i] = qlnorm((nquant - 1 - 0.1) / (nquant - 1), M, S)
+			}
+
+		}
+
+
+		rmin_y = 0.09 / (nquant-1)
+		rmax_y = (nquant-1-0.09) / (nquant-1)
+		rmin_x = quantToRate(rmin_y)
+		rmax_x = quantToRate(rmax_y)
+
+		#print(paste0(nn, ": (", round(rmin_x, 3), ", ", round(rmax_x, 3), ")"))
+		x = c(x, nquant)
+		yu = c(yu, rmax_x)
+		yl = c(yl, rmin_x)
+
+
+	}
+
+
+	polygon( c(0, x, rev(x), 0), c(1, yu, rev(yl), 1))
+
+
+
+}
+
+abline(1, 0)
+grid()
+
+
+
+
+
+
+
+
+
 
 
 
