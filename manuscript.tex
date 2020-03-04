@@ -335,6 +335,8 @@ Zhang and Drummond 2020 present a series of tree operators which propose interna
 % Such operators are incompatible with the \textit{cat} parameterisation.  The \textit{real} parameterisation and its associated operators yield a mixing rate up to an order of magnitude faster than that of \textit{cat}. \\
 
 
+
+
 \subsubsection*{2. Categories}
 The category parameterisation (\textit{cat}) is an abstraction of the \textit{real} parameterisation. Each branch is assigned an integer from $0$ to $n-1$:
 
@@ -367,7 +369,7 @@ The key advantage of the \textit{cat} parameterisation is the removal of a term 
 
 
 
-This method was suggested in the original BEAST2 relaxed clock paper \cite{drummond2006relaxed} and has been widely used. However, the constant distance operators since introduced by Zhang and Drummond 2020 -- which are incompatible with the \textit{cat} parameterisation -- yield an increase in mixing rate under \textit{real} by up to an order of magnitude over that of \textit{cat}.
+This method was suggested in the original BEAST2 relaxed clock paper \cite{drummond2006relaxed} and has been widely used. However, the constant distance operators since introduced by Zhang and Drummond 2020 -- which are incompatible with the \textit{cat} parameterisation -- yield an increase in mixing rate under \textit{real} by up to an order of magnitude over that of \textit{cat}. Moreover, the implementation of the \textit{cat} model has come under criticism \cite{rannala2007inferring}.
 
 
 
@@ -466,7 +468,7 @@ In this article we compare the performance of uniform and Bactrian proposal kern
 % REMEMBER to define NNI and SPR acronyms in introduction preferably
 \subsection*{Narrow Exchange Rate} \label{sect:NER}
 
-The \textbf{Narrow Exchange} operator \cite{drummond2002estimating}, widely used in BEAST \cite{drummond2012bayesian} and BEAST2 \cite{bouckaert2019beast}, is similar to NNI, and works as follows (\textbf{Fig. \ref{fig:narrowexchange}}):
+The \textbf{Narrow Exchange} operator \cite{drummond2002estimating}, widely used in BEAST \cite{drummond2012bayesian,suchard2018bayesian} and BEAST2 \cite{bouckaert2019beast}, is similar to NNI, and works as follows (\textbf{Fig. \ref{fig:narrowexchange}}):
 
 \textul{\textit{Step 1}}. Sample an internal/root node $E$ from tree $\mathcal{T}$, where $E$ has grandchildren.
 
@@ -599,8 +601,8 @@ The AVMVN proposal kernel is computed as
 
 
 \begin{align}
-	& x^\prime \leftarrow x + \sum\limits_{i=1}^N \sum\limits_{j=i}^N c_{i,j} \times s\Sigma \\
-	\text {where } & c = \texttt{cholesky} \{ (1-\beta) \frac{\Sigma_N}{N} + \beta \frac{\mathbb{I}_N}{N} \}.
+	x^\prime &\leftarrow x + \sum\limits_{i=1}^N \sum\limits_{j=i}^N c_{i,j} \times s\Sigma \\
+	\text {where }  c &= \texttt{cholesky} \{ (1-\beta) \frac{\Sigma_N}{N} + \beta \frac{\mathbb{I}_N}{N} \}.
 \end{align}
 
 
@@ -615,10 +617,39 @@ In \nameref{sect:results}, we evaluate this operator for its ability to estimate
 
 \subsection*{Clock model averaging}
 
+In Bayesian model averaging (BMA), competing models are estimated in the posterior distribution alongside other parameters and are thus directly selected through usual Bayesian inference methods  \cite{fragoso2018bayesian}. This is in contrast to other methods -- such as path sampling \cite{lartillot2006computing} and stepping-stone sampling \cite{xie2011improving} -- which operate outside of this central Bayesian inference process (in this case the MCMC algorithm). BMA has been applied to many domains \cite{fragoso2018bayesian} -- including astrophysics \cite{parkinson2013bayesian}, geographical information systems \cite{barber2006modelling}, and molecular biology \cite{douglas2020bayesian} -- and in phylogenetics  has been applied to selection of substitution models \cite{beier2004phylogenetic,posada2008jmodeltest,bouckaert2017bmodeltest}, rate heterogeneity models \cite{bouckaert2017bmodeltest}, and clock models \cite{li2012model,baele2012accurate}.
+
+
+Li and Drummond 2012 used Bayesian model averaging to select clock model prior distributions -- LogNormal, Exponential, and Inverse Gaussian \cite{li2012model}. This was achieved by a model indicator that points to the applicable clock model. However, due to its discrete nature, sampling the model indicator can be inefficient.  
 
 
 
-\section*{Results and Discussion} \label{sect:results}
+
+
+
+As a preliminary non-phylogenetic analysis, we explored the statistical power of distinguishing between log-normally and exponentially distributed data, and how this depends on sample size $2N-2$ (for $N$ taxa) and standard deviation $\sigma$ (for log-normally distributed data). Models are distinguished using the Bayesian information criterion (BIC):
+
+
+\begin{align}
+	BIC = \begin{cases} \log(2N-2) - 2 \log \big( \hat{L} \; P(\hat{\sigma}) \big) & \text{for LogNormal}(-0.5\sigma^2, \sigma) \\ 
+	- 2 \log \big( \hat{L} \big) & \text{for Exponential}(1) \end{cases}
+\end{align}
+
+
+where $\hat{L}$ is the maximim likelihood and $P(\hat{\sigma})$ is the prior density of $\sigma$. This analysis reveals that when there are a small number of rates, data simulated from a lognormal distribution is often best modelled with an exponential distribution, especially when $\sigma$ is close to 1 (\text{Fig. \ref{fig:ClockModelAverging}}). However, for larger trees $N > 30$, clock model averaging should be a viable approach. 
+
+
+
+\begin{figure}[!h]
+\includegraphics[width=\textwidth]{Figures/ClockModelAverging.pdf}
+\caption{\textbf{Ability to resolve LogNormal and Exponential distributed data.} \textit{Left:} at each grid point, $2N-2$ random variables are sampled from a $\text{LogNormal}(-0.5\sigma^2, \sigma)$ distribution. The point is assessed for its fit to i) a $\text{LogNormal}(-0.5\hat{\sigma}^2, \hat{\sigma})$ distributon, and ii) an $\text{Exponential}(1)$ disribution using the Bayesian information criterion (BIC). This is repeated 1000 $\times$ at each grid point and the two sets of BIC scores are compared using a paired t-test ($p=0.001$), which determines the colour of the point on the plot. \textit{Right:} points are instead sampled from an $\text{Exponential}(1)$ disribution. These simulations show that clock model averaging is most applicable for trees with more than 30 taxa.   } 
+\label{fig:ClockModelAverging}
+\end{figure}
+
+
+
+
+\section*{Results} \label{sect:results}
 
 
 
@@ -780,6 +811,12 @@ Although there are several operators tying for first place, we selected the $\te
 
 
 
+
+\subsubsection*{Clock model averaging}
+
+
+
+\section*{Discussion} \label{sect:discussion}
 
 
 \section*{Conclusion}
