@@ -256,7 +256,7 @@ Remco Bouckaert\textsuperscript{1,2}
 
 
 The molecular clock hypothesis states that the evolutionary rates of biological sequences are approximately constant throughout time \cite{zuckerkandl1962molecular}.
-By applying this assumption under a phylogenetic framework, evolutionary trees and divergence dates of life forms can be inferred from biological sequences, such as nucleotides and amino acids \cite{douzery2003local, drummond2006relaxed}.
+This assumption forms the basis of phylogenetics, under which evolutionary trees and divergence dates of life forms are inferred from biological sequences, such as nucleotides and amino acids \cite{douzery2003local, drummond2006relaxed}.
 In Bayesian phylogenetics, these trees and their associated parameters are estimated as probabilitiy distributions \cite{kuhner1995estimating, larget1999markov, mau1999bayesian}. 
 Statistical inference is typically performed by sampling under the Metropolis-Hastings Markov chain Monte Carlo (MCMC) algorithm \cite{metropolis53, hastings70}.
 Bayesian phylogenetic clock models have been implemented in many platforms including BEAST \cite{drummond2012bayesian}, BEAST2 \cite{bouckaert2019beast}, MrBayes \cite{ronquist2012mrbayes}, and RevBayes \cite{hohna2016revbayes}.
@@ -265,7 +265,8 @@ Bayesian phylogenetic clock models have been implemented in many platforms inclu
 
 The simplest phylogenetic clock model -- the strick clock -- makes the convenient assumption that the evolutionary rate is constant across all lineages \cite{zuckerkandl1965evolutionary, kuhner1995estimating, larget1999markov}.  % Early examples? 
 However, molecular substitution rates are known to vary over time, over population sizes, over evolutionary pressures, and over DNA replicative machineries \cite{gillespie1994causes, woolfit2009effective, loh2010optimization}.
-Moreover, any given dataset may be clock-like (i.e. a small variance in substitution rate across lineages) or non clock-like (a large variance). In the latter case, a strict clock is probably not suitable. 
+Moreover, any given dataset may be clock-like (where the substitution rate has a small variance across lineages) or non clock-like (a large variance). 
+In the latter case, a strict clock is probably not suitable. 
 
 
 
@@ -294,8 +295,8 @@ The rate parameterisation itself can also affect the ability to ``mix'' during M
 
 
 While a range of advanced operators and other MCMC optimisation methods have arisen over the years, there has yet to be a widescale performance benchmarking of such methods as applied to the relaxed clock model. 
-In this article, we systematically evaluate how the relaxed clock model can benefit from i) different rate parameterisations,  ii) the use of Bactrian proposal kernels \cite{yang2013searching}, iii) tree operators which account for correlations between rates and times, and iv) adaptive multivariate operators \cite{baele2017adaptive}.
-Our findings suggest that...
+In this article, we systematically evaluate how the relaxed clock model can benefit from i) different substitution rate parameterisations,  ii) the use of Bactrian proposal kernels \cite{yang2013searching}, iii) tree operators which account for correlations between substitution rates and times, and iv) adaptive multivariate operators \cite{baele2017adaptive}.
+The discussed methods are implemented in and compared using BEAST2 \cite{bouckaert2019beast}. 
 
 % phylogenetic model -- and the operators used during MCMC -- to achieve convergence. 
 %A great body of research of MCMC performance
@@ -326,31 +327,40 @@ Our findings suggest that...
 % Define tau
 
 
-Let $\mathcal{T}$ be a binary rooted time tree with $N$ taxa (and $2N-2$ branches). Let $L$ be the number of sites within the multiple sequence alignment $D$, and let $L_\text{eff}$ be the effective number of sites in the alignment (i.e. the number of site patterns). The posterior density of a phylogenetic model is described by
+Let $\mathcal{T}$ be a binary rooted time tree with $N$ taxa. Let $L$ be the number of sites within the multiple sequence alignment $D$, and let $L_\text{eff}$ be the effective number of sites in the alignment (i.e. the number of unique patterns across all sites in the alignment). The posterior density of a phylogenetic model is described by
 
 \begin{eqnarray}
 \label{eq:bayesian}
 p(\mathcal{T}, \vec{\mathcal{R}}^{\,}, \sigma, \theta|D) \propto  p(D|\mathcal{T}, r(\vec{\mathcal{R}}^{\,}), \theta) \; p(\mathcal{T}|\theta) \;  p(\vec{\mathcal{R}}^{\,} | \sigma) \; p(\sigma) \; p(\theta),
 \end{eqnarray}
 
-for rate standard deviation $\sigma$ and other model parameters $\theta$. $\vec{\mathcal{R}}^{\,}$ is a vector of abstracted substitution rates, which is transformed into real rates by $r(\vec{\mathcal{R}}^{\,})$. Three methods of representing rates as $\vec{\mathcal{R}}^{\,}$ are presented in \textbf{\nameref{sect:rateparams}}.  
+for substitution rate standard deviation $\sigma$ and other model parameters $\theta$. $\vec{\mathcal{R}}^{\,}$ is a vector of abstracted substitution rates, which is transformed into real rates by $r(\vec{\mathcal{R}}^{\,})$. Three methods of representing rates as $\vec{\mathcal{R}}^{\,}$ are presented in \textbf{\nameref{sect:rateparams}}.  
+
+
+Let $t_i$ be the height (time) of node $i$.
+Every internal and leaf node $i$ in $\mathcal{T}$ is associated with a parental branch length (the height difference between $i$ and its parent) $\tau_i$ and a parental branch substitution rate $r_i = r(\mathcal{R}_i)$. 
+There are a total of $2N-2$ internal and leaf nodes. 
+Under the relaxed clock model, each $\mathcal{R}_i$ is independently distributed under the prior.
+
+
+
+The posterior distribution is sampled by MCMC.
+The probability of accepting proposed state $x^\prime$ from state $x$ is calculated using the Metropolis-Hastings ratio \cite{metropolis53, hastings70}:
+
+\begin{eqnarray}
+\label{eq:MCMC}
+\alpha(x^\prime|x) =  \min\left( 1, \frac{p(x^\prime|D)}{p(x|D)} \frac{q(x|x^\prime)}{q(x^\prime|x)} \right).
+\end{eqnarray}
+
+$q(a|b)$ is the transition kernel: the probability of proposing state $b$ from state $a$.
+The ratio between the two $\frac{q(x|x^\prime)}{q(x^\prime|x)}$ is known as the Hastings ratio \cite{hastings70}.
 
 
 
 
-Under the \textit{relaxed clock model}, each internal and leaf node is assigned a substitution rate $r_i = r(\mathcal{R}_i)$, which corresponds to its parent branch. There are a total of $|\vec{\mathcal{R}}^{\,}| = 2N-2$ rates, which are independently distributed under the relaxed clock model prior  \cite{drummond2006relaxed}. 
 
 
-
-
- 
-
-%The substitution rate on branch $i$  
-
-
-
-
-\subsection*{Rate parameterisations}
+\subsection*{Substitution rate parameterisations}
 \label{sect:rateparams}
 
 In Bayesian inference, the way parameters are represented in the model can affect the mixing ability of the model and the meaning of the model itself \cite{gelman2004parameterization}. Three methods for parameterising substitution rates are described below, and are later evaluated in \textbf{\nameref{sect:results}}. Each parameterisation technique is associated with i) an abstraction of the rates $\vec{\mathcal{R}}^{\,}$, ii) some function for transforming this parameter into real rates $r(\vec{\mathcal{R}}^{\,})$, and iii) a prior density function of the abstraction $p(\vec{\mathcal{R}}^{\,} | \sigma) $. The three methods are summarised in \textbf{Fig \ref{fig:rateparams}}.
@@ -364,7 +374,7 @@ In Bayesian inference, the way parameters are represented in the model can affec
 
 
 
-
+\clearpage
 \subsubsection*{1. Real rates}
 The natural (and unabstracted) parameterisation of a substitution rate is a real number $\mathcal{R}_i \in \mathbb{R}, \mathcal{R}_i > 0$ which is equal to the rate itself. Thus, under the \textit{real} parameterisation:
 
@@ -374,18 +384,20 @@ r(\vec{\mathcal{R}}^{\,}) =& \; \vec{\mathcal{R}}^{\,}.
 \end{align}
 
 
-Under the prior distribution $p(\vec{\mathcal{R}}^{\,} | \sigma)$, rates are often log-normally or exponentially distributed with a mean of 1:
+Under the prior distribution $p(\vec{\mathcal{R}}^{\,} | \sigma)$, rates are log-normally distributed with a mean of 1:
 
 \begin{align}
-p(\mathcal{R}_i | \sigma) = \frac{1}{\mathcal{R}_i \sigma \sqrt{2\pi}} \exp \big( -\frac{(\ln \mathcal{R}_i - \mu)^2}{2\sigma^2} \big) \quad &(\text{ LogNormal}(\mu, \sigma)\;) \text{, or}  \\
-p(\mathcal{R}_i | \sigma) = p(\mathcal{R}_i) = e^{-\mathcal{R}_i} \quad &(\text{ Exponential}(\lambda=1)\;)
+p(\mathcal{R}_i | \sigma) = \frac{1}{\mathcal{R}_i \sigma \sqrt{2\pi}} \exp \big( -\frac{(\ln \mathcal{R}_i - \mu)^2}{2\sigma^2} \big) 
 \end{align}
 
 
 where $\mu = -0.5\sigma^2$ is set such that the expected value of the log-normal distribution is 1.
+In this article we only consider log-normal clock priors, however the methods discussed are general.
 
 
-Zhang and Drummond 2020 present a series of tree operators which propose internal/root node heights, and then recompute the rates of incident branches such that their genetic distances ($r_i \times \tau_i$) remain constant after the proposal \cite{zhang2020improving}. By maintaining genetic distances the likelihood can also be maintained. These operators account for the correlation which exists between branch rates and branch times -- a correlation which is induced by the likelihood function.
+Zhang and Drummond 2020 present a series of tree operators which propose internal/root node heights, and then recompute the rates of incident branches such that their genetic distances ($r_i \times \tau_i$) remain constant after the proposal \cite{zhang2020improving}. 
+These operators account for the correlation which exists between branch rates and branch times.
+By keeping the genetic distance of each branch constant, the likelihood is unaltered by the proposal. 
 
 
 %the correlation between rates and times, as imposed by likelihood function, is r after the proposal , and thus lowers the risk of ``falling o
@@ -403,7 +415,8 @@ The category parameterisation (\textit{cat}) is an abstraction of the \textit{re
 \end{align}
 
 
-The domain of $\vec{\mathcal{R}}^{\,}$ is uniformly distributed:
+These integers correspond to $n$ rate categories.
+ The domain of $\vec{\mathcal{R}}^{\,}$ is uniformly distributed:
 
 
 \begin{align}
@@ -427,7 +440,8 @@ The key advantage of the \textit{cat} parameterisation is the removal of a term 
 
 
 
-This method was suggested in the original BEAST2 relaxed clock paper \cite{drummond2006relaxed} and has been widely used. However, the constant distance operators since introduced by Zhang and Drummond 2020 -- which are incompatible with the \textit{cat} parameterisation -- yield an increase in mixing rate under \textit{real} by up to an order of magnitude over that of \textit{cat}. Moreover, the implementation of the \textit{cat} model has come under criticism \cite{rannala2007inferring}.
+This method has been widely used in BEAST and BEAST2 analyses \cite{drummond2006relaxed}. 
+However, the recently developed constant distance operators  -- which are incompatible with the \textit{cat} parameterisation -- yield an increase in mixing rate under \textit{real} by up to an order of magnitude over that of \textit{cat} \cite{zhang2020improving}. 
 
 
 
@@ -446,9 +460,12 @@ p(\mathcal{R}_i | \sigma) = & \; p(\mathcal{R}_i) = 1
 \end{align}
 
 
-Transforming these quantiles into rates invokes the i-cdf of the underlying \textit{real} clock model distribution. Thus, while this approach has clear similarities with \textit{cat}, the domain of rates here is continuous (as opposed to being confined to a discrete number of bins) and is therefore compatible with the class of operators described by Zhang and Drummond 2020 \cite{zhang2020improving}. 
+Transforming these quantiles into rates invokes the i-cdf of the underlying \textit{real} clock model distribution. Thus, while this approach has clear similarities with \textit{cat}, the domain of rates here is continuous (as opposed to being confined to a discrete number of bins) and is therefore compatible with constant distance operators \cite{zhang2020improving}. 
 
-A potential disadvantage of the \textit{quant} method would be the computational requirements of continuously evaluating the i-cdf, especially for trees with large $N$. Hence, rather than evaluating the exact i-cdf $F^{-1}$, an approximation $\hat{F}^{-1}$ will be used instead:
+
+A potential disadvantage of the \textit{quant} method would be the computational requirements of continuously evaluating the i-cdf.
+As the number of quantiles grows with the taxon count $N$, this drawback would be at its worst on large trees.
+Hence, rather than evaluating the exact i-cdf $F^{-1}$, an approximation $\hat{F}^{-1}$ will be used instead:
 
 
 \begin{align}
@@ -456,10 +473,10 @@ r(\mathcal{R}_i) =& \; \hat{F}^{-1}(\mathcal{R}_i).
 \end{align}
 
 
-In this article we have extended \textit{quant} through a linear piecewise approximation of the i-cdf. As the piecewise approximation is linear, evaluating the derivatives $\frac{\partial}{\partial \mathcal{R}_i} \hat{F}^{-1}(\mathcal{R}_i) =  D \hat{F}^{-1}(\mathcal{R}_i)$ and $\frac{\partial}{\partial r_i} \hat{F}(r_i) = D \hat{F}(r_i)$  -- which are required for computing Hastings ratios -- is trivial. The approximation is comprised of $n$ pieces (where $n$ is fixed) and upper and lower rate boundaries $r_\text{min}$ and $r_\text{max}$. The approximation is displayed in \textbf{Fig \ref{fig:rateparams}} and further detailed in \textbf{\nameref{sect:S1Appendix}}.
+In this article we have extended \textit{quant} through a linear piecewise approximation of the i-cdf. As the piecewise approximation is linear, evaluating the derivatives $\frac{\partial}{\partial \mathcal{R}_i} \hat{F}^{-1}(\mathcal{R}_i) =  D \hat{F}^{-1}(\mathcal{R}_i)$ and $\frac{\partial}{\partial r_i} \hat{F}(r_i) = D \hat{F}(r_i)$  -- which are required for computing the Hastings ratios -- is trivial. The approximation is comprised of $n$ pieces (where $n$ is fixed) and upper and lower rate boundaries $r_\text{min}$ and $r_\text{max}$. The approximation is displayed in \textbf{Fig \ref{fig:rateparams}} and further detailed in \textbf{\nameref{sect:S1Appendix}}.
 
 
-Zhang and Drummond 2020 introduced several tree operators for the \textit{real} parameterisation -- including \textbf{Constant Distance}, \textbf{Simple Distance}, and \textbf{Small Pulley}. In this project, we extended these three operators so that they are compatible with the \textit{quant} parameterisation. These are presented in \textbf{\nameref{sect:S1Appendix}}. 
+Zhang and Drummond 2020 introduced several tree operators for the \textit{real} parameterisation -- including \texttt{Constant Distance}, \texttt{Simple Distance}, and \texttt{Small Pulley}. In this project, we extended these three operators so that they are compatible with the \textit{quant} parameterisation. These are presented in \textbf{\nameref{sect:S1Appendix}}. 
 
 
 
@@ -507,14 +524,16 @@ In this article we compare the performance of uniform and Bactrian proposal kern
 \begin{tabular}{|l| l l l|} 
  \hline
  & Operator & Proposal & Parameters  \\
- 1 & \textbf{Random walk operator} & $x^\prime \leftarrow x + s\Sigma$ & $\sigma, r, q$ \\
- 2 & \textbf{Scale operator} & $x^\prime \leftarrow x \times e^{s\Sigma}$ & $\sigma, r$  \\
- 3 & \textbf{Interval operator} & $\begin{array} {rl} y &\leftarrow \frac{u - x}{x - l} \times e^{s\Sigma} \\ x^\prime &\leftarrow \frac{u + l * y}{y + 1}  \end{array}$ & $q \;\; (l=0,u=1)$  \\
- 4 & \textbf{Constant distance operators} & $x^\prime \leftarrow x + s\Sigma$ & $t$ \\
+ 1 & \texttt{Random walk} operator & $x^\prime \leftarrow x + s\Sigma$ & $\sigma, r, q$ \\
+ 2 & \texttt{Scale} operator & $x^\prime \leftarrow x \times e^{s\Sigma}$ & $\sigma, r$  \\
+ 3 & \texttt{Interval} operator & $\begin{array} {rl} y &\leftarrow \frac{u - x}{x - l} \times e^{s\Sigma} \\ x^\prime &\leftarrow \frac{u + l * y}{y + 1}  \end{array}$ & $q \;\; (l=0,u=1)$  \\
+ 4 & \texttt{Constant distance} operator & $x^\prime \leftarrow x + s\Sigma$ & $t$ \\
 
  \hline
 \end{tabular}
-\caption{Summary of proposal kernels $q(x^\prime|x)$ of clock model operators. In each operator, $\Sigma$ is drawn from either a $\text{Bactrian}(m)$ or $\text{Uniform}$ distribution (distributions are normalised so that they have a mean of 0 and a variance of 1). The scale size $s$ is tunable. The proposal kernel may apply to node heights $t$, clock standard deviation $\sigma$, clock rates $r$ (\textit{real} only), and clock rate quantiles $q$ (\textit{quant} only). The Scale operator acts on parameters with non-negative domains. The Interval operator proposes values which respect its domain i.e. $l < x^\prime < u$. }
+\caption{Summary of proposal kernels $q(x^\prime|x)$ of clock model operators.
+\texttt{Random walk}, \texttt{Scale}, and \texttt{Interval} are standard BEAST2 operators.
+ In each operator, $\Sigma$ is drawn from either a $\text{Bactrian}(m)$ or $\text{Uniform}$ distribution (distributions are normalised so that they have a mean of 0 and a variance of 1). The scale size $s$ is tunable. The proposal kernel may apply to node heights $t$, clock standard deviation $\sigma$, clock rates $r$ (\textit{real} only), and clock rate quantiles $q$ (\textit{quant} only). The Scale operator acts on parameters with non-negative domains. The Interval operator proposes values which respect the domain of the parameter i.e. $l < x, x^\prime < u$. }
 \label{table:kernels}
 \end{table}
 
@@ -526,7 +545,7 @@ In this article we compare the performance of uniform and Bactrian proposal kern
 % REMEMBER to define NNI and SPR acronyms in introduction preferably
 \subsection*{Narrow Exchange Rate} \label{sect:NER}
 
-The \textbf{Narrow Exchange} operator \cite{drummond2002estimating}, widely used in BEAST \cite{drummond2012bayesian,suchard2018bayesian} and BEAST2 \cite{bouckaert2019beast}, is similar to NNI, and works as follows (\textbf{Fig. \ref{fig:narrowexchange}}):
+The \texttt{Narrow Exchange} operator \cite{drummond2002estimating}, widely used in BEAST \cite{drummond2012bayesian,suchard2018bayesian} and BEAST2 \cite{bouckaert2019beast}, is similar to NNI, and works as follows (\textbf{Fig. \ref{fig:narrowexchange}}):
 
 \textul{\textit{Step 1}}. Sample an internal/root node $E$ from tree $\mathcal{T}$, where $E$ has grandchildren.
 
@@ -539,23 +558,23 @@ The \textbf{Narrow Exchange} operator \cite{drummond2002estimating}, widely used
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{Figures/NarrowExchange.pdf}
-\caption{\textbf{Depiction of Narrow Exchange and Narrow Exchange Rate operators.} Proposals are denoted by $\mathcal{T} \rightarrow \mathcal{T}^\prime$. The vertical axis corresponds to node height $t$. In the bottom figure, branch rates $r$ are indicated by line thickness. In this example, the $\mathcal{D}_{AE}$ and $\mathcal{D}_{CE}$ constraints are satisfied.}
+\caption{\textbf{Depiction of \texttt{Narrow Exchange} and \texttt{Narrow Exchange Rate} operators.} Proposals are denoted by $\mathcal{T} \rightarrow \mathcal{T}^\prime$. The vertical axis corresponds to node height $t$. In the bottom figure, branch rates $r$ are indicated by line thickness. In this example, the $\mathcal{D}_{AE}$ and $\mathcal{D}_{CE}$ constraints are satisfied.}
 \label{fig:narrowexchange}
 \end{figure}
 
 
-Lakner et al. 2008 \cite{lakner2008efficiency} found that tree operators which perterb topology (such as NNI and SPR) consistently perform better than those which also change branch lengths (such as LOCAL \cite{simon1998local} and Continuous Change \cite{jow2002bayesian}). If Narrow Exchange was adapted to the relaxed clock model by ensuring that genetic distances remain constant after the proposal, its performance may be improved even further. This may in turn permit proposing a new node height $t_D$ and therefore changing branch (time) lengths.
+Lakner et al. 2008 \cite{lakner2008efficiency} found that tree operators which perterb topology (such as NNI and SPR) consistently perform better than those which also change branch lengths (such as LOCAL \cite{simon1998local} and Continuous Change \cite{jow2002bayesian}). If \texttt{Narrow Exchange} was adapted to the relaxed clock model by ensuring that genetic distances remain constant after the proposal, its performance may be improved even further. This may in turn permit proposing a new node height $t_D$ and therefore changing branch (time) lengths.
 
 %Therefore, it seems reasonable to adapt the Narrow Exchange operator for use with the relaxed clock model, such that genetic distances remain constant after performing the proposal $\mathcal{T} \rightarrow \mathcal{T}^\prime$.
 
 
-Here, we present the \textbf{Narrow Exchange Rate} (NER) operator. Let $r_A$, $r_B$, $r_C$, and $r_D$ be the clock rates of nodes $A$, $B$, $C$, and $D$, respectively. In addition to the modest topological change applied by Narrow Exchange, NER also proposes new clock rates ${r_A}^\prime$, ${r_B}^\prime$, ${r_C}^\prime$, and ${r_D}^\prime$. While NER does not alter $t_D$ (i.e. ${t_D}^\prime \leftarrow t_D$), we also consider NERw - a special case of the NER operator which embarks $t_D$ on a random walk:
+Here, we present the \texttt{Narrow Exchange Rate} (NER) operator. Let $r_A$, $r_B$, $r_C$, and $r_D$ be the clock rates of nodes $A$, $B$, $C$, and $D$, respectively. In addition to the modest topological change applied by \texttt{Narrow Exchange}, NER also proposes new clock rates ${r_A}^\prime$, ${r_B}^\prime$, ${r_C}^\prime$, and ${r_D}^\prime$. While NER does not alter $t_D$ (i.e. ${t_D}^\prime \leftarrow t_D$), we also consider NERw - a special case of the NER operator which embarks $t_D$ on a random walk:
 
 \begin{align}
 	{t_D}^\prime \leftarrow t_D + s\Sigma
 \end{align}
 
-for random walk step size $s\Sigma$ where $s$ is a tunable scaler parameter and $\Sigma$ is drawn from a uniform or \textbf{\nameref{sect:randomwalks}}. NER (and NERw) are compatible with both the \textit{real} and \textit{quant} parameterisations. Analagous to the Constant Distance operator, new rates are proposed such that genetic distances between nodes $A$, $B$, $C$, and $E$ are maintained. Thus, there are $\binom{4}{2} = 6$ pairwise distance constraints.
+for random walk step size $s\Sigma$ where $s$ is a tunable scaler parameter and $\Sigma$ is drawn from a uniform or \textbf{\nameref{sect:randomwalks}}. NER (and NERw) are compatible with both the \textit{real} and \textit{quant} parameterisations. Analagous to the \texttt{Constant Distance} operator, new rates are proposed such that genetic distances between nodes $A$, $B$, $C$, and $E$ are maintained. Thus, there are $\binom{4}{2} = 6$ pairwise distance constraints.
 
 
 \begin{align}
@@ -590,7 +609,7 @@ Unfortunately, it is not possible to solve all six $\mathcal{D}_{ij}$ constraint
 \subsubsection*{Automated generation of operators and constraint satisfaction}
 
 
-The total space of NER operators is comprised of all possible subsets of distance constraints (i.e. $\{\},\{\mathcal{D}_{AB}\}, \{\mathcal{D}_{AC}\}, \dotso , \{\mathcal{D}_{AB}, \mathcal{D}_{AC}, \mathcal{D}_{AE}, \mathcal{D}_{BC}, \mathcal{D}_{BE}, \mathcal{D}_{CE} \}$) which are solvable. The simplest NER -- the null operator denoted by NER$\{\}$ -- does not satisfy any distance constraints. This is equivalent to Narrow Exchange. 
+The total space of NER operators is comprised of all possible subsets of distance constraints (i.e. $\{\},\{\mathcal{D}_{AB}\}, \{\mathcal{D}_{AC}\}, \dotso , \{\mathcal{D}_{AB}, \mathcal{D}_{AC}, \mathcal{D}_{AE}, \mathcal{D}_{BC}, \mathcal{D}_{BE}, \mathcal{D}_{CE} \}$) which are solvable. The simplest NER -- the null operator denoted by NER$\{\}$ -- does not satisfy any distance constraints. This is equivalent to \texttt{Narrow Exchange}. 
 
 As it is unclear which NER variants would perform the best, we developed an automated pipeline for generating and testing these operators.
 
@@ -609,10 +628,11 @@ As it is unclear which NER variants would perform the best, we developed an auto
 \end{align}
 
 
-Computing the determinant $|J|$ invokes standard analytical differentiation and linear algebra libraries of MATLAB. 6 of the 54 operators were found to have $|J|=0$, corresponding to irreversible proposals, and were discarded. 
+Computing the determinant $|J|$ invokes standard analytical differentiation and linear algebra libraries of MATLAB. 
+6 of the 54 solvable operators were found to have $|J|=0$, corresponding to irreversible proposals, and were discarded. 
 
 
-\paragraph{3. Automated generation of BEAST2 operators.} Java class files are generated using string processing. Each class corresponds to a single operator, extends the class of a meta-NER-operator, and is comprised of the solutions found in \textbf{1} and the Jacobian determinant found in \textbf{2}. $|J|$ is further augmented if the \textit{quant} parameterisation is employed.
+\paragraph{3. Automated generation of BEAST2 operators.} Java class files are generated using string processing. Each class corresponds to a single operator, extends the class of a meta-NER-operator, and is comprised of the solutions found in \textbf{1} and the Jacobian determinant found in \textbf{2}. $|J|$ is further augmented if the \textit{quant} parameterisation is employed (\textbf{\nameref{sect:S1Appendix}}).
 
 The 48 operators generated by this pipeline are evaluated and compared in \textbf{\nameref{sect:results}}. Each operator is considered with and without a random walk on $t_D$ and thus there are 96 total settings.
 
@@ -627,7 +647,7 @@ The 48 operators generated by this pipeline are evaluated and compared in \textb
 \subsection*{A guided adaptive leaf rate operator}
 \label{AVMVN_sect}
 
-A \textit{guided} operator incorporates knowledge about neighbouring states, while an \textit{adaptive} operator undergoes a training process to improve its efficiency over time \cite{roberts2007coupling}. In previous work, parsimony scores and conditional clade probabilities of neighbouring trees have been employed by guided tree operators \cite{hohna2012guided,zhang2019using,meyer2019adaptive} and the latter has also been explored as the basis of  adaptive tree operators \cite{hohna2012guided,meyer2019adaptive}. The (adaptive) mirror kernel \cite{thawornwattana2018designing} learns a target distribution which acts as a `mirror image' of the current point $x$.  The adaptable variance multivariate normal (AVMVN) kernel \cite{baele2017adaptive,suchard2018bayesian} learns correlations between parameters during MCMC. Baele et al. 2017  observed a large increase ($\approx 5-10 \times$) in sampling efficiency from using the AVMVN kernel on clock rates and substitution model parameters across partitions \cite{baele2017adaptive}.  
+A \textit{guided} operator incorporates knowledge about neighbouring states, while an \textit{adaptive} operator undergoes a training process to improve its efficiency over time \cite{roberts2007coupling}. In previous work, parsimony scores and conditional clade probabilities of neighbouring trees have been employed by guided tree operators \cite{hohna2012guided,zhang2020using,meyer2019adaptive} and the latter has also been explored as the basis of  adaptive tree operators \cite{hohna2012guided,meyer2019adaptive}. The (adaptive) mirror kernel \cite{thawornwattana2018designing} learns a target distribution which acts as a `mirror image' of the current point $x$.  The adaptable variance multivariate normal (AVMVN) kernel \cite{baele2017adaptive,suchard2018bayesian} learns correlations between parameters during MCMC. Baele et al. 2017  observed a large increase ($\approx 5-10 \times$) in sampling efficiency from using the AVMVN kernel on clock rates and substitution model parameters across partitions \cite{baele2017adaptive}.  
 
 
 In this article we consider application of the AVMVN kernel to the branch rates of leaf nodes. This operator is not readily applicable to internal node branch rates due to their dependencies on tree topology.  
@@ -660,11 +680,11 @@ The AVMVN proposal kernel is computed as
 
 \begin{align}
 	x^\prime &\leftarrow x + \sum\limits_{i=1}^N \sum\limits_{j=i}^N c_{i,j} \times s\Sigma \\
-	\text {where }  c &= \texttt{cholesky} \{ (1-\beta) \frac{\Sigma_N}{N} + \beta \frac{\mathbb{I}_N}{N} \}.
+	\text {where }  c &= \text{cholesky} \left( (1-\beta) \frac{\Sigma_N}{N} + \beta \frac{\mathbb{I}_N}{N} \right).
 \end{align}
 
 
-The \texttt{cholesky}$\{Y\}$ decomposition returns a lower diagonal matrix $L$, with positive real diagonal entries, such that $Y = LL^\prime$ \cite{lindstrom1988newton, pourahmadi2007cholesky}. $s$ is a tunable step size parameter and $\Sigma$ is a random variable drawn from a proposal kernel (uniform or Bactrian for instance). Our BEAST2 implementation of the AVMVN kernel is adapted from that of BEAST \cite{suchard2018bayesian}.
+The cholesky$(Y)$ decomposition returns a lower diagonal matrix $L$, with positive real diagonal entries, such that $Y = LL^\prime$ \cite{lindstrom1988newton, pourahmadi2007cholesky}. $s$ is a tunable step size parameter and $\Sigma$ is a random variable drawn from a proposal kernel (uniform or Bactrian for instance). Our BEAST2 implementation of the AVMVN kernel is adapted from that of BEAST \cite{suchard2018bayesian}.
 
 
 
@@ -699,17 +719,19 @@ Methodologies are assessed according to the following criteria.
 
 \textbf{1. Validation}. This is assessed by measuring the coverage of all estimated parameters in a well-calibrated simulation study, using 100 simulated datasets (with $N=100$ taxa and $L=5000$ nucleotide alignments). These are presented in \textbf{\nameref{sect:WCSS_appendix}}. \\
 
-\textbf{2. Time to convergence}. Two independent MCMC chains are run and the time is measured until: a) the absolute difference in clade posterior probability between the two chains is less than 0.05 for all clades, b) the Rubin-Gelman statistic $\hat{R}$ \cite{gelman1992inference} of every estimated parameter is less than 1.05, and c) the effective sample size \cite{rambaut2018posterior} of every estimated parameter is greater than 200 in each chain. \\
 
-\textbf{3. Mixing of parameters}. Key parameters are evaluated for the number of effective samples generated per hour (ESS/hr). \\
+\textbf{2. Mixing of parameters}. Key parameters are evaluated for the number of effective samples generated per hour (ESS/hr). This calculation is performed by BEAST2 \cite{bouckaert2019beast}. \\
+
+%\textbf{3. Time to convergence}. Two independent MCMC chains are run and the time is measured until: a) the absolute difference in clade posterior probability between the two chains is less than 0.05 for all clades, b) the Rubin-Gelman statistic $\hat{R}$ \cite{gelman1992inference} of every estimated parameter is less than 1.05, and c) the effective sample size \cite{rambaut2018posterior} of every estimated parameter is greater than 200 in each chain. \\
 
 
-For the latter two criteria, methodologies are benchmarked using both simulated and empirical datasets -- the latter were compiled \cite{lanfear2019Github} and partitioned \cite{lanfear2016partitionfinder} by Lanfear et al. as `benchmark alignments' (\textbf{Table \ref{table:datasets}}). Each setting is run $10 \times$ per dataset and the average statistics across the $10 \times 2 = 20$ chains are reported. .
+
+Methodologies are benchmarked using one simulated and nine empirical datasets -- the latter were compiled \cite{lanfear2019Github} and partitioned \cite{lanfear2016partitionfinder} by Lanfear et al. as `benchmark alignments' (\textbf{Table \ref{table:datasets}}).
+To facilitate convergence on complex datasets, each posterior distribution is sampled using coupled MCMC (MC$^3$) with 4 chains \cite{muller2019coupled}.
+Each methodology is benchmarked across 5 replicates on each dataset, using an the Intel Xeon Gold 6138 CPU (2.00 GHz).
+
 
 %All 25 datasets presented in \textbf{Table \ref{table:datasets}} are benchmarked together $1 \times$ each at the end of the protocol. Datasets and BEAST2 .xml templates are provided in the GitHub repository accompanying this article.
-
-
-Methodologies are benchmarked using the Intel(R) Xeon(R) Gold 6138 CPU (2.00 GHz), with two processing units per pair of MCMC chains.
 
 
 
@@ -751,6 +773,9 @@ Methodologies are benchmarked using the Intel(R) Xeon(R) Gold 6138 CPU (2.00 GHz
 \label{table:datasets}
 \end{table}
 
+
+
+\subsection*{Evaluating constant distance operators}
 
 
 
@@ -802,16 +827,16 @@ The \textbf{\nameref{sect:NER}} (NER) operators are evaluated. This protocol sel
 \subsubsection*{Initial screening by acceptance rate}
 
 
-We selected the best operator variant by performing MCMC on 300 simulated datasets, where each MCMC employed all 96 NER/NERw variants. Simulated datasets have $N=30$ taxa and an alignment with $L \sim \text{Uniform}(10^2, 10^4)$ sites. The acceptance rate of each operator is compared to that of the null operator $\text{NER}\{\}$ (i.e. Narrow Exchange). 
+We selected the best operator variant by performing MCMC on 300 simulated datasets, where each MCMC employed all 96 NER/NERw variants. Simulated datasets have $N=30$ taxa and an alignment with $L \sim \text{Uniform}(10^2, 10^4)$ sites. The acceptance rate of each operator is compared to that of the null operator $\text{NER}\{\}$ (i.e. \texttt{Narrow Exchange}). 
 
 
-\textbf{Fig. \ref{fig:acceptanceRateScreening}} shows that NER variants which satisfy the genetic distances between nodes $B$ and $A$ (i.e. $\mathcal{D}_{AB}$) or between $B$ and $C$ (i.e. $\mathcal{D}_{BC}$) usually perform worse than the standard Narrow Exchange operator, where $B$ is the node being interchanged from the $A$ branch to the $C$ branch (\textbf{Fig. \ref{fig:narrowexchange}}). This is an intuitive result. If the posterior distribution is relatively flat, and the data presents high uncertainty in the positioning of $B$, with respect to $A$ and $C$, then the topological rearrangement performed by Narrow Exchange will be favoured. However, this uncertainty in the \textit{topology} is likely coupled with uncertainty in the \textit{distance} between $B$ and $A$ or between $B$ and $C$. Thus, in this case, respecting the $\mathcal{D}_{AB}$ and $\mathcal{D}_{BC}$ constraints (by proposing branch rates) makes too many unnecessary changes to the state and the operator performs worse.
+\textbf{Fig. \ref{fig:acceptanceRateScreening}} shows that NER variants which satisfy the genetic distances between nodes $B$ and $A$ (i.e. $\mathcal{D}_{AB}$) or between $B$ and $C$ (i.e. $\mathcal{D}_{BC}$) usually perform worse than the standard \texttt{Narrow Exchange} operator, where $B$ is the node being interchanged from the $A$ branch to the $C$ branch (\textbf{Fig. \ref{fig:narrowexchange}}). This is an intuitive result. If the posterior distribution is relatively flat, and the data presents high uncertainty in the positioning of $B$, with respect to $A$ and $C$, then the topological rearrangement performed by \texttt{Narrow Exchange} will be favoured. However, this uncertainty in the \textit{topology} is likely coupled with uncertainty in the \textit{distance} between $B$ and $A$ or between $B$ and $C$. Thus, in this case, respecting the $\mathcal{D}_{AB}$ and $\mathcal{D}_{BC}$ constraints (by proposing branch rates) makes too many unnecessary changes to the state and the operator performs worse.
 
 
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{Figures/acceptanceRates.pdf}
-\caption{\textbf{Screening of NER and NERw variants by acceptance rate.} Top left: comparison of NER variants with the null operator $\text{NER}\{\}$ (i.e. Narrow Exchange). Each of the 48 operators are represented by a single point, uniquely encoded by the point stylings. The number of times each operator is proposed and accepted is compared with that of $\text{NER}\{\}$, and one-sided z-tests are performed to assess the statistical significance between the two acceptance rates ($p = 0.001$).  This process is repeated for each of $300$ simulated datasets. The axes of each plot are the proportion of these $300$ simulations for which there is evidence that the operator is better than $\text{NER}\{\}$ (x-axis) or worse than $\text{NER}\{\}$ (y-axis). Top right: comparison of NER and NERw acceptance rates. Each point is one NER/NERw variant from a single simulation. Bottom: relationship between the acceptance rates $\alpha$ of $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ and $\text{NER}\{ \}$ with the clock model standard deviation $\sigma$ and the number of patterns $L_\textit{eff}$.  Each point is a single simulation. }
+\caption{\textbf{Screening of NER and NERw variants by acceptance rate.} Top left: comparison of NER variants with the null operator $\text{NER}\{\}$ (i.e. \texttt{Narrow Exchange}). Each of the 48 operators are represented by a single point, uniquely encoded by the point stylings. The number of times each operator is proposed and accepted is compared with that of $\text{NER}\{\}$, and one-sided z-tests are performed to assess the statistical significance between the two acceptance rates ($p = 0.001$).  This process is repeated for each of $300$ simulated datasets. The axes of each plot are the proportion of these $300$ simulations for which there is evidence that the operator is better than $\text{NER}\{\}$ (x-axis) or worse than $\text{NER}\{\}$ (y-axis). Top right: comparison of NER and NERw acceptance rates. Each point is one NER/NERw variant from a single simulation. Bottom: relationship between the acceptance rates $\alpha$ of $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ and $\text{NER}\{ \}$ with the clock model standard deviation $\sigma$ and the number of patterns $L_\textit{eff}$.  Each point is a single simulation. }
 \label{fig:acceptanceRateScreening}
 \end{figure}
 
@@ -819,7 +844,7 @@ We selected the best operator variant by performing MCMC on 300 simulated datase
 
 
 
-\textbf{Fig. \ref{fig:acceptanceRateScreening}} also reveals a cluster of NER variants which -- under the conditions of the simulation --  performed better than the null operator $\text{NER}\{\}$ around 25\% of the time and performed worse around 10\% of the time. One such operator is  $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$. This variant conserves the genetic distance between all child nodes $A$, $B$, and $C$, and the grandparent node $E$. This is performed by proposing rates for $r_A$, $r_B$, and $r_C$ while obeying the distance constraints imposed by the operator. Exploring this operator further, we can see that $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ is at its best when there is a large variance in branch rate i.e. when clock standard deviation $\sigma$ is high ($\sigma \gtrsim 0.5$ for $N=30$), corresponding to data which is not clock-like. On the other hand, $\text{NER}\{\}$ is much preferred when the operator's acceptance rate is high ($\gtrsim 0.15$) -- corresponding with datasets with a small number of site patterns ($L_\textit{eff} \lesssim 500$ for $N=30$) and thus poor signal.  Overall, $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ outperforms the standard Narrow Exchange operator when the data is not clock-like and contains enough signal. 
+\textbf{Fig. \ref{fig:acceptanceRateScreening}} also reveals a cluster of NER variants which -- under the conditions of the simulation --  performed better than the null operator $\text{NER}\{\}$ around 25\% of the time and performed worse around 10\% of the time. One such operator is  $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$. This variant conserves the genetic distance between all child nodes $A$, $B$, and $C$, and the grandparent node $E$. This is performed by proposing rates for $r_A$, $r_B$, and $r_C$ while obeying the distance constraints imposed by the operator. Exploring this operator further, we can see that $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ is at its best when there is a large variance in branch rate i.e. when clock standard deviation $\sigma$ is high ($\sigma \gtrsim 0.5$ for $N=30$), corresponding to data which is not clock-like. On the other hand, $\text{NER}\{\}$ is much preferred when the operator's acceptance rate is high ($\gtrsim 0.15$) -- corresponding with datasets with a small number of site patterns ($L_\textit{eff} \lesssim 500$ for $N=30$) and thus poor signal.  Overall, $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ outperforms the standard \texttt{Narrow Exchange} operator when the data is not clock-like and contains enough signal. 
 
 
 
@@ -861,7 +886,7 @@ Although there are several operators tying for first place, we selected the $\te
 
 \paragraph*{S1 Appendix.}
 \label{sect:S1Appendix}
-{\textbf{Rate quantiles.} The linear piecewise approximation used in the \textit{quant} parameterisation is described. Constant distance tree operators \cite{zhang2020improving} are extended to the \textit{quant} parameterisation. 
+{\textbf{Rate quantiles.} The linear piecewise approximation used in the \textit{quant} parameterisation is described. \texttt{Constant distance} tree operators \cite{zhang2020improving} are extended to the \textit{quant} parameterisation. 
 
 
 
