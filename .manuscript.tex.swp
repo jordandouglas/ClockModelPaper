@@ -287,8 +287,8 @@ MCMC setup to achieve its convergence.
 A critical task therein lies the further advancement of MCMC operators.
 Recent developments in this area include the advancement of guided tree proposals \cite{zhang2020using, meyer2019adaptive, hohna2012guided}, coupled MCMC \cite{altekar2004parallel, muller2019coupled},
 adaptive multivariate transition kernels \cite{baele2017adaptive},
-and other explorative proposal kernels including the Bactrian and mirror kernels \cite{yang2013searching, thawornwattana2018designing}.
-In the case of clock models, smart tree proposals can account for correlations between substitution rates and divergence times \cite{zhang2020improving}. 
+and other explorative proposal kernels such as the Bactrian and mirror kernels \cite{yang2013searching, thawornwattana2018designing}.
+In the case of clock models, informed tree proposals can account for correlations between substitution rates and divergence times \cite{zhang2020improving}. 
 The rate parameterisation itself can also affect the ability to ``mix'' during MCMC \cite{drummond2006relaxed, li2012model, zhang2020improving}. 
 
 
@@ -332,8 +332,8 @@ Let $\mathcal{T}$ be a binary rooted time tree with $N$ taxa. Let $L$ be the num
 p(\mathcal{T}, \vec{\mathcal{R}}^{\,}, \sigma, \theta|D) \propto  p(D|\mathcal{T}, r(\vec{\mathcal{R}}^{\,}), \theta) \; p(\mathcal{T}|\theta) \;  p(\vec{\mathcal{R}}^{\,} | \sigma) \; p(\sigma) \; p(\theta),
 \end{eqnarray}
 
-where $\sigma$ is the clock model standard deviation, $p(\mathcal{T}|\theta)$ is the tree prior, and $\theta$ describes other unspecified parameters. 
-The tree likelihood $p(D|\mathcal{T}, r(\vec{\mathcal{R}}^{\,}), \theta)$ is computed using Felsenstein's tree-peeling algorithm \cite{felsenstein1981evolutionary}, where
+where $\sigma$ is the clock model standard deviation, $p(\mathcal{T}|\theta)$ is the tree prior, and $\theta$ describes further unspecified parameters. 
+The tree likelihood $p(D|\mathcal{T}, r(\vec{\mathcal{R}}^{\,}), \theta)$ is computed using the tree-peeling algorithm \cite{felsenstein1981evolutionary}, where
 $\vec{\mathcal{R}}^{\,}$ is a vector of abstracted substitution rates and transformed into real rates by function $r(\vec{\mathcal{R}}^{\,})$. Three methods of representing rates as $\vec{\mathcal{R}}^{\,}$ are presented in \textbf{\nameref{sect:rateparams}}.  
 
 
@@ -578,7 +578,7 @@ This operator resamples $\psi$ randomly selected elements within vector $\vec{x}
 
 
 
-We hypothesis that datasets with strong signal (or large $L$) will mix best when the more precise and meticulous kind of operator is employed, such as those informed by correlations within the posterior distribution e.g. the family of constant distance operators \cite{zhang2020improving}.
+We hypothesise that datasets with strong signal (or large $L$) will mix best when the more precise and meticulous kind of operator is employed, such as those informed by correlations within the posterior distribution e.g. the family of constant distance operators \cite{zhang2020improving}.
 Whereas, datasets which contain very poor signal (or small $L$) are likely to mix best when there is more weight placed on bold operators such as \texttt{SampleFromPrior}, \texttt{Swap}, or \texttt{Uniform} which sample each branch rate independently of its current estimate.
 \texttt{AdaptiveOperatorSampler} should learn the combination of weights behind these classes of operators best suited for the dataset.
 
@@ -932,7 +932,7 @@ Methodologies are assessed according to the following criteria.
 
 Methodologies are benchmarked using one simulated and nine empirical datasets -- the latter were compiled \cite{lanfear2019Github} and partitioned \cite{lanfear2016partitionfinder} by Lanfear et al. as `benchmark alignments' (\textbf{Table \ref{table:datasets}}).
 To facilitate convergence on complex datasets, each posterior distribution is sampled using coupled MCMC (MC$^3$) with 4 chains \cite{muller2019coupled}.
-Each methodology is benchmarked across 5 replicates on each dataset, using an the Intel Xeon Gold 6138 CPU (2.00 GHz).
+Each methodology is benchmarked across 5 replicates on each dataset, using an the Intel Xeon Gold 6138 CPU (2.00 GHz) and all methodologies use identical models and operator configurations, except where a difference is specified.
 
 
 %All 25 datasets presented in \textbf{Table \ref{table:datasets}} are benchmarked together $1 \times$ each at the end of the protocol. Datasets and BEAST2 .xml templates are provided in the GitHub repository accompanying this article.
@@ -945,6 +945,7 @@ Each methodology is benchmarked across 5 replicates on each dataset, using an th
 \begin{tabular}{|l| l l l l l|} 
  \hline
   & $N$ & $P$ & $L$ (kb) & $L_\text{eff}$ (kb) & \textbf{Description} \\
+  \hline
  
  
  1  &  38  &  8  &  9.1  &  6.45  &  Seed plants (Ran 2018 \cite{Ran_2018}) \\ 
@@ -979,7 +980,7 @@ Each methodology is benchmarked across 5 replicates on each dataset, using an th
 
 
 \clearpage
-\subsection*{Round 1: A simple operator weight learning algorithm can improve performance}
+\subsection*{Round 1: A simple operator-weight learning algorithm can improve performance}
 
 We compared the cons, nocons, and adapt operator configurations for the \textit{real} and \textit{quant} parameterisations (\textbf{Table \ref{table:round1Results}}).
 The nocons configuration contained the standard BEAST2 operator mix, while cons contained the operator mix used by Zhang and Drummond 2020 \cite{zhang2020improving}. 
@@ -1017,7 +1018,7 @@ Configuration & Operator & Weight & Parameterisations  \\
   \hline
 
 \end{tabular}
-\caption{Operator configurations for Round 1. In each configuration, the weight behind $\mathcal{R}$ sums to 30 and for $\sigma$ is equal to 10 within any one rate parameterisation. Operators which apply to either internal nodes or the root (but not both) weighted according to leaf count $N$.}
+\caption{Operator configurations for Round 1. In each configuration, the weight behind $\mathcal{R}$ sums to 30 and for $\sigma$ is equal to 10 within any one rate parameterisation. Operators which apply to either internal nodes or the root (but not both) weighted according to leaf count $N$. The adapt operators are further broken down in \textbf{Table \ref{table:adaptiveSampling}}.}
 \label{table:round1Results}
 \end{table}
 
