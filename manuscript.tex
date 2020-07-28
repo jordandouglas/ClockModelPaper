@@ -258,7 +258,7 @@ Remco Bouckaert\textsuperscript{1,2}
 The molecular clock hypothesis states that the evolutionary rates of biological sequences are approximately constant throughout time \cite{zuckerkandl1962molecular}.
 This assumption forms the basis of phylogenetics, under which evolutionary trees and divergence dates of life forms are inferred from biological sequences, such as nucleotides and amino acids \cite{douzery2003local, drummond2006relaxed}.
 In Bayesian phylogenetics, these trees and their associated parameters are estimated as probabilitiy distributions \cite{kuhner1995estimating, larget1999markov, mau1999bayesian}. 
-Statistical inference is typically performed by sampling under the Metropolis-Hastings Markov chain Monte Carlo (MCMC) algorithm \cite{metropolis53, hastings70}.
+Statistical inference is typically performed by sampling using the Markov chain Monte Carlo (MCMC) algorithm \cite{metropolis53, hastings70}.
 Bayesian phylogenetic clock models have been implemented in many platforms including BEAST \cite{drummond2012bayesian}, BEAST2 \cite{bouckaert2019beast}, MrBayes \cite{ronquist2012mrbayes}, and RevBayes \cite{hohna2016revbayes}.
 
 
@@ -329,32 +329,36 @@ Let $\mathcal{T}$ be a binary rooted time tree with $N$ taxa. Let $L$ be the num
 
 \begin{eqnarray}
 \label{eq:bayesian}
-p(\mathcal{T}, \vec{\mathcal{R}}^{\,}, \sigma, \theta|D) \propto  p(D|\mathcal{T}, r(\vec{\mathcal{R}}^{\,}), \theta) \; p(\mathcal{T}|\theta) \;  p(\vec{\mathcal{R}}^{\,} | \sigma) \; p(\sigma) \; p(\theta),
+p(\mathcal{T}, \vec{\mathcal{R}}^{\,}, \sigma, \theta|D) \propto  p(D|\mathcal{T}, r(\vec{\mathcal{R}}^{\,}), \theta) \; p(\mathcal{T}|\theta) \;  p(\vec{\mathcal{R}}^{\,} | \sigma) \; p(\sigma) \; p(\theta).
 \end{eqnarray}
 
-where $\sigma$ is the clock model standard deviation, $p(\mathcal{T}|\theta)$ is the tree prior, and $\theta$ describes further unspecified parameters. 
+
+$\sigma$ represents clock model related parameters, and $p(\mathcal{T}|\theta)$ is the tree prior where $\theta$ describes further unspecified parameters. 
 The tree likelihood $p(D|\mathcal{T}, r(\vec{\mathcal{R}}^{\,}), \theta)$ is computed using the tree-peeling algorithm \cite{felsenstein1981evolutionary}, where
 $\vec{\mathcal{R}}^{\,}$ is a vector of abstracted substitution rates and transformed into real rates by function $r(\vec{\mathcal{R}}^{\,})$. Three methods of representing rates as $\vec{\mathcal{R}}^{\,}$ are presented in \textbf{\nameref{sect:rateparams}}.  
 
 
+
+
+
 Let $t_i$ be the height (time) of node $i$.
-Every internal and leaf node $i$ in $\mathcal{T}$ is associated with a parental branch length (the height difference between $i$ and its parent) $\tau_i$ and a parental branch substitution rate $r_i = r(\mathcal{R}_i)$. 
-There are a total of $2N-2$ internal and leaf nodes. 
-Under the relaxed clock model, each $\mathcal{R}_i$ is independently distributed under the prior.
+Each node $i$ in $\mathcal{T}$, except for the root, is associated with a parental branch length $\tau_i$ (the height difference between $i$ and its parent)  and a parental branch substitution rate $r_i = r(\mathcal{R}_i)$. 
+In a relaxed clock model, each of the $2N-2$ elements in $\mathcal{R}_i$ are independently distributed under the prior $p(\vec{\mathcal{R}}^{\,} | \sigma)$.
 
 
 
-The posterior distribution is sampled by MCMC.
-The probability of accepting proposed state $x^\prime$ from state $x$ is calculated using the Metropolis-Hastings ratio \cite{metropolis53, hastings70}:
+The posterior distribution is sampled by the Metropolis-Hastings-Green MCMC algorithm \cite{metropolis53, hastings70, green1995reversible},
+under which the probability of accepting proposed state $x^\prime$ from state $x$ is equal to:
 
 \begin{eqnarray}
 \label{eq:MCMC}
-\alpha(x^\prime|x) =  \min\left( 1, \frac{p(x^\prime|D)}{p(x|D)} \frac{q(x|x^\prime)}{q(x^\prime|x)} \right).
+\alpha(x^\prime|x) =  \min\left( 1, \frac{p(x^\prime|D)}{p(x|D)} \; \frac{q(x|x^\prime)}{q(x^\prime|x)} \; |J| \right).
 \end{eqnarray}
 
 $q(a|b)$ is the transition kernel: the probability of proposing state $b$ from state $a$.
-The ratio between the two $\frac{q(x|x^\prime)}{q(x^\prime|x)}$ is known as the Hastings ratio \cite{hastings70}.
-
+The ratio between the two $\frac{q(x|x^\prime)}{q(x^\prime|x)}$ is also known as the Hastings ratio \cite{hastings70}.
+The determinant of the Jacobian matrix $|J|$ solves the dimension-matching problem for proposals which operate on multiple terms across one or more spaces \cite{green1995reversible, geyer2003metropolis}. 
+This term is known as the Green ratio. 
 
 
 
@@ -363,12 +367,16 @@ The ratio between the two $\frac{q(x|x^\prime)}{q(x^\prime|x)}$ is known as the 
 \subsection*{Substitution rate parameterisations}
 \label{sect:rateparams}
 
-In Bayesian inference, the way parameters are represented in the model can affect the mixing ability of the model and the meaning of the model itself \cite{gelman2004parameterization}. Three methods for parameterising substitution rates are described below, and are later evaluated in \textbf{\nameref{sect:results}}. Each parameterisation technique is associated with i) an abstraction of the rates $\vec{\mathcal{R}}^{\,}$, ii) some function for transforming this parameter into real rates $r(\vec{\mathcal{R}}^{\,})$, and iii) a prior density function of the abstraction $p(\vec{\mathcal{R}}^{\,} | \sigma) $. The three methods are summarised in \textbf{Fig \ref{fig:rateparams}}.
+In Bayesian inference, the way parameters are represented in the model can affect the mixing ability of the model and the meaning of the model itself \cite{gelman2004parameterization}. Three methods for parameterising substitution rates are described below.
+ Each parameterisation is associated with i) an abstraction of the branch rate vector $\vec{\mathcal{R}}^{\,}$, ii) some function for transforming this parameter into unabstracted branch rates $r(\vec{\mathcal{R}}^{\,})$, and iii) a prior density function of the abstraction $p(\vec{\mathcal{R}}^{\,} | \sigma) $. 
+ The three methods are summarised in \textbf{Fig \ref{fig:rateparams}}.
 
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{Figures/rateparameterisation.pdf}
-\caption{\textbf{Methods of rate parameterisation.} The \textit{cat} and \textit{quant} approximations are plotted on top of the true underlying rate prior distribution (\textit{real}). In this example, rates are drawn from a $\text{LogNormal}(\mu = -0.045, \sigma = 0.3)$ distribution. The probability density function (pdf) and cumulative density function (cdf) of this distribution are shown.}
+\caption{\textbf{Branch rate parameterisations.} Top left: the branch rate prior under a log-normal($-0.5\sigma^2, \sigma$) distribution (with a mean of 1). 
+The function for transforming $\mathcal{R}$ into branch rates $r(\mathcal{R})$ is depicted for \textit{real} (top right), \textit{cat} (bottom left), and \textit{quant} (bottom right).
+For simplicity there are 10 \textit{cat} bins displayed, however in practice there are $2N-2$ bins. }
 \label{fig:rateparams}
 \end{figure}
 
