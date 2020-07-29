@@ -256,7 +256,7 @@ Remco Bouckaert\textsuperscript{1,2}
 
 
 The molecular clock hypothesis states that the evolutionary rates of biological sequences are approximately constant throughout time \cite{zuckerkandl1962molecular}.
-This assumption forms the basis of phylogenetics, under which evolutionary trees and divergence dates of life forms are inferred from biological sequences, such as nucleotides and amino acids \cite{douzery2003local, drummond2006relaxed}.
+This assumption forms the basis of phylogenetics, under which the evolutionary trees and divergence dates of life forms are inferred from biological sequences, such as nucleotides and amino acids \cite{douzery2003local, drummond2006relaxed}.
 In Bayesian phylogenetics, these trees and their associated parameters are estimated as probabilitiy distributions \cite{kuhner1995estimating, larget1999markov, mau1999bayesian}. 
 Statistical inference is typically performed by sampling using the Markov chain Monte Carlo (MCMC) algorithm \cite{metropolis53, hastings70}.
 Bayesian phylogenetic clock models have been implemented in many platforms including BEAST \cite{drummond2012bayesian}, BEAST2 \cite{bouckaert2019beast}, MrBayes \cite{ronquist2012mrbayes}, and RevBayes \cite{hohna2016revbayes}.
@@ -264,13 +264,13 @@ Bayesian phylogenetic clock models have been implemented in many platforms inclu
 
 
 The simplest phylogenetic clock model -- the strick clock -- makes the convenient assumption that the evolutionary rate is constant across all lineages \cite{zuckerkandl1965evolutionary, kuhner1995estimating, larget1999markov}.  % Early examples? 
-However, molecular substitution rates are known to vary over time, over population sizes, over evolutionary pressures, and over DNA replicative machineries \cite{gillespie1994causes, woolfit2009effective, loh2010optimization}.
+However, molecular substitution rates are known to vary over time, over population sizes, over evolutionary pressures, and over nucleic acid replicative machineries \cite{gillespie1994causes, woolfit2009effective, loh2010optimization}.
 Moreover, any given dataset may be clock-like (where the substitution rate has a small variance across lineages) or non clock-like (a large variance). 
 In the latter case, a strict clock is probably not suitable. 
 
 
 
-This led to the development of relaxed (uncorrelated) clock models, under which each branch in the phylogenetic tree has its own substitution rate  \cite{drummond2006relaxed}.
+This led to the development of relaxed (uncorrelated) clock models, under which each branch in the phylogenetic tree has its own molecular substitution rate  \cite{drummond2006relaxed}.
 Branch rates can be drawn from a range of probability distributions including log-normal, exponential, gamma, and inverse-gamma distributions \cite{drummond2006relaxed, lepage2007general, li2012model}.
 This class of models is widely used, and has aided insight into many recent biological problems, including the 2016 Zika virus outbreak \cite{faria2017establishment} and the COVID-19 pandemic \cite{giovanetti2020first}.
 % is compatible with increasingly prominent multispecies coalescent models \cite{ogilvie2017starbeast2}, 
@@ -343,7 +343,7 @@ $\vec{\mathcal{R}}^{\,}$ is a vector of abstracted substitution rates and transf
 
 Let $t_i$ be the height (time) of node $i$.
 Each node $i$ in $\mathcal{T}$, except for the root, is associated with a parental branch length $\tau_i$ (the height difference between $i$ and its parent)  and a parental branch substitution rate $r_i = r(\mathcal{R}_i)$. 
-In a relaxed clock model, each of the $2N-2$ elements in $\mathcal{R}_i$ are independently distributed under the prior $p(\vec{\mathcal{R}}^{\,} | \sigma)$.
+In a relaxed clock model, each of the $2N-2$ elements in $\vec{\mathcal{R}}^{\,}$ are independently distributed under the prior $p(\vec{\mathcal{R}}^{\,} | \sigma)$.
 
 
 
@@ -374,7 +374,7 @@ In Bayesian inference, the way parameters are represented in the model can affec
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{Figures/rateparameterisation.pdf}
-\caption{\textbf{Branch rate parameterisations.} Top left: the branch rate prior under a log-normal($-0.5\sigma^2, \sigma$) distribution (with a mean of 1). 
+\caption{\textbf{Branch rate parameterisations.} Top left: the prior density of a branch rate $r$ under a log-normal($-0.5\sigma^2, \sigma$) distribution (with its mean fixed at 1). 
 The function for transforming $\mathcal{R}$ into branch rates $r(\mathcal{R})$ is depicted for \textit{real} (top right), \textit{cat} (bottom left), and \textit{quant} (bottom right).
 For simplicity there are 10 \textit{cat} bins displayed, however in practice there are $2N-2$ bins. }
 \label{fig:rateparams}
@@ -403,8 +403,8 @@ where $\mu = -0.5\sigma^2$ is set such that the expected value of the log-normal
 In this article we only consider log-normal clock priors, however the methods discussed are general.
 
 
-Zhang and Drummond 2020 present a series of tree operators which propose internal/root node heights, and then recompute the rates of incident branches such that their genetic distances ($r_i \times \tau_i$) remain constant after the proposal \cite{zhang2020improving}. 
-These operators account for the correlation which exists between branch rates and branch times.
+Zhang and Drummond 2020 introduced a series of tree operators which propose node heights and branch rates, such that the resulting genetic distances ($r_i \times \tau_i$) remain constant \cite{zhang2020improving}. 
+These operators account for correlations between branch rates and branch times.
 By keeping the genetic distance of each branch constant, the likelihood is unaltered by the proposal. 
 
 
@@ -416,15 +416,16 @@ By keeping the genetic distance of each branch constant, the likelihood is unalt
 
 
 \subsubsection*{2. Categories}
-The category parameterisation (\textit{cat}) is an abstraction of the \textit{real} parameterisation. Each branch is assigned an integer from $0$ to $n-1$:
+The category parameterisation (\textit{cat}) is an abstraction of the \textit{real} parameterisation. 
+Each of the $2N-2$ branches are assigned an integer from $0$ to $n-1$:
 
 \begin{align}
 \vec{\mathcal{R}}^{\,} \in& \{ 0, 1, \dotso, n-1 \}^{2N-2}.
 \end{align}
 
 
-These integers correspond to $n$ rate categories.
- The domain of $\vec{\mathcal{R}}^{\,}$ is uniformly distributed:
+These integers correspond to $n$ rate categories (\textbf{Fig. \ref{fig:rateparams}}).
+The domain of $\vec{\mathcal{R}}^{\,}$ is uniformly distributed under thr prior:
 
 
 \begin{align}
@@ -433,18 +434,23 @@ p(\mathcal{R}_i | \sigma) = p(\mathcal{R}_i) = \frac{1}{n}.
 
 
 
-Let $f(x|\sigma)$ be the probability density function (pdf) and let $F(x|\sigma) = \int\limits_{0}^{x} f(t|\sigma) \; dt$ be the cumulative distribution function (cdf) of the prior distribution used by the underlying \textit{real} clock model. Then, in the \textit{cat} parameterisation, $f(x|\sigma)$ is discretised into $n$ bins and the elements of $\vec{\mathcal{R}}^{\,}$ each point to one of these bins. Each bin contains uniform probability density $1/n$. The rate of each bin is equal to the median value within the bin 
+Let $f(x|\sigma)$ be the probability density function (PDF) and let $F(x|\sigma) = \int\limits_{0}^{x} f(t|\sigma) \; dt$ be the cumulative distribution function (CDF) of the prior distribution used by the underlying \textit{real} clock model. 
+Then, in the \textit{cat} parameterisation, $f(x|\sigma)$ is discretised into $n$ bins and each element within $\vec{\mathcal{R}}^{\,}$ points to one such bin,
+where each bin has uniform prior density.
+ The rate of each bin is equal to the median value within the bin 
 
 
 \begin{align}
 r(\mathcal{R}_i) =& \; F^{-1}\big(\frac{\mathcal{R}_i + 0.5}{n}\big),
 \end{align}
 
-where $F^{-1}$ is the inverse cumulative distribution function (i-cdf).
+where $F^{-1}$ is the inverse cumulative distribution function (i-CDF).
 
 
 
-The key advantage of the \textit{cat} parameterisation is the removal of a term from the posterior density (Equation \ref{eq:bayesian}), or more accurately the replacement of a non-trivial $p(\vec{\mathcal{R}}^{\,} | \sigma)$ term with that of a uniform prior. Thus, one fewer term needs to be estimated per rate.
+The key advantage of the \textit{cat} parameterisation is the removal of a term from the posterior density (Equation \ref{eq:bayesian}), or more accurately the replacement of a non-trivial $p(\vec{\mathcal{R}}^{\,} | \sigma)$ term with that of a uniform prior. 
+This may facilitate efficient traversal of the parameter space by MCMC.
+
 
 
 
@@ -459,7 +465,7 @@ However, the recently developed constant distance operators  -- which are incomp
 \subsubsection*{3. Quantiles}
 
 
-Finally, rates can be parameterised as real numbers $0 < \mathcal{R}_i < 1$ which describe the rate's quantile with respect to some underlying clock model distribution. Under the  \textit{quant} parameterisation, each element in $\vec{\mathcal{R}}^{\,}$ is uniformly distributed.
+Finally, rates can be parameterised as real numbers $0 < \mathcal{R}_i < 1$ which describe the rate's quantile with respect to some underlying clock model distribution. Under the  \textit{quant} parameterisation, each of the $2N-2$ elements in $\vec{\mathcal{R}}^{\,}$ are uniformly distributed.
 
 
 \begin{align}
@@ -468,7 +474,7 @@ p(\mathcal{R}_i | \sigma) = & \; p(\mathcal{R}_i) = 1
 \end{align}
 
 
-Transforming these quantiles into rates invokes the i-cdf of the underlying \textit{real} clock model distribution:
+Transforming these quantiles into rates invokes the i-CDF of the underlying \textit{real} clock model distribution:
 
 
 \begin{align}
@@ -476,9 +482,14 @@ r(\mathcal{R}_i) =& \; F^{-1}(\mathcal{R}_i).
 \end{align}
 
 
+
 While this approach has clear similarities with \textit{cat}, the domain of rates here is continuous (as opposed to being confined to a discrete number of bins).
 In this project we extended the family of constant distance operators  \cite{zhang2020improving} so they are compatible with \textit{quant}.
-These are presented in \textbf{\nameref{sect:S1Appendix}}. 
+These operators are presented in \textbf{\nameref{sect:S1Appendix}}. 
+
+The computational requirements of i-CDF evaluation may hinder the performance of the \textit{quant} parameterisation.
+
+
 
 
 %A potential disadvantage of the \textit{quant} method would be the computational requirements of continuously evaluating the i-cdf.
@@ -508,7 +519,7 @@ These are presented in \textbf{\nameref{sect:S1Appendix}}.
 The weight of an operator determines the probability of the operator being selected at each step during MCMC.
 In BEAST2, operators can have a tunable parameter $s$ which determines the step size of the operator \cite{bouckaert2019beast}. 
 Although $s$ is learned throughout the MCMC chain, the operator weights themselves are typically held constant.
-Pre-existing BEAST2 clock model operators (i.e. those which generate proposals for either $\mathcal{R}$ or $\sigma$) are summarised in \textbf{Table \ref{table:kernels}}, and further operators are introduced throughout the paper.
+Pre-existing BEAST2 clock model operators (i.e. those which generate proposals for either $\vec{\mathcal{R}}^{\,}$ or $\sigma$) are summarised in \textbf{Table \ref{table:kernels}}, and further operators are introduced throughout the paper.
 
 
 
@@ -522,31 +533,31 @@ Pre-existing BEAST2 clock model operators (i.e. those which generate proposals f
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{|l| l p{4cm} l l|} 
+\begin{tabular}{|l p{4.2cm} l l|} 
  \hline
- & Operator & Description & Parameters & Parameterisations  \\
+ Operator & Description & Parameters & Parameterisations  \\
   \hline
- 1 & \texttt{RandomWalk} & Moves a single element by a tunable amount. & $\mathcal{R}, \sigma$ & \textit{cat}, \textit{real}, \textit{quant} \\
+ \texttt{RandomWalk} & Moves a single element by a tunable amount. & $\vec{\mathcal{R}}^{\,}, \sigma$ & \textit{cat}, \textit{real}, \textit{quant} \\
   \hline
- 2 & \texttt{Scale} & Applies \texttt{RandomWalk} on the log-transformation (suitable for parameters with positive domains). & $\mathcal{R}, \sigma$ & \textit{real}, \textit{quant}  \\
+\texttt{Scale} & Applies \texttt{RandomWalk} on the log-transformation (suitable for parameters with positive domains). & $\vec{\mathcal{R}}^{\,}, \sigma$ & \textit{real}, \textit{quant}  \\
   \hline
- 3 & \texttt{Interval} & Applies \texttt{RandomWalk} on the logit-transformation (suitable for parameters with upper and lower limits). & $\mathcal{R}$ & \textit{quant}  \\
+ \texttt{Interval} & Applies \texttt{RandomWalk} on the logit-transformation (suitable for parameters with upper and lower limits). & $\vec{\mathcal{R}}^{\,}$ & \textit{quant}  \\
   \hline
-   4 & \texttt{Swap} & Swaps two random elements in the vector \cite{drummond2006relaxed}. & $\mathcal{R}$  & \textit{cat}, \textit{real}, \textit{quant}  \\
+ \texttt{Swap} & Swaps two random elements in the vector \cite{drummond2006relaxed}. & $\vec{\mathcal{R}}^{\,}$  & \textit{cat}, \textit{real}, \textit{quant}  \\
  \hline
-  5 & \texttt{Uniform} & Resamples one element in the vector from a uniform distribution. & $\mathcal{R}$  & \textit{cat}, \textit{quant}  \\
+\texttt{Uniform} & Resamples one element in the vector from a uniform distribution. & $\vec{\mathcal{R}}^{\,}$  & \textit{cat}, \textit{quant}  \\
  \hline
- 6 & \texttt{ConstantDistance} & Adjusts an internal node and recalculates all incident branch rates such that the genetic distances remain constant \cite{zhang2020improving}.  & $\mathcal{R}, \mathcal{T}$ & \textit{real}, \textit{quant} \\
+\texttt{ConstantDistance} & Adjusts an internal node and recalculates all incident branch rates such that the genetic distances remain constant \cite{zhang2020improving}.  & $\vec{\mathcal{R}}^{\,}, \mathcal{T}$ & \textit{real}, \textit{quant} \\
  \hline
- 7 & \texttt{SimpleDistance} & Applies \texttt{SimpleDistance} to the root node \cite{zhang2020improving}.  & $\mathcal{R}, \mathcal{T}$ & \textit{real}, \textit{quant} \\
+\texttt{SimpleDistance} & Applies \texttt{ConstantDistance} to the root node \cite{zhang2020improving}.  & $\vec{\mathcal{R}}^{\,}, \mathcal{T}$ & \textit{real}, \textit{quant} \\
  \hline
- 8 & \texttt{SmallPulley} & Proposes new branch rates incident to the root such that their combined genetic distance is constant  \cite{zhang2020improving}.  & $\mathcal{R}$ & \textit{real}, \textit{quant} \\
+\texttt{SmallPulley} & Proposes new branch rates incident to the root such that their combined genetic distance is constant  \cite{zhang2020improving}.  & $\vec{\mathcal{R}}^{\,}$ & \textit{real}, \textit{quant} \\
  \hline
- 9 & \texttt{FastClockScale} & Applies \texttt{Scale} to $\sigma$ and then recomputes all rates $\mathcal{R}$ such that their quantiles under the prior $p(\mathcal{R}|\sigma)$ are constant \cite{zhang2020improving}.  & $\mathcal{R}$ & \textit{real} \\
+\texttt{FastClockScale} & Applies \texttt{Scale} to $\sigma$ and then recomputes all rates $\vec{\mathcal{R}}^{\,}$ such that their quantiles under the prior $p(\vec{\mathcal{R}}^{\,}|\sigma)$ are constant \cite{zhang2020improving}.  & $\mathcal{R}$ & \textit{real} \\
  \hline
 \end{tabular}
-\caption{Summary of pre-existing BEAST2 operators which apply to either branch rates $\mathcal{R}$ or the clock standard deviation $\sigma$, and the substitution rate parameterisation they apply to.
- \texttt{ConstantDistance} and \texttt{SimpleDistance} also adjust tree node heights. }
+\caption{Summary of pre-existing BEAST2 operators, which apply to either branch rates $\vec{\mathcal{R}}^{\,}$ or the clock standard deviation $\sigma$, and the substitution rate parameterisation they apply to.
+ \texttt{ConstantDistance} and \texttt{SimpleDistance} also adjust node heights in the tree $\mathcal{T}$. }
 \label{table:kernels}
 \end{table}
 
@@ -589,6 +600,22 @@ This operator resamples $\psi$ randomly selected elements within vector $\vec{x}
 We hypothesise that datasets with strong signal (or large $L$) will mix best when the more precise and meticulous kind of operator is employed, such as those informed by correlations within the posterior distribution e.g. the family of constant distance operators \cite{zhang2020improving}.
 Whereas, datasets which contain very poor signal (or small $L$) are likely to mix best when there is more weight placed on bold operators such as \texttt{SampleFromPrior}, \texttt{Swap}, or \texttt{Uniform} which sample each branch rate independently of its current estimate.
 \texttt{AdaptiveOperatorSampler} should learn the combination of weights behind these classes of operators best suited for the dataset.
+
+
+
+
+\begin{figure}[!h]
+\includegraphics[width=\textwidth]{Figures/correlations.pdf}
+\caption{\textbf{Traversing likelihood space.}
+The z-axes above are log-likelihoods under the Jukes-Cantor substitution model \cite{jukes1969evolution}, with respect to simulated nucleic acid sequences of length $L$.  
+Likelihood is conditional on substitution rate $r$ and the divergence time between the two sequences $\tau$.
+The effect of two possible proposals from the current state (red circle) are depicted.
+The two proposals are generated by the \texttt{RandomWalk} (\texttt{RW}) and \texttt{ConstantDistance} (\texttt{CD}) operators.
+In the low signal dataset ($L=0.1$kb above), both operators can traverse the likelihood space effectively.
+ However, the same exact same proposal by \texttt{RandomWalk} incurs a much larger likelihood penalty in $L=0.5$kb dataset by ``falling off the ridge'', in contrast to \texttt{ConstantDistance} which ``walks along the ridge''. }
+\label{fig:rateparams}
+\end{figure}
+
 
 In this article we apply three instances of the \texttt{AdaptiveOperatorSampler} meta-operator to the \textit{real} and \textit{quant} parameterisations. 
 These are summarised in \textbf{Table \ref{table:adaptiveSampling}}.
