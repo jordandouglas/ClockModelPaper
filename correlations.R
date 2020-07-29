@@ -45,7 +45,7 @@ likelihood = function(seq1, seq2, len, rate){
 xmax = 1.5
 mu = 1 * 4/3
 t = 0.1
-grid.len = 100
+grid.len = 500
 x = seq(from = 0.01, to = xmax, length = grid.len)
 y = seq(from = 0.01, to = xmax, length = grid.len)
 for (L in c(100, 500)){
@@ -83,7 +83,7 @@ for (L in c(100, 500)){
 	breaks  =signif(breaks, 2)
 	breaks = round(breaks / 10, 0) * 10
 	#seq(from = min(lnL.vec), to = max(lnL.vec), length = nbins+1)
-	image(x, y, lnL, xlab="Branch rate $r$", ylab="Branch length $\\tau$", axes=F,  main = paste0("Branch log-likelihood when L = ", L/1000, "kb"), col = cols,
+	image(x, y, lnL, xlab="Branch rate $r$", ylab="Branch length $\\tau$", axes=F,  main = paste0("log-likelihood when L = ", L/1000, "kb"), col = cols,
 			 breaks = breaks, useRaster = TRUE, xaxs = "i", yaxs = "i")
 
 
@@ -108,16 +108,17 @@ for (L in c(100, 500)){
 	
 
 
-	dr = 0.3
+	dr = 0.5
 
 	# Randomwalk
 	Arrows(r0, t0, r0 + dr, t0, lcol = arrow.col,  arr.type="curved")
 	#text(r0 + dr + 0.05, t0, "$x^\\prime$", adj = c(0, 0.3), col = font.col)
-	text(r0 + dr/2, t0 - 0.02, "\\texttt{RW}", adj = c(0.5, 1), cex = 1.2)
+	text(r0 + dr/2, t0 + 0.02, "\\texttt{RW}", adj = c(0.5, 0), cex = 1.2)
 
 
 
 	# Constant distance
+	dr = 0.3
 	r1 = r0 - dr
 	t1 = r0/r1 * t0
 	#r1 = r0*t0/t1
