@@ -108,7 +108,7 @@ for (i in 1:length(Svals)){
 	S = Svals[i]
 	M = Mvals[i]
 	x = seq(from = 0, to = 1, by = 0.001)
-	y = qlnorm (x, M, S)
+	y = c(qlnorm (x[-length(x)], M, S), xmax*2)
 	lines(x, y, pch = 16, col = Scols[i], lwd = 3)
 }
 

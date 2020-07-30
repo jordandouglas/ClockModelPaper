@@ -83,13 +83,13 @@ for (L in c(100, 500)){
 	breaks  =signif(breaks, 2)
 	breaks = round(breaks / 10, 0) * 10
 	#seq(from = min(lnL.vec), to = max(lnL.vec), length = nbins+1)
-	image(x, y, lnL, xlab="Branch rate $r$", ylab="Branch length $\\tau$", axes=F,  main = paste0("log-likelihood when L = ", L/1000, "kb"), col = cols,
+	image(x, y, xlim = c(0, xmax), ylim = c(0, xmax), lnL, xlab="Branch rate $r$", ylab="Branch length $\\tau$", axes=F,  main = paste0("log-likelihood when L = ", L/1000, "kb"), col = cols,
 			 breaks = breaks, useRaster = TRUE, xaxs = "i", yaxs = "i")
 
 
 
 	par(new=TRUE)
-	contour(x, y, lnL, xlab="", ylab="", axes=F,  main = "", nlevels = nbins, levels = breaks, xaxs = "i", yaxs = "i", col = "black", lwd = 2, labcex = 1.0)
+	contour(x, y, lnL, xlab="", ylab="", axes=F,  main = "", nlevels = nbins, levels = breaks, xaxs = "i", yaxs = "i", col = "black", lwd = 2, labcex = 1.0, xlim = c(0, xmax), ylim = c(0, xmax))
 
 	axis(1, at = seq(from = 0, to = xmax, by = 0.5))
 	axis(2, at = seq(from = 0, to = xmax, by = 0.5), las=2)
