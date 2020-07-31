@@ -16,129 +16,79 @@
 \begin{document}
 
 
-\section*{S1 Appendix: Rate quantiles}
+\section*{S1 Appendix: Tree operators for rate quantiles}
 
 
-\section{Linear piecewise approximation}
-
-In this article we introduced a linear piecewise approximation of the i-cdf to improve the \textit{quant} method. Let $\hat{F}^{-1}(\mathcal{R}_i)$ be the piecewise approximation of $F^{-1}(\mathcal{R}_i)$. The approximation is comprised of $n$ pieces (where $n$ is fixed).
 
 
-%$\hat{F}(\mathcal{R}_i)$ be the piecewise approximation of $F(\mathcal{R}_i)$, and let  be its inverse function. 
+Zhang and Drummond 2020 introduced several tree operators for the \textit{real} parameterisation -- including Constant Distance, Simple Distance, and Small Pulley \cite{zhang2020improving}.
+In this appendix, these three operators are extended to the  the \textit{quant} parameterisation.
+Following the notation presented in the main article, let $t_i$ be the time of node $i$, let $0 < q_i < 1$ be the rate quantile of node $i$, and let $r_i = F^{-1}(q_i)$ be the real rate of node $i$ where $F^{-1}$ is the inverse cumulative density function (i-CDF).
+
+
+
+
+
+
+
+
+\subsection*{Constant Distance}
+
+
+
+Let $\mathcal{X}$ be a uniformly-at-random sampled internal node on tree $\mathcal{T}$. Let $\mathcal{L}$ and $\mathcal{R}$ be the left and right child of $\mathcal{X}$, respectively, and let $\mathcal{P}$ be the parent of $\mathcal{X}$. 
+Under the \textit{quant} parameterisation, the \texttt{ConstantDistance} operator works as follows: \\
+
+
+\textul{\textit{Step 1}}. Propose a new height for $t_\mathcal{X}$:
 
 \begin{align}
-\hat{F}^{-1}(\mathcal{R}_i) = F^{-1}(\floor{b_i}) + \begin{cases} \Big( F^{-1}(\floor{b_i} + 1) - F^{-1}(\floor{b_i}) \Big) \Big( b_i - \floor{b_i}  \Big) &\text{ if } \floor{b_i} < n-1  \\ 0 &\text{ if } \floor{b_i} = n-1 \end{cases}
+	{t_\mathcal{X}}^\prime \leftarrow t_\mathcal{X} + s\Sigma
+\end{align}
+
+where $\Sigma$ is drawn from a proposal transition distribution (Uniform or Bactrian), and $s$ is a tunable step size. Ensure that $\max\{t_\mathcal{L}, t_\mathcal{R} \} < {t_\mathcal{X}}^\prime < t_\mathcal{P}$, and if the constraint is broken then reject the proposal.  \\
+
+
+\textul{\textit{Step 2}}. Recalculate $q_\mathcal{X}$ as:
+
+
+
+\begin{align}
+	{q_\mathcal{X}}^\prime  \leftarrow & F\Big({r_\mathcal{X}}^\prime \Big) \nonumber\\
+				\leftarrow & F\Big(\frac{t_\mathcal{P} - t_\mathcal{X}}{t_\mathcal{P} - {t_\mathcal{X}}^\prime} r_X \Big)\nonumber \\
+				\leftarrow & F\Big(\frac{t_\mathcal{P} - t_\mathcal{X}}{t_\mathcal{P} - {t_\mathcal{X}}^\prime} F^{-1}(q_\mathcal{X}) \Big).
 \end{align}
 
 
-where $b_i = \min \{ \max\{ \frac{n \times \mathcal{R}_i}{n-1}, \frac{n_0}{n-1} \}, \frac{n - 1 -n_0}{n-1} \}$ indexes $\mathcal{R}_i$ into one of the $n$ pieces $\floor{b_i}$. $n_0 = 0.1$ provides a lower and upper limits of the piecewise approximation, corresponding to $r_\text{min}$ and $r_\text{max}$ respectively. The lower and upper rate limits are equal to:
-
-
-
-\begin{align}
-r_\text{min} &= F^{-1}\Big( \frac{n_0}{n-1}\Big) = F^{-1}\Big( 0.001 \Big) \\
-r_\text{max} &= F^{-1}\Big( \frac{n - 1 -n_0}{n-1}\Big) = F^{-1}\Big( 0.999 \Big),
-\end{align}
-
-when $n=101$ and $n_0=0.1$. It is important to ensure that any operators which act in rate space (as opposed to quantile space) respect these boundaries. The inverse of the approximation function (ie. the cdf $\hat{F}$) is 
+This ensures that the genetic distance between $\mathcal{X}$ and $P$ remains constant after the operation by enforcing the constraint:
 
 
 \begin{align}
-\hat{F}(r_i) = \begin{cases} \max \big(0, \frac{1}{n-1} \times \Big( v_i + \frac{r_i -  F^{-1}(\floor{v_i})}{F^{-1}(\floor{v_i}+1) - F^{-1}(\floor{v_i})} \Big) \big) &\text{ if } \floor{v_i} < n-1  \\
-	1 &\text{ if } \floor{v_i} = n-1 
-\end{cases}
-\end{align}
-
-
-where $v_i \in (0, 1, \dotso, n-1)$ is the piece which $r_i$ corresponds to:
-
-
-\begin{align}
-v_i = \max\limits_{j = 0}^{n-1} \{ j : \hat{F}^{-1}\big(\frac{j}{n-1}\big) < r_i \}.
-\end{align}
-
-
-As the piecewise approximation is linear, computing the derivatives of these two functions (required for computing Hastings ratios) are trivial:
-
-
-\begin{align}
-\frac{\partial}{\partial \mathcal{R}_i} \hat{F}^{-1}(\mathcal{R}_i) =  D \hat{F}^{-1}(\mathcal{R}_i) &= \begin{cases}  \Big(\hat{F}^{-1}(\floor{b_i}+1) - \hat{F}^{-1}(\floor{b_i})\Big) \times(n-1)  & \text{ if } \floor{b_i} < n-1 \\
-0 & \text{ if } \floor{b_i} = n-1 \end{cases} \label{eqn:derivFinv}  \\
-\frac{\partial}{\partial r_i} \hat{F}(r_i) = D \hat{F}(r_i) &= \frac{1}{\hat{F}^{-1}\Big(\hat{F}(r_i)\Big)} \label{eqn:derivF}
-\end{align}
-
-
-
-
-
-\section{Tree operators for rate quantiles}
-
-Zhang and Drummond 2020 introduced several tree operators for the \textit{real} parameterisation -- including Constant Distance, Simple Distance, and Small Pulley. In this appendix, these three operators are extended to the  the \textit{quant} parameterisation.
-
-Following the notation presented in the main article, let $t_i$ be the time of node $i$, let $0 < q_i < 1$ be the rate quantile of node $i$, and let $r_i = \hat{F}^{-1}(q_i)$ be the natural rate of node $i$.
-
-
-
-
-
-
-
-
-\subsection{Constant Distance}
-
-
-
-Let $X$ be a uniformly-at-random sampled internal node on tree $\mathcal{T}$. Let $L$ and $R$ be the left and right child of $X$, respectively, and let $P$ be the parent of $X$. Under the \textit{quant} parameterisation, the Constant Distance operator works as follows: \\
-
-
-\textul{\textit{Step 1}}. Propose a new height for $t_X$:
-
-\begin{align}
-	{t_X}^\prime \leftarrow t_X + \Sigma
-\end{align}
-
-where $\Sigma \sim \text{ Uniform}(-s, s)$, for some random walk step size $s$. Ensure that $\max\{t_L, t_R \} < {t_X}^\prime < t_P$, and if the constrant is broken then reject the proposal.  \\
-
-
-\textul{\textit{Step 2}}. Recalculate $q_X$ as:
-
-
-
-\begin{align}
-	{q_X}^\prime  \leftarrow & \hat{F}\Big({r_X}^\prime \Big) \nonumber\\
-				\leftarrow & \hat{F}\Big(\frac{t_P - t_X}{t_P - {t_X}^\prime} r_X \Big)\nonumber \\
-				\leftarrow & \hat{F}\Big(\frac{t_P - t_X}{t_P - {t_X}^\prime} \hat{F}^{-1}(q_X) \Big).
-\end{align}
-
-
-This ensures that the genetic distance between $X$ and $P$ remains constant after the operation by enforcing the constraint:
-
-
-\begin{align}
-	r_X (t_P - t_X) = {r_X}^\prime (t_P - {t_X}^\prime).
+	r_\mathcal{X} (t_\mathcal{P} - t_\mathcal{X}) = {r_\mathcal{X}}^\prime (t_\mathcal{P} - {t_\mathcal{X}}^\prime).
 \end{align}
 
 
 
 
-\textul{\textit{Step 3}}. Similarly, propose new rate quantiles for the two children $C \in \{L, R\}$:
+\textul{\textit{Step 3}}. Similarly, propose new rate quantiles for the two children $\mathcal{C} \in \{\mathcal{L}, \mathcal{R}\}$:
 
 
 
 \begin{align}
-	{q_C}^\prime  \leftarrow & \hat{F}\Big({r_C}^\prime \Big) \nonumber\\
-				\leftarrow & \hat{F}\Big(\frac{t_X - t_C}{{t_X}^\prime - t_C} \times r_C \Big) \nonumber\\
-				\leftarrow & \hat{F}\Big(\frac{t_X - t_C}{{t_X}^\prime - t_C} \times \hat{F}^{-1}(q_C) \Big).
+	{q_\mathcal{C}}^\prime  \leftarrow & F\Big({r_\mathcal{C}}^\prime \Big) \nonumber\\
+				\leftarrow & F\Big(\frac{t_\mathcal{X} - t_\mathcal{C}}{{t_\mathcal{X}}^\prime - t_\mathcal{C}} \times r_\mathcal{C} \Big) \nonumber\\
+				\leftarrow & F\Big(\frac{t_\mathcal{X} - t_\mathcal{C}}{{t_\mathcal{X}}^\prime - t_\mathcal{C}} \times F^{-1}(q_\mathcal{C}) \Big).
 \end{align}
 
 
-Ensure that $r_\text{min} < {r_i}^\prime < r_\text{max}$ for all proposed nodes $i \in \{X, L, R\}$, and if the constraint is broken then reject the proposal. 
+Ensure that $0 < {q_i}^\prime < 1$ for all proposed nodes $i \in \{\mathcal{X}, L, R\}$, and if the constraint is broken then reject the proposal. 
+This constraint can only be broken from numerical issues.
 
 
 
 
 
-\textul{\textit{Step 4}}. Finally, compute the natural logarithm of the Hastings ratio as that of the determinant of the Jacobian matrix:
+\textul{\textit{Step 4}}. Finally, in order to calculate the Metropolis-Hastings-Green ratio, return the determinant of the Jacobian matrix:
 
 
 
@@ -146,14 +96,14 @@ Ensure that $r_\text{min} < {r_i}^\prime < r_\text{max}$ for all proposed nodes 
 
 
 \begin{align}
-	J &= \begin{bmatrix} \frac{\partial {t_X}^\prime}{\partial t_X} & \frac{\partial {t_X}^\prime}{\partial q_X} & \frac{\partial {t_X}^\prime}{\partial q_L} & \frac{\partial {t_X}^\prime}{\partial q_R} \\
-			\frac{\partial {q_X}^\prime}{\partial t_X} & \frac{\partial {q_X}^\prime}{\partial q_X} & \frac{\partial {q_X}^\prime}{\partial q_L} & \frac{\partial {q_X}^\prime}{\partial q_R} \\
-			\frac{\partial {q_L}^\prime}{\partial t_X} & \frac{\partial {q_L}^\prime}{\partial q_X} & \frac{\partial {q_L}^\prime}{\partial q_L} & \frac{\partial {q_L}^\prime}{\partial q_R} \\
-			\frac{\partial {q_R}^\prime}{\partial t_X} & \frac{\partial {q_R}^\prime}{\partial q_X} & \frac{\partial {q_R}^\prime}{\partial q_L} & \frac{\partial {q_R}^\prime}{\partial q_R} \\ \end{bmatrix} \nonumber \\
-			&= \begin{bmatrix} \frac{\partial {t_X}^\prime}{\partial t_X} & 0 & 0 & 0 \\
-			\frac{\partial {q_X}^\prime}{\partial t_X} & \frac{\partial {q_X}^\prime}{\partial q_X} & 0 & 0 \\
-			\frac{\partial {q_L}^\prime}{\partial t_X} & 0 & \frac{\partial {q_L}^\prime}{\partial q_L} & 0 \\
-			\frac{\partial {q_R}^\prime}{\partial t_X} & 0 & 0 & \frac{\partial {q_R}^\prime}{\partial q_R} \\ \end{bmatrix}.
+	J &= \begin{bmatrix} \frac{\partial {t_\mathcal{X}}^\prime}{\partial t_\mathcal{X}} & \frac{\partial {t_\mathcal{X}}^\prime}{\partial q_\mathcal{X}} & \frac{\partial {t_\mathcal{X}}^\prime}{\partial q_\mathcal{L}} & \frac{\partial {t_\mathcal{X}}^\prime}{\partial q_\mathcal{R}} \\
+			\frac{\partial {q_\mathcal{X}}^\prime}{\partial t_\mathcal{X}} & \frac{\partial {q_\mathcal{X}}^\prime}{\partial q_\mathcal{X}} & \frac{\partial {q_\mathcal{X}}^\prime}{\partial q_\mathcal{L}} & \frac{\partial {q_\mathcal{X}}^\prime}{\partial q_\mathcal{R}} \\
+			\frac{\partial {q_\mathcal{L}}^\prime}{\partial t_\mathcal{X}} & \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{X}} & \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{L}} & \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{R}} \\
+			\frac{\partial {q_\mathcal{R}}^\prime}{\partial t_\mathcal{X}} & \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{X}} & \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{L}} & \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{R}} \\ \end{bmatrix} \nonumber \\
+			&= \begin{bmatrix} \frac{\partial {t_\mathcal{X}}^\prime}{\partial t_\mathcal{X}} & 0 & 0 & 0 \\
+			\frac{\partial {q_\mathcal{X}}^\prime}{\partial t_\mathcal{X}} & \frac{\partial {q_\mathcal{X}}^\prime}{\partial q_\mathcal{X}} & 0 & 0 \\
+			\frac{\partial {q_\mathcal{L}}^\prime}{\partial t_\mathcal{X}} & 0 & \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{L}} & 0 \\
+			\frac{\partial {q_\mathcal{R}}^\prime}{\partial t_\mathcal{X}} & 0 & 0 & \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{R}} \\ \end{bmatrix}.
 \end{align}
 
 
@@ -161,13 +111,13 @@ As $J$ is triangular, its determinant $|J|$ is equal to the product of diagonal 
 
 
 \begin{align}
-	\ln |J| =&  \ln \{ \frac{\partial {t_X}^\prime}{\partial t_X} \times \frac{\partial {q_X}^\prime}{\partial q_X} \times \frac{\partial {q_L}^\prime}{\partial q_L} \times \frac{\partial {q_R}^\prime}{\partial q_R} \} \nonumber\\
-		=& \ln 1 + \ln \; D \hat{F}\Big( \frac{t_P - t_X}{t_P - {t_X}^\prime} \times \hat{F}^{-1}(q_X)  \Big) + \ln \frac{\partial}{\partial q_X}  \frac{t_P - t_X}{t_P - {t_X}^\prime} \hat{F}^{-1} \Big( q_X \Big) \nonumber\\
-		& + \ln \; D\hat{F}\Big( \frac{t_X - t_L}{{t_X}^\prime - t_L} \times \hat{F}^{-1}(q_L) \Big) + \ln \frac{\partial}{\partial q_L} \frac{t_X - t_L}{{t_X}^\prime - t_L} \hat{F}^{-1} \Big( q_L \Big) \nonumber\\
-		& + \ln \; D \hat{F}\Big( \frac{t_X - t_R}{{t_X}^\prime - t_R} \times \hat{F}^{-1}(q_R) \Big) + \ln \frac{\partial}{\partial q_R} \frac{t_X - t_R}{{t_X}^\prime - t_R} \hat{F}^{-1} \Big( q_R \Big) \nonumber\\
-		=& \ln \; D \hat{F}\Big( \frac{t_P - t_X}{t_P - {t_X}^\prime} \times \hat{F}^{-1}(q_X)  \Big) + \ln \; D  \hat{F}^{-1} \Big( q_X \Big) + \ln \frac{t_P - t_X}{t_P - {t_X}^\prime} \nonumber\\
-		& + \ln \; D\hat{F}\Big( \frac{t_X - t_L}{{t_X}^\prime - t_L} \times \hat{F}^{-1}(q_L) \Big) + \ln \; D \hat{F}^{-1} \Big( q_L \Big) + \ln  \frac{t_X - t_L}{{t_X}^\prime - t_L} \nonumber \\
-		& + \ln \; D \hat{F}\Big( \frac{t_X - t_R}{{t_X}^\prime - t_R} \times \hat{F}^{-1}(q_R) \Big) + \ln \; D\hat{F}^{-1} \Big( q_R \Big) + \ln \frac{t_X - t_R}{{t_X}^\prime - t_R} .
+	\ln |J| =&  \ln \{ \frac{\partial {t_\mathcal{X}}^\prime}{\partial t_\mathcal{X}} \times \frac{\partial {q_\mathcal{X}}^\prime}{\partial q_\mathcal{X}} \times \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{L}} \times \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{R}} \} \nonumber\\
+		=& \ln 1 + \ln \; D F\Big( \frac{t_\mathcal{P} - t_\mathcal{X}}{t_\mathcal{P} - {t_\mathcal{X}}^\prime} \times F^{-1}(q_\mathcal{X})  \Big) + \ln \frac{\partial}{\partial q_\mathcal{X}}  \frac{t_\mathcal{P} - t_\mathcal{X}}{t_\mathcal{P} - {t_\mathcal{X}}^\prime} F^{-1} \Big( q_\mathcal{X} \Big) \nonumber\\
+		& + \ln \; DF\Big( \frac{t_X - t_\mathcal{L}}{{t_\mathcal{X}}^\prime - t_\mathcal{L}} \times F^{-1}(q_\mathcal{L}) \Big) + \ln \frac{\partial}{\partial q_\mathcal{L}} \frac{t_\mathcal{X} - t_\mathcal{L}}{{t_\mathcal{X}}^\prime - t_\mathcal{L}} F^{-1} \Big( q_\mathcal{L} \Big) \nonumber\\
+		& + \ln \; D F\Big( \frac{t_\mathcal{X} - t_\mathcal{R}}{{t_\mathcal{X}}^\prime - t_\mathcal{R}} \times F^{-1}(q_\mathcal{R}) \Big) + \ln \frac{\partial}{\partial q_\mathcal{R}} \frac{t_\mathcal{X} - t_\mathcal{R}}{{t_\mathcal{X}}^\prime - t_\mathcal{R}} F^{-1} \Big( q_\mathcal{R} \Big) \nonumber\\
+		=& \ln \; D F\Big( \frac{t_\mathcal{P} - t_\mathcal{X}}{t_\mathcal{P} - {t_\mathcal{X}}^\prime} \times F^{-1}(q_\mathcal{X})  \Big) + \ln \; D  F^{-1} \Big( q_\mathcal{X} \Big) + \ln \frac{t_\mathcal{P} - t_\mathcal{X}}{t_\mathcal{P} - {t_\mathcal{X}}^\prime} \nonumber\\
+		& + \ln \; DF\Big( \frac{t_\mathcal{X} - t_\mathcal{L}}{{t_\mathcal{X}}^\prime - t_\mathcal{L}} \times F^{-1}(q_\mathcal{L}) \Big) + \ln \; D F^{-1} \Big( q_\mathcal{L} \Big) + \ln  \frac{t_\mathcal{X} - t_\mathcal{L}}{{t_\mathcal{X}}^\prime - t_\mathcal{L}} \nonumber \\
+		& + \ln \; D F\Big( \frac{t_\mathcal{X} - t_\mathcal{R}}{{t_\mathcal{X}}^\prime - t_\mathcal{R}} \times F^{-1}(q_\mathcal{R}) \Big) + \ln \; DF^{-1} \Big( q_\mathcal{R} \Big) + \ln \frac{t_\mathcal{X} - t_\mathcal{R}}{{t_\mathcal{X}}^\prime - t_\mathcal{R}} .
 \end{align}
 
 
@@ -176,60 +126,61 @@ As $J$ is triangular, its determinant $|J|$ is equal to the product of diagonal 
 
 
 
-The derivatives $D\hat{F}$ and $D\hat{F}^{-1}$ are readily computed under the linear piecewise approximation. As its final step, the operator returns $\ln |J|$. 
+The derivatives $DF$ and $DF^{-1}$ can be computed using numerical approximations.
+ As its final step, the operator returns $\ln |J|$. 
 
 
 
 
-\subsection{Simple Distance}
+\subsection*{Simple Distance}
 
-While Constant Distance proposes internal node heights, Simple Distance operates on the root. Let $X$ be the root node and let $L$ and $R$ be its two children.
+While \texttt{ConstantDistance} proposes internal node heights, \texttt{SimpleDistance} operates on the root. Let $\mathcal{X}$ be the root node and let $\mathcal{L}$ and $\mathcal{R}$ be its two children.
 
-\textul{\textit{Step 1}}. Propose a new height for $t_X$:
+\textul{\textit{Step 1}}. Propose a new height for $t_\mathcal{X}$:
 
 \begin{align}
-	{t_X}^\prime \leftarrow t_X + \Sigma
+	{t_\mathcal{X}}^\prime \leftarrow t_\mathcal{X} + s\Sigma
 \end{align}
 
-where $\Sigma \sim \text{ Uniform}(-s, s)$, for some window size $s$. Ensure that $\max\{t_L, t_R \} < {t_X}^\prime$, and if the constraint is broken then reject the proposal.  \\
+Ensure that $\max\{t_\mathcal{L}, t_\mathcal{R} \} < {t_\mathcal{X}}^\prime$, and if the constraint is broken then reject the proposal.  \\
 
 
-\textul{\textit{Step 2}}. Propose new rate quantiles for the two children $C \in \{L, R\}$:
+\textul{\textit{Step 2}}. Propose new rate quantiles for the two children $\mathcal{C} \in \{\mathcal{L}, \mathcal{R}\}$:
 
 
 
 \begin{align}
-	{q_C}^\prime  \leftarrow & \hat{F}\Big({r_C}^\prime \Big)  \nonumber \\
-				\leftarrow & \hat{F} \Big( \frac{t_X - t_C}{{t_X}^\prime - t_C} \times r_C \Big) \nonumber \\
-				\leftarrow & \hat{F} \Big( \frac{t_X - t_C}{{t_X}^\prime - t_C} \times \hat{F}^{-1}(q_C) \Big).
-\end{align}
-
-
-
-
-These proposals ensure that the genetic distance between $X$ and its children $C$ remain constant after the operation by enforcing the constraint:
-
-
-\begin{align}
-	r_C (t_X - t_C) = {r_C}^\prime ({t_X}^\prime - t_C).
+	{q_\mathcal{C}}^\prime  \leftarrow & F\Big({r_\mathcal{C}}^\prime \Big)  \nonumber \\
+				\leftarrow & F \Big( \frac{t_\mathcal{X} - t_\mathcal{C}}{{t_\mathcal{X}}^\prime - t_\mathcal{C}} \times r_\mathcal{C} \Big) \nonumber \\
+				\leftarrow & F \Big( \frac{t_\mathcal{X} - t_\mathcal{C}}{{t_\mathcal{X}}^\prime - t_\mathcal{C}} \times F^{-1}(q_\mathcal{C}) \Big).
 \end{align}
 
 
-Ensure that $r_\text{min} < {r_C}^\prime < r_\text{max}$, and if the constraint is broken then reject the proposal. 
+
+
+These proposals ensure that the genetic distance between $\mathcal{X}$ and its children $\mathcal{C}$ remain constant after the operation by enforcing the constraint:
+
+
+\begin{align}
+	r_\mathcal{C} (t_\mathcal{X} - t_\mathcal{C}) = {r_\mathcal{C}}^\prime ({t_\mathcal{X}}^\prime - t_\mathcal{C}).
+\end{align}
+
+
+Ensure that $0 < {q_C}^\prime < 1$, and if the constraint is broken then reject the proposal. 
 
 
 
-\textul{\textit{Step 3}}. Return the natural logarithm of the Green ratio by calculating the determinant of the Jacobian matrix $J$.
+\textul{\textit{Step 3}}. Finally, in order to calculate the Metropolis-Hastings-Green ratio, return the determinant of the Jacobian matrix:
 
 
 
 \begin{align}
-	J &= \begin{bmatrix} \frac{\partial {t_X}^\prime}{\partial t_X} & \frac{\partial {t_X}^\prime}{\partial q_L} & \frac{\partial {t_X}^\prime}{\partial q_R} \\
-						\frac{\partial {q_L}^\prime}{\partial t_X} & \frac{\partial {q_L}^\prime}{\partial q_L} & \frac{\partial {q_L}^\prime}{\partial q_R} \\
-						\frac{\partial {q_R}^\prime}{\partial t_X} & \frac{\partial {q_R}^\prime}{\partial q_L} & \frac{\partial {q_R}^\prime}{\partial q_R} \end{bmatrix} \nonumber \\
-		&= \begin{bmatrix} \frac{\partial {t_X}^\prime}{\partial t_X} & 0 & 0 \\
-						\frac{\partial {q_L}^\prime}{\partial t_X} & \frac{\partial {q_L}^\prime}{\partial q_L} & 0\\
-						\frac{\partial {q_R}^\prime}{\partial t_X} & 0 & \frac{\partial {q_R}^\prime}{\partial q_R} \end{bmatrix}.
+	J &= \begin{bmatrix} \frac{\partial {t_\mathcal{X}}^\prime}{\partial t_\mathcal{X}} & \frac{\partial {t_\mathcal{X}}^\prime}{\partial q_\mathcal{L}} & \frac{\partial {t_\mathcal{X}}^\prime}{\partial q_\mathcal{R}} \\
+						\frac{\partial {q_\mathcal{L}}^\prime}{\partial t_\mathcal{X}} & \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{L}} & \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{R}} \\
+						\frac{\partial {q_\mathcal{R}}^\prime}{\partial t_\mathcal{X}} & \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{L}} & \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{R}} \end{bmatrix} \nonumber \\
+		&= \begin{bmatrix} \frac{\partial {t_\mathcal{X}}^\prime}{\partial t_\mathcal{X}} & 0 & 0 \\
+						\frac{\partial {q_\mathcal{L}}^\prime}{\partial t_\mathcal{X}} & \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{L}} & 0\\
+						\frac{\partial {q_\mathcal{R}}^\prime}{\partial t_\mathcal{X}} & 0 & \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{R}} \end{bmatrix}.
 \end{align}
 
 
@@ -238,57 +189,60 @@ As $J$ is triangular, its determinant $|J|$ is equal to the product of diagonal 
 
 
 \begin{align}
-	\ln |J| =&  \ln \{ \frac{\partial {t_X}^\prime}{\partial t_X} \times \frac{\partial {q_L}^\prime}{\partial q_L} \times \frac{\partial {q_R}^\prime}{\partial q_R} \} \nonumber \\
-			=& \ln \frac{\partial {t_X}^\prime}{\partial t_X} +  \ln \frac{\partial {q_L}^\prime}{\partial q_L} + \ln \frac{\partial {q_R}^\prime}{\partial q_R} \nonumber \\
+	\ln |J| =&  \ln \{ \frac{\partial {t_\mathcal{X}}^\prime}{\partial t_\mathcal{X}} \times \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{L}} \times \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{R}} \} \nonumber \\
+			=& \ln \frac{\partial {t_\mathcal{X}}^\prime}{\partial t_\mathcal{X}} +  \ln \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{L}} + \ln \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{R}} \nonumber \\
 			=& \ln 1  \nonumber\\
-			&+ \ln \; D \hat{F}\Big( \frac{t_X - t_L}{{t_X}^\prime - t_L} \times \hat{F}^{-1}(q_L) \Big) + \ln \frac{\partial}{\partial q_L} \frac{t_X - t_L}{{t_X}^\prime - t_L} \hat{F}^{-1} \Big( q_L \Big) \nonumber\\
-			&+ \ln \; D \hat{F}\Big( \frac{t_X - t_R}{{t_X}^\prime - t_R}\times \hat{F}^{-1}(q_R) \Big) + \ln \frac{\partial}{\partial q_R} \frac{t_X - t_R}{{t_X}^\prime - t_R} \hat{F}^{-1} \Big( q_R \Big) \nonumber\\
-			=& \ln \; D \hat{F}\Big( \frac{t_X - t_L}{{t_X}^\prime - t_L} \times \hat{F}^{-1}(q_L) \Big) + \ln \; D \hat{F}^{-1} \Big( q_L \Big) + \ln \frac{t_X - t_L}{{t_X}^\prime - t_L}\nonumber \\
-			&+ \ln \; D \hat{F}\Big( \frac{t_X - t_R}{{t_X}^\prime - t_R}\times \hat{F}^{-1}(q_R) \Big) + \ln \; D \hat{F}^{-1} \Big( q_R \Big) + \ln  \frac{t_X - t_R}{{t_X}^\prime - t_R}.
+			&+ \ln \; D F\Big( \frac{t_\mathcal{X} - t_\mathcal{L}}{{t_\mathcal{X}}^\prime - t_\mathcal{L}} \times F^{-1}(q_\mathcal{L}) \Big) + \ln \frac{\partial}{\partial q_\mathcal{L}} \frac{t_\mathcal{X} - t_\mathcal{L}}{{t_\mathcal{X}}^\prime - t_\mathcal{L}} F^{-1} \Big( q_\mathcal{L} \Big) \nonumber\\
+			&+ \ln \; D F\Big( \frac{t_\mathcal{X} - t_\mathcal{R}}{{t_\mathcal{X}}^\prime - t_\mathcal{R}}\times F^{-1}(q_\mathcal{R}) \Big) + \ln \frac{\partial}{\partial q_\mathcal{R}} \frac{t_\mathcal{X} - t_\mathcal{R}}{{t_\mathcal{X}}^\prime - t_\mathcal{R}} F^{-1} \Big( q_\mathcal{R} \Big) \nonumber\\
+			=& \ln \; D F\Big( \frac{t_\mathcal{X} - t_\mathcal{L}}{{t_\mathcal{X}}^\prime - t_\mathcal{L}} \times F^{-1}(q_\mathcal{L}) \Big) + \ln \; D F^{-1} \Big( q_\mathcal{L} \Big) + \ln \frac{t_\mathcal{X} - t_\mathcal{L}}{{t_\mathcal{X}}^\prime - t_\mathcal{L}}\nonumber \\
+			&+ \ln \; D F\Big( \frac{t_\mathcal{X} - t_\mathcal{R}}{{t_\mathcal{X}}^\prime - t_\mathcal{R}}\times F^{-1}(q_\mathcal{R}) \Big) + \ln \; D F^{-1} \Big( q_\mathcal{R} \Big) + \ln  \frac{t_\mathcal{X} - t_\mathcal{R}}{{t_\mathcal{X}}^\prime - t_\mathcal{R}}.
 \end{align}
 
 
-$D \hat{F}(x)$ and $D \hat{F}^{-1}(x)$ are readily computed from the linear piecewise approximation. As its final step, the operator returns $\ln |J|$. 
+As its final step, the operator returns $\ln |J|$. 
 
 
-\subsection{Small Pulley}
+\subsection*{Small Pulley}
 
-Just like the previous operator, Small Pulley operates on the root. Let $X$ be the root node and let $L$ and $R$ be its two children. However, unlike Simple Distance, this operator alters the two genetic distances $d_L = r_L (t_X - t_L) = \hat{F}^{-1} (q_L) (t_X - t_L)$ and $d_R = r_R (t_X - t_R) = \hat{F}^{-1} (q_R) (t_X - t_R)$, while conserving their sum $d_L + d_R$.
-
-
-
-\textul{\textit{Step 1}}. Propose new genetic distances for $d_L$ and $d_R$:
-
-\begin{align}
-	{d_L}^\prime & \leftarrow d_L + \Sigma \\
-	{d_R}^\prime & \leftarrow d_R - \Sigma
-\end{align}
-
-where $\Sigma \sim \text{ Uniform}(-s, s)$, for some window size $s$. Ensure that $0 < {d_L}^\prime < d_L + d_R$ and that $r_\text{min} < {r_C}^\prime < r_\text{max}$ for $C \in \{ L, R \}$, and if either constrant is broken then reject the proposal.  \\
+Just like the previous operator, \texttt{SmallPulley} operates on the root. 
+Let $\mathcal{X}$ be the root node and let $\mathcal{L}$ and $\mathcal{R}$ be its two children.
+However, unlike \texttt{SimpleDistance}, this operator alters the two genetic distances $d_\mathcal{L} = r_\mathcal{L} (t_\mathcal{X} - t_\mathcal{L}) = F^{-1} (q_\mathcal{L}) (t_\mathcal{X} - t_\mathcal{L})$ and $d_\mathcal{R} = r_\mathcal{R} (t_\mathcal{X} - t_\mathcal{R}) = F^{-1} (q_\mathcal{R}) (t_\mathcal{X} - t_\mathcal{R})$, while conserving their sum $d_\mathcal{L} + d_\mathcal{R}$.
 
 
 
-
-\textul{\textit{Step 2}}. Propose new rate quantiles for the two children $L$ and $R$:
-
+\textul{\textit{Step 1}}. Propose new genetic distances for $d_\mathcal{L}$ and $d_\mathcal{R}$:
 
 \begin{align}
-	{q_L}^\prime &\leftarrow \hat{F}\big( \frac{{d_L}^\prime}{t_X - t_L} \big) \nonumber\\
-				 &\leftarrow \hat{F}\big( \frac{\hat{F}^{-1} (q_L) (t_X - t_L) + \Sigma}{t_X - t_L} \big) \\
-	{q_R}^\prime &\leftarrow \hat{F}\big( \frac{{d_R}^\prime}{t_X - t_R} \big) \nonumber \\
-				 &\leftarrow \hat{F}\big( \frac{\hat{F}^{-1} (q_R) (t_X - t_R) - \Sigma}{t_X - t_R} \big).
+	{d_\mathcal{L}}^\prime & \leftarrow d_\mathcal{L} + s\Sigma \\
+	{d_\mathcal{R}}^\prime & \leftarrow d_\mathcal{R} - s\Sigma
 \end{align}
 
 
+Ensure that $0 < {d_\mathcal{L}}^\prime < d_\mathcal{L} + d_\mathcal{R}$, and if the constraint is broken then reject the proposal.  \\
 
-\textul{\textit{Step 3}}. Return the natural logarithm of the Green ratio by calculating the determinant of the Jacobian matrix $J$.
+
+
+
+\textul{\textit{Step 2}}. Propose new rate quantiles for the two children $\mathcal{L}$ and $\mathcal{R}$:
 
 
 \begin{align}
-	J &= \begin{bmatrix} \frac{\partial {q_L}^\prime}{\partial q_L} & \frac{\partial {q_L}^\prime}{\partial q_R} \\
-						 \frac{\partial {q_R}^\prime}{\partial q_L} & \frac{\partial {q_R}^\prime}{\partial q_R} \end{bmatrix} \nonumber \\
-	 &= \begin{bmatrix} \frac{\partial {q_L}^\prime}{\partial q_L} & 0 \\
-						 0 & \frac{\partial {q_R}^\prime}{\partial q_R} \end{bmatrix}
+	{q_\mathcal{L}}^\prime &\leftarrow F\big( \frac{{d_\mathcal{L}}^\prime}{t_\mathcal{X} - t_\mathcal{L}} \big) \nonumber\\
+				 &\leftarrow F\big( \frac{F^{-1} (q_\mathcal{L}) (t_\mathcal{X} - t_\mathcal{L}) + \Sigma}{t_\mathcal{X} - t_\mathcal{L}} \big) \\
+	{q_\mathcal{R}}^\prime &\leftarrow F\big( \frac{{d_\mathcal{R}}^\prime}{t_\mathcal{X} - t_\mathcal{R}} \big) \nonumber \\
+				 &\leftarrow F\big( \frac{F^{-1} (q_\mathcal{R}) (t_\mathcal{X} - t_\mathcal{R}) - \Sigma}{t_\mathcal{X} - t_\mathcal{R}} \big).
+\end{align}
+
+
+
+\textul{\textit{Step 3}}. Return the determinant of the Jacobian matrix:
+
+
+\begin{align}
+	J &= \begin{bmatrix} \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{L}} & \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{R}} \\
+						 \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{L}} & \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{R}} \end{bmatrix} \nonumber \\
+	 &= \begin{bmatrix} \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{L}} & 0 \\
+						 0 & \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{R}} \end{bmatrix}
 \end{align}
 
 
@@ -297,12 +251,12 @@ As $J$ is triangular/diagonal, its determinant $|J|$ is equal to the product of 
 
 
 \begin{align}
-	\ln |J| =&  \ln \{ \frac{\partial {q_L}^\prime}{\partial q_L} \times \frac{\partial {q_R}^\prime}{\partial q_R} \} \nonumber \\
-			=& \ln  \frac{\partial {q_L}^\prime}{\partial q_L} + \ln \frac{\partial {q_R}^\prime}{\partial q_R}\nonumber \\
-			=& \ln \; D \hat{F}\big( \frac{\hat{F}^{-1} (q_L) (t_X - t_L) + \Sigma}{t_X - t_L} \big) + \ln \frac{\partial {q_L}^\prime}{\partial q_L}  \frac{\hat{F}^{-1} (q_L) (t_X - t_L) + \Sigma}{t_X - t_L} \nonumber\\
-			&+ \ln \; D \hat{F}\big( \frac{\hat{F}^{-1} (q_R) (t_X - t_R) - \Sigma}{t_X - t_R} \big) + \ln \frac{\partial {q_R}^\prime}{\partial q_R}  \frac{\hat{F}^{-1} (q_R) (t_X - t_R) - \Sigma}{t_X - t_R} \nonumber\\
-			=& \ln \; D \hat{F}\big( \frac{\hat{F}^{-1} (q_L) (t_X - t_L) + \Sigma}{t_X - t_L} \big) + \ln \; D \hat{F}^{-1} (q_L) \nonumber \\
-			&+ \ln \; D \hat{F}\big( \frac{\hat{F}^{-1} (q_R) (t_X - t_R) - \Sigma}{t_X - t_R} \big) + \ln \; D\hat{F}^{-1} (q_R) .
+	\ln |J| =&  \ln \{ \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{L}} \times \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{R}} \} \nonumber \\
+			=& \ln  \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{L}} + \ln \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{R}}\nonumber \\
+			=& \ln \; D F\big( \frac{F^{-1} (q_\mathcal{L}) (t_\mathcal{X} - t_\mathcal{L}) + \Sigma}{t_\mathcal{X} - t_\mathcal{L}} \big) + \ln \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{L}}  \frac{F^{-1} (q_\mathcal{L}) (t_\mathcal{X} - t_\mathcal{L}) + \Sigma}{t_\mathcal{X} - t_\mathcal{L}} \nonumber\\
+			&+ \ln \; D F\big( \frac{F^{-1} (q_\mathcal{R}) (t_\mathcal{X} - t_\mathcal{R}) - \Sigma}{t_\mathcal{X} - t_\mathcal{R}} \big) + \ln \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{R}}  \frac{F^{-1} (q_\mathcal{R}) (t_\mathcal{X} - t_\mathcal{R}) - \Sigma}{t_\mathcal{X} - t_\mathcal{R}} \nonumber\\
+			=& \ln \; D F\big( \frac{F^{-1} (q_\mathcal{L}) (t_\mathcal{X} - t_\mathcal{L}) + \Sigma}{t_\mathcal{X} - t_\mathcal{L}} \big) + \ln \; D F^{-1} (q_\mathcal{L}) \nonumber \\
+			&+ \ln \; D F\big( \frac{F^{-1} (q_\mathcal{R}) (t_\mathcal{X} - t_\mathcal{R}) - \Sigma}{t_\mathcal{X} - t_\mathcal{R}} \big) + \ln \; DF^{-1} (q_\mathcal{R}) .
 \end{align}
 
 
