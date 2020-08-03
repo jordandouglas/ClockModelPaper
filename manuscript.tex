@@ -266,7 +266,7 @@ Statistical inference can be performed by the Markov chain Monte Carlo (MCMC) al
 
 The simplest phylogenetic clock model -- the strick clock -- makes the convenient assumption that the evolutionary rate is constant across all lineages \cite{zuckerkandl1965evolutionary, kuhner1995estimating, larget1999markov}.  % Early examples? 
 However, molecular substitution rates are known to vary over time, over population sizes, over evolutionary pressures, and over nucleic acid replicative machineries \cite{gillespie1994causes, woolfit2009effective, loh2010optimization}.
-Moreover, any given dataset may be clock-like (where the substitution rate has a small variance across lineages) or non clock-like (a large variance). 
+Moreover, any given dataset may be clock-like (where the substitution rates have a small variance across lineages) or non clock-like (a large variance). 
 In the latter case, a strict clock is probably not suitable. 
 
 
@@ -1076,7 +1076,7 @@ All methodologies use identical models and operator configurations, except where
 
 7  &  78  &  8  &  3.4  &  3.1  &  Animals (Cannon 2016 \cite{Cannon_2016}) \\ 
 
-8  &  80  &  1 &  10.0  &  4.2  &  \textit{Simulated data}  \\ 
+8  &  80  &  1 &  10.0  &  0.9  &  \textit{Simulated data}  \\ 
 
 9  &  94  &  4  &  2.2  &  1  &  Bees (Rightmyer 2013 \cite{Rightmyer_2013}) \\ 
 
@@ -1200,7 +1200,7 @@ Configuration & Operator & Weight  \\
 
 
 \begin{figure}[!h]
-\includegraphics[width=\textwidth]{/home/jdou557/Documents/Marsden2019/Months/July2020/fromVM/benchmarkingVM/ESS_round1.pdf}
+\includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round1.pdf}
 \caption{\textbf{Rate parameterisation performance evaluation.} Comparison of ESS/hr (averaged across five independent MC3 analyses) with respect to relevant terms -- $P$: posterior density; $L$: likelihood, $p$: prior density, $r$: clock rate ESS averaged across all leaves, $\hat{r}$: branch rate mean, $v$: branch rate variance, $\sigma$: clock standard deviation, $\kappa$: HKY model transition-transversion ratio, $\lambda$: Yule model birth rate. $h$: tree height. Datasets are displayed in \textbf{Table \ref{table:datasets}}.  }
 \label{fig:parameterisationResults}
 \end{figure}
