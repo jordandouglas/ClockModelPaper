@@ -9,7 +9,7 @@ PER_CHAIN = TRUE
 
 #settings = c("cat", "real", "quant", "bactrian95", "bactrian98")
 settings = c("cat",  "real_06", "quant_06", "real", "quant", "bactrian95", "bactrian98", "NER", "AVMN")
-settings = c("cat",  "real_06", "real", "real_adaptive", "quant_06_cached", "quant_cached_adaptive", "quant_cached")
+settings = c("cat",  "real_06", "real", "real_adaptive", "quant_06_cached", "quant_cached_adaptive", "quant_cached", "bactrian95")
 
 benchmark = data.frame(batch = numeric(0), param = character(0), dataset = character(0), partition = numeric(0), setting = character(0), nstates = numeric(0), finalESS = numeric(0), finalMCD = numeric(0), done = logical(0),  error = logical(0))
 
@@ -30,7 +30,7 @@ settings.names["bactrian95"] = "Bactrian (\\textit{real})"
 settings.names["NER"] = "NER (\\textit{real})"
 
 
-latex.table = read.table("../../Benchmarking/latex.table", sep = "&")
+latex.table = read.table("../latex.table", sep = "&")
 colnames(latex.table) = c("ID", "N", "P", "L", "Leff", "ref")
 latex.table$ref = gsub(" ", "", gsub("[0-9].+", "", latex.table$ref))
 
@@ -384,7 +384,7 @@ plot.grid = function(filename, settings, grid.like = TRUE, main = "") {
 			lwd_base = 1.6
 			for (i in length(times):1){
 				t = times[i]
-				polygon(c(0.0001, xymax*10, xymax*10, 0.0001), c(0.0001*t, xymax*10*t, xymax*10/t, 0.0001/t), col = bg.cols[i], lwd =lwd_base * 0.8^i, border="black")
+				polygon(c(0.0001, xymax*10, xymax*10, 0.0001), c(0.0001*t, xymax*10*t, xymax*10/t, 0.0001/t), col = bg.cols[i], lwd =lwd_base * 0.6^i, border="black")
 			}
 
 
@@ -522,18 +522,19 @@ plot.grid = function(filename, settings, grid.like = TRUE, main = "") {
 
 
 
-plot.grid("ESS_real", c("real_06", "real", "real_adaptive"), TRUE, "Round 1")
-plot.grid("ESS_quant", c("quant_06_cached", "quant_cached", "quant_cached_adaptive"), TRUE, "Round 1")
+plot.grid("ESS_round1_real", c("real_06", "real", "real_adaptive"), TRUE, "Round 1")
+plot.grid("ESS_round1_quant", c("quant_06_cached", "quant_cached", "quant_cached_adaptive"), TRUE, "Round 1")
 
 #plot.grid("ESS_round3", c("bactrian95", "NER"), FALSE, "Round 3")
 #plot.grid("ESS_round4", c("NER", "AVMN"), FALSE, "Round 4")
 
 #plot.grid("ESS_real", c("real_06", "real"), TRUE, "Round 1")
 #plot.grid("ESS_quant", c("quant_06", "quant"), TRUE, "Round 1")
-plot.grid("ESS_round1", c("cat", "real_adaptive", "quant_cached_adaptive"), TRUE, "Round 1")
+plot.grid("ESS_round2", c("cat", "real_adaptive", "quant_cached_adaptive"), TRUE, "Round 2")
+
+plot.grid("ESS_round3", c("real_adaptive", "bactrian95"), TRUE, "Round 3")
 
 
-plot.grid("tmp", c("cat", "real_adaptive", "quant_cached_adaptive"), TRUE, "Round 1")
 
 
 #plot.grid("ESS_round2", c("quant", "bactrian95", "bactrian98"), FALSE, "Round 2")

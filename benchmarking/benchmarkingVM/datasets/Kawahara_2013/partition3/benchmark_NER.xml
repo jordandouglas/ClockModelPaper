@@ -119,7 +119,7 @@
 
 
 			<parameter id="ucldStdev.c:benchmark" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.1</parameter>
-			<stateNode id="rates.c:benchmark" spec="parameter.RealParameter" lower="0" upper="1">1</stateNode>
+			<stateNode id="rates.c:benchmark" spec="parameter.RealParameter">1</stateNode>
 			<parameter id="birthRate.t:benchmark" spec="parameter.RealParameter" name="stateNode">1.0</parameter>
 
 
@@ -215,6 +215,10 @@
 				</prior>
 
 
+				<prior id="FastRatePriorDistrbution.c:dna" name="distribution" x="@rates.c:benchmark">
+					<LogNormal id="LogNormalDistributionModel.rates" S="@ucldStdev.c:benchmark" M="1" meanInRealSpace="true" name="distr"/>
+				</prior>
+
 			</distribution>
 
 			<distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
@@ -226,14 +230,12 @@
 								<parameter spec="parameter.RealParameter" estimate="false" name="shape">1.0</parameter>
 								<substModel spec="HKY" kappa="@kappa.t:CAD_1stpos"><frequencies spec="Frequencies" frequencies="@freqParameter.t:CAD_1stpos"/></substModel>
 							    </siteModel>
-							    <branchRateModel id="RelaxedClock.c:benchmark" spec="beast.evolution.branchratemodel.UCRelaxedClockModel" rateQuantiles="@rates.c:benchmark" tree="@Tree.t:benchmark">
+							    <branchRateModel id="RelaxedClock.c:benchmark" spec="beast.evolution.branchratemodel.UCRelaxedClockModel" rates="@rates.c:benchmark" tree="@Tree.t:benchmark">
 								<parameter id="ucldMean.c:benchmark" estimate="false" name="clock.rate">1.0</parameter>
 								
-								<distr id="ApproxLogNormal" spec="beast.math.distributions.PiecewiseLinearDistribution">
-									<LogNormal id="LogNormalDistributionModel.c:calsim" S="@ucldStdev.c:benchmark" meanInRealSpace="true" name="distr">
-										<parameter id="RealParameter.9" spec="parameter.RealParameter" estimate="false" lower="0.0" name="M" upper="1.0">1.0</parameter>
-									</LogNormal>
-								</distr>
+								<LogNormal id="LogNormalDistributionModel.c:calsim" S="@ucldStdev.c:benchmark" meanInRealSpace="true" name="distr">
+									<parameter id="RealParameter.9" spec="parameter.RealParameter" estimate="false" lower="0.0" name="M" upper="1.0">1.0</parameter>
+								</LogNormal>
 								
 							    </branchRateModel>
 							</distribution>
@@ -280,48 +282,69 @@
 					    <parameter idref="freqParameter.t:COI_1stpos"/>
 					</operator>
 
-
 		<operator id="ClockRateExchanger" spec="BactrianDeltaExchangeOperator" delta="0.01" weight="0.4">
-			<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="uniform"/>
 			
 				<parameter idref="clockRate.t:CAD_1stpos"/>
 				<parameter idref="clockRate.t:EF1a_1stpos"/>
 				<parameter idref="clockRate.t:COI_1stpos"/>
 		</operator>
+
+	
+
+		<operator id="AdaptableOperatorSampler.ucldStdev" spec="AdaptableOperatorSampler" weight="10.0">
+
+			<parameter idref="ucldStdev.c:benchmark" />
+
+			<operator id="ucldStdevScaler.c:benchmark" spec="beast.evolution.operators.BactrianScaleOperator" parameter="@ucldStdev.c:benchmark" scaleFactor="0.5" weight="1">
+				<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
+			<operator id="UcldStdevRandomWalk.c:benchmark" spec="BactrianRandomWalkOperator" parameter="@ucldStdev.c:benchmark" weight="1" scaleFactor="0.1">
+				<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
+			<operator id="UcldStdevScale.c:benchmark" spec="BactrianScaleOperator" scaleFactor="0.5" parameter="@ucldStdev.c:benchmark" weight="1">
+				<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
+
+
+			<operator id="SampleFromPriorOperator.c:ucldStdev" spec="SampleFromPriorOperator" parameter="@ucldStdev.c:benchmark" prior="@Gamma.2" weight="1"/>
+
+		</operator>
 		
 
-		<operator id="YuleModelNarrow.t:dummy" spec="Exchange" tree="@Tree.t:benchmark" weight="7.5"/>
-		<operator id="NEROperator_nowalk_dAE_dBE_dCE" spec="NERVariants.NEROperator_dAE_dBE_dCE" tree="@Tree.t:benchmark" quantiles="@rates.c:benchmark" distr="@ApproxLogNormal" weight="7.5"/>
-		
+		<operator id="AdaptableOperatorSampler.rates.root" spec="AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="0.216">
+
+			<operator id="RootOperator1.c:dna" spec="consoperators.SimpleDistance" twindowSize="0.005" tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" rates="@rates.c:benchmark"  weight="1">
+				<kernel spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
+
+			<operator id="RootOperator2.c:dna" spec="consoperators.SmallPulley" dwindowSize="0.005" tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" rates="@rates.c:benchmark"  weight="1">
+				<kernel spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
 
 
-		<!--<operator id="ucldStdevScaler.c:benchmark" spec="ScaleOperator" parameter="@ucldStdev.c:benchmark" scaleFactor="0.5" weight="3.0"/>-->
-		<operator id="ucldStdevScaler.c:benchmark" spec="beast.evolution.operators.BactrianScaleOperator" parameter="@ucldStdev.c:benchmark" scaleFactor="0.5" weight="10.0">
-			<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
 		</operator>
 
 
 
-		<operator id="InternalnodesOperator.c:dna" spec="consoperators.InConstantDistanceOperator" twindowSize="0.005"  tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" quantiles="@rates.c:benchmark"  weight="19.856">
-			<kernel spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+		<operator id="AdaptableOperatorSampler.rates.internal" spec="AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="29.784">
+
+
+			<operator id="InternalnodesOperator.c:dna" spec="consoperators.InConstantDistanceOperator" twindowSize="0.005"  tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" rates="@rates.c:benchmark"  weight="1">
+				<kernel spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
+
+			<operator id="RatesRandomWalk.c:benchmark" spec="BactrianRandomWalkOperator" parameter="@rates.c:benchmark" weight="1" scaleFactor="0.1">
+				<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
+			
+			<operator id="RatesScale.c:benchmark" spec="BactrianScaleOperator" scaleFactor="0.5" parameter="@rates.c:benchmark" weight="1">
+				<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
+
+			<operator id="SampleFromPriorOperator.c:benchmark" spec="SampleFromPriorOperator" parameter="@rates.c:benchmark" np="1" prior="@LogNormalDistributionModel.rates" weight="1"/>
+
 		</operator>
-
-		<operator id="RootOperator1.c:dna" spec="consoperators.SimpleDistance" twindowSize="0.005" tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" quantiles="@rates.c:benchmark"  weight="0.072">
-			<kernel spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
-		</operator>
-
-		<operator id="RootOperator2.c:dna" spec="consoperators.SmallPulley" dwindowSize="0.005" tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" quantiles="@rates.c:benchmark"  weight="0.072">
-			<kernel spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
-		</operator>
-
-
-
-		<operator id="RatesInterval.c:benchmark" spec="BactrianIntervalOperator" parameter="@rates.c:benchmark" scaleFactor="1" weight="2.5">
-			<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
-		</operator>
-		<operator id="RatesSwapOperator.c:benchmark" spec="SwapOperator" parameter="@rates.c:benchmark" weight="2.5"/>
-		<operator id="RatesUniform.c:benchmark" spec="UniformOperator" parameter="@rates.c:benchmark" weight="5"/>
-
 
 
 		<operator id="YuleBirthRateScaler.t:dummy" spec="ScaleOperator" parameter="@birthRate.t:benchmark" scaleFactor="0.75" weight="2.0"/>
@@ -329,11 +352,17 @@
 		<operator id="YuleModelTreeRootScaler.t:dummy" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@Tree.t:benchmark" weight="3.0"/>
 		<operator id="YuleModelUniformOperator.t:dummy" spec="Uniform" tree="@Tree.t:benchmark" weight="30.0"/>
 		<operator id="YuleModelSubtreeSlide.t:dummy" spec="SubtreeSlide" tree="@Tree.t:benchmark" weight="15.0"/>
-		
 		<operator id="YuleModelWide.t:dummy" spec="Exchange" isNarrow="false" tree="@Tree.t:benchmark" weight="3.0"/>
 		<operator id="YuleModelWilsonBalding.t:dummy" spec="WilsonBalding" tree="@Tree.t:benchmark" weight="3.0"/>
 
 
+		<operator id="AdaptableOperatorSampler.NER" spec="AdaptableOperatorSampler" tree="@Tree.t:benchmark" weight="15">
+
+			<metric spec="beast.evolution.tree.RobinsonsFouldMetric" taxonset="@TaxonSet.benchmark"/>
+			<operator id="YuleModelNarrow.t:dummy" spec="Exchange" tree="@Tree.t:benchmark" weight="1"/>
+			<operator id="NEROperator_nowalk_dAE_dBE_dCE" spec="NERVariants.NEROperator_dAE_dBE_dCE" tree="@Tree.t:benchmark" rates="@rates.c:benchmark" weight="1"/>
+			
+		</operator>
 
 
 
@@ -380,7 +409,6 @@
 		<logger id="treelog.t:benchmark" spec="Logger" fileName="benchmark_NER3.trees" logEvery="2000" mode="tree">
 			<log id="TreeWithMetaDataLogger.t:benchmark" spec="beast.evolution.tree.TreeWithMetaDataLogger" branchratemodel="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
 		</logger>
-
 
 	</run>
 
