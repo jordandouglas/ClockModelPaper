@@ -3,13 +3,15 @@ library(tikzDevice)
 library(HDInterval)
 library(lubridate)
 library(colorspace)
+library(rjson)
 
 
-PER_CHAIN = TRUE
+
+PER_CHAIN = FALSE
 
 #settings = c("cat", "real", "quant", "bactrian95", "bactrian98")
 settings = c("cat",  "real_06", "quant_06", "real", "quant", "bactrian95", "bactrian98", "NER", "AVMN")
-settings = c("cat",  "real_06", "real", "real_adaptive", "quant_06_cached", "quant_cached_adaptive", "quant_cached", "bactrian95")
+settings = c("cat", "cat_adaptive",  "real_06", "real", "real_adaptive", "quant_06_cached", "quant_cached_adaptive", "quant_cached", "bactrian95", "NER")
 
 benchmark = data.frame(batch = numeric(0), param = character(0), dataset = character(0), partition = numeric(0), setting = character(0), nstates = numeric(0), finalESS = numeric(0), finalMCD = numeric(0), done = logical(0),  error = logical(0))
 
@@ -18,6 +20,7 @@ benchmark = data.frame(batch = numeric(0), param = character(0), dataset = chara
 
 settings.names = lapply(settings, function(x) x)
 settings.names["cat"] = "\\textit{cat}"
+settings.names["cat_adaptive"] = "adapt (\\textit{cat})"
 
 settings.names["real"] = "cons (\\textit{real})"
 settings.names["real_06"] = "nocons (\\textit{real})"
@@ -43,7 +46,7 @@ progress.df$batch = ifelse(progress.df$batch == 4, 5, ifelse(progress.df$batch =
 
 
 #parameters = c("posterior", "likelihood", "prior", "height", "birthRate", "kappa",  "ucldStdev", "clockRate", "TipRates", "RateStatLogger.mean", "RateStatLogger.variance")
-parameters = c("prior", "likelihood", "TipRates", "height", "ucldStdev", "clockRate")
+parameters = c("prior", "likelihood", "TipRates", "height", "ucldStdev", "kappa")
 
 
 parameters.latex = lapply(parameters, function(x) x)
@@ -61,6 +64,26 @@ parameters.latex["TipRates"] = "Mean tip rate $r$"
 parameters.latex["height"] = "Tree height $h$"
 
 
+
+parameters.latex.small = lapply(parameters, function(x) x)
+names(parameters.latex.small) = parameters
+parameters.latex.small["posterior"] = "$P$"
+parameters.latex.small["likelihood"] = "$L$"
+parameters.latex.small["prior"] = "$p$"
+parameters.latex.small["birthRate"] = "$\\lambda$"
+parameters.latex.small["gammaShape"] = "$\\Gamma$"
+parameters.latex.small["kappa"] = "$\\kappa$"
+#parameters.latex.small["freqParameter"] = "$f$"
+parameters.latex.small["ucldStdev"] = "$\\sigma$"
+parameters.latex.small["TipRates"] = "$r$"
+#parameters.latex.small["treeLength"] = "$l$"
+parameters.latex.small["height"] = "$h$"
+parameters.latex.small["clockRate"] = "$\\mu$"
+parameters.latex.small["RateStatLogger.variance"] = "$v$"
+parameters.latex.small["RateStatLogger.mean"] = "$\\bar{r}$"
+
+
+
 getDateTime = function(str){
 
 	year = as.numeric(strsplit(str, " +")[[1]][6])
@@ -76,7 +99,10 @@ getDateTime = function(str){
 
 
 ESS.df = data.frame(batch = numeric(0), param = character(0), dataset = character(0), partition = numeric(0), setting = character(0), nstates = numeric(0),
- ESS = numeric(0), hr = numeric(0), ESS.hr = numeric(0), Leff = numeric(0), L = numeric(0), N = numeric(0), mean.speed = numeric(0))
+ ESS = numeric(0), hr = numeric(0), ESS.hr = numeric(0), Leff = numeric(0), L = numeric(0), N = numeric(0), mean.speed = numeric(0), CD_weight = numeric(0), RW_weight = numeric(0), SPP_weight = numeric(0))
+
+
+
 
 
 speed.df = data.frame(batch = numeric(0), dataset = character(0), setting = character(0), state = numeric(0), speed = numeric(0))
@@ -136,6 +162,9 @@ for (f in batchfolders){
 
 				# For each setting
 				for (s in settings) {
+
+
+
 
 
 				
@@ -206,6 +235,32 @@ for (f in batchfolders){
 					this.ESS.df = read.table(ess.file, sep = "\t", header = T)
 
 
+					# Adaptive
+					CD_weight = -1
+					RW_weight = -1
+					SPP_weight = -1
+					if (length(grep("adaptive", s)) == 1){
+						state.file = readLines(paste0("benchmark_", s, ".xml.0state"))
+
+						if (length(grep("<!--", state.file)) == 1){
+
+							operator.lines = paste(state.file[(grep("<!--", state.file)+1):(grep("-->", state.file)-1)], collapse = " ")
+							json = fromJSON(operator.lines)
+							ops = json$operators
+
+							match = which(sapply(ops, function(ele) ele$id == "AdaptableOperatorSampler.rates.internal"))
+							if (length(match) == 1){
+								weights = as.numeric(strsplit(gsub("([[]|[]])", "", ops[[match]]$weights), ",")[[1]])
+								CD_weight = weights[1]
+								RW_weight = weights[2]
+								SPP_weight = weights[3]
+							}
+
+						}
+
+					}
+
+
 					for (p in parameters){
 
 						pindex = grep(paste0(p, ".+ESS"), colnames(this.ESS.df))
@@ -216,7 +271,8 @@ for (f in batchfolders){
 						#print(paste(p, ESS))
 
 						
-						ESS.df2 = data.frame(batch = batch, param = p, setting = s, dataset = dataset, ESS = ESS, hr = runtime.hr, partition = P, Leff = Leff, L = L, N = N ,mean.speed = mean.speed)
+						ESS.df2 = data.frame(batch = batch, param = p, setting = s, dataset = dataset, ESS = ESS, hr = runtime.hr, partition = P, Leff = Leff, L = L, N = N ,
+								mean.speed = mean.speed, CD_weight = CD_weight, RW_weight = RW_weight, SPP_weight = SPP_weight)
 						ESS.df = rbind(ESS.df, ESS.df2)
 						
 					}
@@ -256,12 +312,248 @@ for (f in batchfolders){
 #settings = c("cat", "real", "quant")
 
 ESS.df = ESS.df[!is.na(ESS.df$ESS),]
+ESS.df$ESS.hr = ESS.df$ESS / ifelse(PER_CHAIN, 1, ESS.df$hr)
+
+datasets = unique(ESS.df[order(ESS.df$N), "dataset"]) # sort(as.character(unique(ESS.df$dataset)))
+
+data.cols = c(rainbow_hcl(8, c = 250, l = 60), "#444444")
+#c("red", "blue", "green", "yellow", "orange", "black", "purple", "darkgreen", "cyan", "magenta")
+
+
+plotRealCat = function(){
+
+
+
+	maxL = 20#max(ESS.df$L) + 2
+	plot(0, 0, type = "n", xlim = c(0,maxL), ylim = c(0, 1000), xlab = "Sequence length $L$ (kb)", ylab = "ESS/hr of tip rates $r$", axes = F, xaxs = "i", yaxs = "i", 
+					main ="Disparity as a function of sequence length", cex.main = 1.5, cex.lab = 1.5)
+
+
+
+	cols = c("#008cba", "#696969", "#a3a3a3")
+
+	for (dataNum in 1:length(datasets)){
+		s1 = "real_adaptive"
+		s2 = "cat_adaptive"
+		s3 = "quant_cached_adaptive"
+		d = datasets[dataNum]
+
+		s1.df = ESS.df[ESS.df$dataset == d & ESS.df$setting == s1 & ESS.df$CD_weight >= 0 & ESS.df$param == "TipRates",]
+		s2.df = ESS.df[ESS.df$dataset == d & ESS.df$setting == s2 & ESS.df$CD_weight >= 0 & ESS.df$param == "TipRates",]
+		s3.df = ESS.df[ESS.df$dataset == d & ESS.df$setting == s3 & ESS.df$CD_weight >= 0 & ESS.df$param == "TipRates",]
+
+		L = mean(s1.df$L)
+
+		y1 = mean(s1.df$ESS.hr)
+		y2 = mean(s2.df$ESS.hr)
+		y3 = mean(s3.df$ESS.hr)
+		lines(c(L, L), c(y1, y2), lty = "2525")
+		text(L, (y1 + y2)/2, paste0("$", signif(y1 / y2, 2), "\\times $"), adj = 0)
+
+		points(L, y1, col = cols[1], pch = 16)
+		points(L, y2, col = cols[2], pch = 16)
+		points(L, y3, col = cols[3], pch = 16)
 
 
 
 
+		legend("bottomleft", c("adapt (\\textit{real})", "adapt (\\textit{cat})", "adapt (\\textit{quant})"), col = cols, pch = 16, bty = "n", cex = 1.15)
 
-plot.grid = function(filename, settings, grid.like = TRUE, main = "") {
+
+	}
+
+
+	axis(1)
+	axis(2, las = 2)
+
+}
+
+
+plotWeights = function() {
+
+
+
+	maxL = 20#max(ESS.df$L) + 2
+	plot(0, 0, type = "n", xlim = c(0,maxL), ylim = c(0, 1), xlab = "Sequence length $L$ (kb)", ylab = "Learned operator weight", axes = F, xaxs = "i", yaxs = "i", 
+					main ="\\texttt{AdaptiveOperatorSampler} weights", cex.main = 1.5, cex.lab = 1.5)
+
+	Ls = numeric(0)
+	CDs = numeric(0)
+	RWs = numeric(0)
+
+	for (dataNum in 1:length(datasets)){
+
+
+		s = "real_adaptive"
+		d = datasets[dataNum]
+
+		sub.df = ESS.df[ESS.df$dataset == d & ESS.df$setting == s & ESS.df$CD_weight >= 0 & ESS.df$param == "height",]
+
+		if (nrow(sub.df) == 0){
+			print(paste("No operators for", d, s))
+			next
+		}
+
+		CD =  mean(sub.df$CD_weight)
+		RW =  mean(sub.df$RW_weight) 
+		SPP = mean(sub.df$SPP_weight)
+
+		pches = c(16, 17, 18) 
+
+		points(mean(sub.df$L), CD, col = data.cols[dataNum], pch = pches[1])
+		points(mean(sub.df$L), RW, col = data.cols[dataNum], pch = pches[2])
+		#points(mean(sub.df$L), SPP, col = data.cols[dataNum], pch = pches[3])
+		#, "\\texttt{SampleFromPrior}"
+
+		CDs = c(CDs, CD)
+		RWs = c(RWs, RW)
+		Ls = c(Ls, mean(sub.df$L))
+
+
+		legend("right", c("\\texttt{ConstantDistance}", "\\texttt{RandomWalk}"), pch = pches, bty = "n", cex = 1.15)
+
+
+	}
+
+	# Fit logit curve to CD
+	logit = glm(formula = CDs ~ Ls, family = "binomial")
+	x = seq(from = 0, to = maxL, length = 500)
+	j = exp(logit$coefficients[1] + logit$coefficients[2]*x)
+	y = j / (1+j)
+	lines(x, y)
+
+	
+	# Fit logit curve to RW
+	logit = glm(formula = RWs ~ Ls, family = "binomial")
+	x = seq(from = 0, to = maxL, length = 500)
+	j = exp(logit$coefficients[1] + logit$coefficients[2]*x)
+	y = j / (1+j)
+	lines(x, y)
+
+
+
+	axis(1)
+	axis(2, las = 2)
+
+
+
+}
+
+
+plot.cell = function(s1, s2, show.legend = FALSE){
+
+
+		r.ESS = ESS.df[ESS.df$setting == s1,]
+		q.ESS = ESS.df[ESS.df$setting == s2,]
+
+
+		#na.rm = !( is.na(r.ESS$ESS.hr) | is.na(q.ESS$ESS.hr) )
+
+		#r.ESS = r.ESS[na.rm,]
+		#q.ESS = q.ESS[na.rm,]
+
+		xymin = 1
+		xymax = 10000
+
+		xyrange = c(xymin, xymax) #c(xymin, max(c(r.ESS$ESS.hr, q.ESS$ESS.hr), na.rm = TRUE))
+		#xyrange = c(0, max(c(r.ESS$MCD.states, q.ESS$MCD.states)))
+		
+		#xyrange = c(0, 2000) 
+		per = ifelse(PER_CHAIN, "ESS/chain", "ESS/hr")
+		plot(1, 1, xlim = xyrange, ylim = xyrange, xlab = paste0(per, " [", settings.names[[s1]], "]"),  ylab = paste0(per, " [", settings.names[[s2]], "]"), 
+		type = "n", main = paste0(settings.names[[s2]], " vs. ", settings.names[[s1]]), log="xy", xaxs = "i", yaxs = "i", axes = FALSE, cex.main = 1.5, cex.lab = 1.5)
+
+
+		
+		
+
+
+		times = c(4, 16, 64)
+		bg.cols = c("#A9A9A9", "#BEBEBE", "#E8E8E8")
+
+		lwd_base = 2.5
+		for (i in length(times):1){
+			t = times[i]
+			polygon(c(0.0001, xymax*10, xymax*10, 0.0001), c(0.0001*t, xymax*10*t, xymax*10/t, 0.0001/t), lwd =lwd_base * 0.6^(i-1), border="black") # col = bg.cols[i],
+		}
+
+
+		textshift = 1
+		for (i in length(times):1){
+			t = times[i]
+			text(xymin*t*textshift, xymin*textshift, paste0("$\\frac{1}{", t, "} \\times$"), adj = c(-0.5, -0.6), cex = 1)
+			text(xymin*textshift, xymin*t*textshift, paste0("$", t, "\\times$"), adj = c(-0.2, -2), cex = 1)
+		}
+		abline(0,1, lwd = lwd_base)
+
+		colfunc = colorRampPalette(c("black", "red"))
+		#max.len = max(benchmark[,v])
+		ncolours = 15
+		l.cols = colfunc(ncolours)
+		get.col = function(Leff) {
+			j = ceiling((Leff / max.len) * ncolours)
+			l.cols[j]
+		}
+
+
+
+
+		#data.cols = c(rainbow_hcl(length(datasets)-1, l = 70, c = 80), "black")
+		for (dataNum in 1:length(datasets)) {
+			d = datasets[dataNum]
+			for (p in parameters) {
+
+
+
+				#if (any(p == c("posterior", "birthRate", "gammaShape", "kappa",  "freqParameter"))) next
+
+				s1.ESS = ESS.df[ESS.df$setting == s1 & ESS.df$param == p & ESS.df$dataset == d,]
+				s2.ESS = ESS.df[ESS.df$setting == s2 & ESS.df$param == p & ESS.df$dataset == d,]
+
+				#linear.model = lm(s2.ESS$ESS.hr ~ s1.ESS$ESS.hr)
+
+				#c = linear.model$coefficients[1]
+				#b_L = linear.model$coefficients[2]
+				#abline(c, b_L)
+				
+				xvals = s1.ESS$ESS.hr
+				yvals = s2.ESS$ESS.hr
+
+				#xvals = s1.ESS$MCD.states
+				#yvals = s2.ESS$MCD.states
+
+
+				m1 = mean(xvals)
+				m2 = mean(yvals)
+				se1 = 2*sqrt(var(xvals) / length(xvals))
+				se2 = 2*sqrt(var(yvals) / length(yvals))
+				lines(c(m1 - se1, m1 + se1), c(m2, m2), col = data.cols[dataNum])
+				lines(c(m1, m1), c(m2 - se2, m2 + se2), col = data.cols[dataNum])
+				
+				#text(m1, m2, paste0(parameters.latex.small[[p]], "$_", which(datasets == d), "$"), col = data.cols[dataNum])
+				text(m1, m2, parameters.latex.small[[p]], col = data.cols[dataNum], cex = 1.4)
+
+			}
+
+		}
+
+		
+		#box()
+		axis(1, cex = 2)
+		axis(2, cex = 2, las=2)
+
+
+		dataset_names = sapply(strsplit(datasets, "_"), function(ele) ele[1])
+		#gsub("^a", "", gsub("_", " ", datasets))
+		if (show.legend) legend("bottomright", dataset_names, fill = data.cols[1:length(datasets)], bg = "white", bty = "n", cex = 1)
+		#legend("bottomright", as.character(parameters.latex[names(parameters.pch)[parameters.pch != names(parameters.pch)]]), pch = as.numeric(unlist(parameters.pch)[parameters.pch != names(parameters.pch)]))
+
+
+
+}
+
+
+plot.grid = function(filename, settings, grid.like = TRUE, fn = sum) {
 
 
 	
@@ -309,23 +601,6 @@ plot.grid = function(filename, settings, grid.like = TRUE, main = "") {
 
 	
 
-	parameters.latex.small = lapply(parameters, function(x) x)
-	names(parameters.latex.small) = parameters
-	parameters.latex.small["posterior"] = "$P$"
-	parameters.latex.small["likelihood"] = "$L$"
-	parameters.latex.small["prior"] = "$p$"
-	parameters.latex.small["birthRate"] = "$\\lambda$"
-	parameters.latex.small["gammaShape"] = "$\\Gamma$"
-	parameters.latex.small["kappa"] = "$\\kappa$"
-	#parameters.latex.small["freqParameter"] = "$f$"
-	parameters.latex.small["ucldStdev"] = "$\\sigma$"
-	parameters.latex.small["TipRates"] = "$r$"
-	#parameters.latex.small["treeLength"] = "$l$"
-	parameters.latex.small["height"] = "$h$"
-	parameters.latex.small["clockRate"] = "$\\mu$"
-	parameters.latex.small["RateStatLogger.variance"] = "$v$"
-	parameters.latex.small["RateStatLogger.mean"] = "$\\bar{r}$"
-
 
 	parameters.pch = lapply(parameters, function(x) x)
 	names(parameters.pch) = parameters
@@ -339,7 +614,7 @@ plot.grid = function(filename, settings, grid.like = TRUE, main = "") {
 
 
 		
-	ESS.df$ESS.hr = ESS.df$ESS / ifelse(PER_CHAIN, 1, ESS.df$hr)
+	
 	first = TRUE
 	for (x in 1:(length(settings) -1)) {
 		s1 = settings[x]
@@ -352,115 +627,8 @@ plot.grid = function(filename, settings, grid.like = TRUE, main = "") {
 			} 
 
 
-
-
-			r.ESS = ESS.df[ESS.df$setting == s1,]
-			q.ESS = ESS.df[ESS.df$setting == s2,]
-
-
-			#na.rm = !( is.na(r.ESS$ESS.hr) | is.na(q.ESS$ESS.hr) )
-
-			#r.ESS = r.ESS[na.rm,]
-			#q.ESS = q.ESS[na.rm,]
-
-			xymin = 1
-
-			xyrange = c(xymin, max(c(r.ESS$ESS.hr, q.ESS$ESS.hr), na.rm = TRUE))
-			#xyrange = c(0, max(c(r.ESS$MCD.states, q.ESS$MCD.states)))
-			
-			#xyrange = c(0, 2000) 
-			per = ifelse(PER_CHAIN, "ESS/chain", "ESS/hr")
-			plot(1, 1, xlim = xyrange, ylim = xyrange, xlab = paste0(per, " [", settings.names[[s1]], "]"),  ylab = paste0(per, " [", settings.names[[s2]], "]"), 
-			type = "n", main = paste0("Comparison of ", settings.names[[s2]], " and ", settings.names[[s1]]), log="xy", xaxs = "i", yaxs = "i", axes = FALSE, cex.main = 1.5, cex.lab = 1.5)
-
-
-			
-			xymax = xyrange[2]
-
-
-			times = c(4, 16, 64)
-			bg.cols = c("#A9A9A9", "#BEBEBE", "#E8E8E8")
-
-			lwd_base = 1.6
-			for (i in length(times):1){
-				t = times[i]
-				polygon(c(0.0001, xymax*10, xymax*10, 0.0001), c(0.0001*t, xymax*10*t, xymax*10/t, 0.0001/t), col = bg.cols[i], lwd =lwd_base * 0.6^i, border="black")
-			}
-
-
-			textshift = 1
-			for (i in length(times):1){
-				t = times[i]
-				text(xymin*t*textshift, xymin*textshift, paste0("$\\frac{1}{", t, "} \\times$"), adj = c(-0.5, -0.6), cex = 1)
-				text(xymin*textshift, xymin*t*textshift, paste0("$", t, "\\times$"), adj = c(-0.2, -2), cex = 1)
-			}
-			abline(0,1, lwd = lwd_base)
-
-			colfunc = colorRampPalette(c("black", "red"))
-			#max.len = max(benchmark[,v])
-			ncolours = 15
-			l.cols = colfunc(ncolours)
-			get.col = function(Leff) {
-				j = ceiling((Leff / max.len) * ncolours)
-				l.cols[j]
-			}
-
-
-
-			datasets = as.character(unique(ESS.df$dataset))
-			data.cols = c("red", "blue", "green", "yellow", "orange", "black", "purple", "darkgreen", "cyan", "magenta")
-			#data.cols = c(rainbow_hcl(length(datasets)-1, l = 70, c = 80), "black")
-			for (dataNum in 1:length(datasets)) {
-				d = datasets[dataNum]
-				for (p in parameters) {
-
-
-
-					#if (any(p == c("posterior", "birthRate", "gammaShape", "kappa",  "freqParameter"))) next
-
-					s1.ESS = ESS.df[ESS.df$setting == s1 & ESS.df$param == p & ESS.df$dataset == d,]
-					s2.ESS = ESS.df[ESS.df$setting == s2 & ESS.df$param == p & ESS.df$dataset == d,]
-
-					#linear.model = lm(s2.ESS$ESS.hr ~ s1.ESS$ESS.hr)
-
-					#c = linear.model$coefficients[1]
-					#b_L = linear.model$coefficients[2]
-					#abline(c, b_L)
-					
-					xvals = s1.ESS$ESS.hr
-					yvals = s2.ESS$ESS.hr
-
-					#xvals = s1.ESS$MCD.states
-					#yvals = s2.ESS$MCD.states
-
-
-					m1 = mean(xvals)
-					m2 = mean(yvals)
-					se1 = 2*sqrt(var(xvals) / length(xvals))
-					se2 = 2*sqrt(var(yvals) / length(yvals))
-					lines(c(m1 - se1, m1 + se1), c(m2, m2), col = "black")
-					lines(c(m1, m1), c(m2 - se2, m2 + se2), col = "black")
-					
-					#text(m1, m2, paste0(parameters.latex.small[[p]], "$_", which(datasets == d), "$"), col = data.cols[dataNum])
-					text(m1, m2, parameters.latex.small[[p]], col = data.cols[dataNum], cex = 1.4)
-
-				}
-
-			}
-
-			
-			#box()
-			axis(1, cex = 2)
-			axis(2, cex = 2, las=2)
-
-
-			dataset_names = sapply(strsplit(datasets, "_"), function(ele) ele[1])
-			#gsub("^a", "", gsub("_", " ", datasets))
-			if (first) legend("bottomright", dataset_names, fill = data.cols[1:length(datasets)], bg = "white", bty = "n", cex = 1)
+			plot.cell(s1, s2, first)
 			first = FALSE
-			#legend("bottomright", as.character(parameters.latex[names(parameters.pch)[parameters.pch != names(parameters.pch)]]), pch = as.numeric(unlist(parameters.pch)[parameters.pch != names(parameters.pch)]))
-
-
 
 			
 		}
@@ -476,40 +644,43 @@ plot.grid = function(filename, settings, grid.like = TRUE, main = "") {
 	}
 
 
+	fn()
 
-	plot(1, 1, type  = "n", ylim = c(0, max(1/ESS.df$mean.speed)),  xlim = c(1, length(settings)), axes = F, xlab = "Setting", ylab = "Speed ($10^6$ states/hr)", 
-						main = "Speed comparison", cex.main = 2, cex.lab = 2)
+	if (FALSE) {
+
+		plot(1, 1, type  = "n", ylim = c(0, max(1/ESS.df$mean.speed)),  xlim = c(1, length(settings)), axes = F, xlab = "Setting", ylab = "Speed ($10^6$ states/hr)", 
+							main = "Speed comparison", cex.main = 2, cex.lab = 2)
 
 
 
-	for (dataNum in 1:length(datasets)){
+		for (dataNum in 1:length(datasets)){
 
-		dataset = datasets[dataNum]
-		speeds.df = ESS.df[ESS.df$param == "prior" & ESS.df$dataset == dataset, ]
-		speeds = numeric(length(settings))
-		for (s in 1:length(settings)){
-			setting = settings[s]
-			speeds[s] = mean(1 / speeds.df[speeds.df$setting == setting, "mean.speed"])
+			dataset = datasets[dataNum]
+			speeds.df = ESS.df[ESS.df$param == "prior" & ESS.df$dataset == dataset, ]
+			speeds = numeric(length(settings))
+			for (s in 1:length(settings)){
+				setting = settings[s]
+				speeds[s] = mean(1 / speeds.df[speeds.df$setting == setting, "mean.speed"])
+			}
+
+			if (any(is.na(speeds))) next
+
+			pch = rep(16, length(settings))
+			fastest = which(speeds == max(speeds))
+			pch[fastest] = 17
+
+			points(1:length(settings), speeds, col = data.cols[dataNum], pch = pch, type = "b")
+
+
 		}
 
-		if (any(is.na(speeds))) next
 
-		pch = rep(16, length(settings))
-		fastest = which(speeds == max(speeds))
-		pch[fastest] = 17
-
-		points(1:length(settings), speeds, col = data.cols[dataNum], pch = pch, type = "b")
+		axis(1, at = 1:length(settings), label = sapply(settings, function(ele) settings.names[[ele]]), las = 2, cex = 2)
+		axis(2, cex = 2)
+		#grid()
 
 
 	}
-
-
-	axis(1, at = 1:length(settings), label = sapply(settings, function(ele) settings.names[[ele]]), las = 2, cex = 2)
-	axis(2, cex = 2)
-	#grid()
-
-
-
 
 
 
@@ -522,17 +693,16 @@ plot.grid = function(filename, settings, grid.like = TRUE, main = "") {
 
 
 
-plot.grid("ESS_round1_real", c("real_06", "real", "real_adaptive"), TRUE, "Round 1")
-plot.grid("ESS_round1_quant", c("quant_06_cached", "quant_cached", "quant_cached_adaptive"), TRUE, "Round 1")
+plot.grid("ESS_round1_real", c("real_06", "real", "real_adaptive"), TRUE, plotWeights)
 
-#plot.grid("ESS_round3", c("bactrian95", "NER"), FALSE, "Round 3")
-#plot.grid("ESS_round4", c("NER", "AVMN"), FALSE, "Round 4")
+plot.cat = function(){
+	plot.cell("cat", "cat_adaptive", show.legend = FALSE)
+}
+plot.grid("ESS_round1_catquant", c("quant_06_cached", "quant_cached", "quant_cached_adaptive"), TRUE, plot.cat)
 
-#plot.grid("ESS_real", c("real_06", "real"), TRUE, "Round 1")
-#plot.grid("ESS_quant", c("quant_06", "quant"), TRUE, "Round 1")
-plot.grid("ESS_round2", c("cat", "real_adaptive", "quant_cached_adaptive"), TRUE, "Round 2")
+plot.grid("ESS_round2", c("cat_adaptive", "real_adaptive", "quant_cached_adaptive"), TRUE, plotRealCat)
 
-plot.grid("ESS_round3", c("real_adaptive", "bactrian95"), TRUE, "Round 3")
+plot.grid("ESS_round3", c("real_adaptive", "bactrian95"), TRUE)
 
 
 
@@ -549,11 +719,6 @@ bad.df = ESS.df[ESS.df$ESS < 200,]
 write.table(bad.df, "ESSbad.tsv", sep = "\t", quote = F, row.names = F)
 
 print(paste("There are", nrow(bad.df), "parameters with ESS<200"))
-
-
-
-
-
 
 
 

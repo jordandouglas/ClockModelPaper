@@ -114,6 +114,7 @@
 \usepackage{commath}
 
 \usepackage{mhchem}
+\usepackage{tikz}
 \usepackage{mathtools}
 
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
@@ -202,6 +203,7 @@
 }%
 \item[]}{\end{list}}
 
+\def\checkmark{\tikz\fill[scale=0.4](0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;} 
 
 
 \renewcommand{\arraystretch}{1.3}
@@ -1065,7 +1067,7 @@ The neighbour joining tree \cite{saitou1987neighbor} is used as the initial stat
 
 
 
-\subsection*{Operator schemes} \label{sect:operatorSchemes}
+\subsection*{Operator configurations} \label{sect:operatorSchemes}
 
 
 Throughout the article, we have introduced four new operators. 
@@ -1092,7 +1094,51 @@ These are summarised in \textbf{Table \ref{table:newOperators}}.
 \end{table}
 
 
-Here, we define 
+In \textbf{Table \ref{table:operatorSchemes}}, we define all operator configurations which are benchmarked throughout \textbf{\nameref{sect:results}}.
+
+
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l l l l l l|} 
+ \hline
+Configuration & Operator & Weight & \textit{real} & \textit{cat} & \textit{quant}  \\
+  \hline
+ \multirow{6}{*}{nocons} & \texttt{RandomWalk($\mathcal{R}$)} & $10$ & \checkmark &&  \\
+ 	& \texttt{Scale($\vec{\mathcal{R}}^{\,}$)} & $10$ & \checkmark && \\ 
+ 	& \texttt{Uniform($\vec{\mathcal{R}}^{\,}$)} & $10$ & & \checkmark & \checkmark \\ 
+ 	& \texttt{Interval($\vec{\mathcal{R}}^{\,}$)} & $10$ &  & & \checkmark \\ 
+ 	& \texttt{Swap($\vec{\mathcal{R}}^{\,}$)} & $10$ & \checkmark & \checkmark & \checkmark \\ 
+ 	& \texttt{Scale($\sigma$)} & $10$ & \checkmark & \checkmark & \checkmark \\ 
+  \hline
+   \multirow{10}{*}{cons} 
+   & \texttt{ConstantDistance($\vec{\mathcal{R}}^{\,}, \mathcal{T}$)} & $20 \times \frac{2N-2}{2N-1}$ & \checkmark & & \checkmark  \\
+   & \texttt{SimpleDistance($\vec{\mathcal{R}}^{\,}, \mathcal{T}$)} & $10 \times \frac{2N-2}{2N-1}$ & \checkmark & & \checkmark  \\
+   & \texttt{SmallPulley($\vec{\mathcal{R}}^{\,}$)} & $10 \times \frac{2N-2}{2N-1}$ & \checkmark & & \checkmark  \\
+   & \texttt{RandomWalk($\vec{\mathcal{R}}^{\,}$)} & $5$ & \checkmark &&  \\
+ 	& \texttt{Scale($\vec{\mathcal{R}}^{\,}$)} & $2.5$ & \checkmark && \\ 
+ 	& \texttt{Uniform($\vec{\mathcal{R}}^{\,}$)} & $5$ & &&\checkmark \\ 
+ 	& \texttt{Interval($\vec{\mathcal{R}}^{\,}$)} & $2.5$ & &&\checkmark\\ 
+ 	& \texttt{Swap($\vec{\mathcal{R}}^{\,}$)} & $2.5$ & \checkmark & & \checkmark  \\ 
+ 	& \texttt{FastClockScale($\sigma, \vec{\mathcal{R}}^{\,}$)} & $10$ & \checkmark  && \\ 
+ 	& \texttt{Scale($\sigma$)} & $10$ &  &&\checkmark \\ 
+  \hline
+     \multirow{3}{*}{adapt} & \texttt{AdaptiveOperatorSampler($\sigma$)} & $10$ & \checkmark & \checkmark & \checkmark  \\
+ 	& \texttt{AdaptiveOperatorSampler($\vec{\mathcal{R}}^{\,}$)} & $30 \times \frac{2N-2}{2N-1}$ & \checkmark & & \checkmark  \\
+ 	& \texttt{AdaptiveOperatorSampler($\vec{\mathcal{R}}^{\,}$)} & $30$ &  & \checkmark & \\
+ 	& \texttt{AdaptiveOperatorSampler(root)} & $30 \times \frac{1}{2N-1}$ & \checkmark & & \checkmark  \\
+ 	
+  \hline
+
+\end{tabular}
+\caption{Operator configurations and the substitution rate parameterisations which each operator are applicable to. Within each configuration (and substitution rate parameterisation), the weight behind $\mathcal{R}$ sums to 30 and the weight of $\sigma$ is equal to 10. 
+There is no cons (\textit{cat}) configuration because the parameterisation is not compatible the constant distance operators.
+Operators which apply to either internal nodes or the root (but not both) are weighted according to leaf count $N$. The adapt operators are further broken down in \textbf{Table \ref{table:adaptiveSampling}}.} 
+%The total weight of all operators across all parameters was 116 in each MCMC setup.
+T%herefore a weight of 10 corresponds to sampling probability of 0.086, for example.
+\label{table:operatorSchemes}
+\end{table}
+
 
 
 
@@ -1192,55 +1238,30 @@ All methodologies use identical models and operator configurations, except where
 \clearpage
 \subsection*{Round 1: A simple operator-weight learning algorithm can improve performance}
 
-We compared the cons, nocons, and adapt operator configurations for the \textit{real} and \textit{quant} parameterisations (\textbf{Table \ref{table:round1Results}}).
+We compared the cons, nocons, and adapt operator configurations for the \textit{real} and \textit{quant} parameterisations (\textbf{Table \ref{table:operatorSchemes}}). 
 The nocons configuration contained the standard BEAST2 operator mix, while cons contained the operator mix used by Zhang and Drummond 2020 \cite{zhang2020improving}. 
-The adapt mix combines the above operators, as well as the rudimentary \texttt{SampleFromPrior} operator, and learns the weights of each operator using  \texttt{AdaptiveOperatorSampler}.
+The adapt mix combines the above operators, as well as the simple-but-bold \texttt{SampleFromPrior} operator, and learns the weights of each operator using  \texttt{AdaptiveOperatorSampler}.
+We also tested the adapt (\textit{cat}) configuration to determine whether \textit{cat} can be further improved by learning the underlying weights behind \texttt{RandomWalk}, \texttt{Swap}, and \texttt{SampleFromPrior}.
 
 
-\begin{table}[h!]
-\centering
-\begin{tabular}{|l l l l|} 
- \hline
-Configuration & Operator & Weight & Parameterisations  \\
-  \hline
- \multirow{6}{*}{nocons} & \texttt{RandomWalk($\mathcal{R}$)} & $10$ & \textit{real}  \\
- 	& \texttt{Scale($\vec{\mathcal{R}}^{\,}$)} & $10$ & \textit{real} \\ 
- 	& \texttt{Uniform($\vec{\mathcal{R}}^{\,}$)} & $10$ & \textit{quant} \\ 
- 	& \texttt{Interval($\vec{\mathcal{R}}^{\,}$)} & $10$ & \textit{quant} \\ 
- 	& \texttt{Swap($\vec{\mathcal{R}}^{\,}$)} & $10$ & \textit{real}, \textit{quant} \\ 
- 	& \texttt{Scale($\sigma$)} & $10$ & \textit{real}, \textit{quant} \\ 
-  \hline
-   \multirow{10}{*}{cons} 
-   & \texttt{ConstantDistance($\vec{\mathcal{R}}^{\,}, \mathcal{T}$)} & $20 \times \frac{2N-2}{2N-1}$ & \textit{real}, \textit{quant}  \\
-   & \texttt{SimpleDistance($\vec{\mathcal{R}}^{\,}, \mathcal{T}$)} & $10 \times \frac{2N-2}{2N-1}$ & \textit{real}, \textit{quant}  \\
-   & \texttt{SmallPulley($\vec{\mathcal{R}}^{\,}$)} & $10 \times \frac{2N-2}{2N-1}$ & \textit{real}, \textit{quant}  \\
-   & \texttt{RandomWalk($\vec{\mathcal{R}}^{\,}$)} & $5$ & \textit{real}  \\
- 	& \texttt{Scale($\vec{\mathcal{R}}^{\,}$)} & $2.5$ & \textit{real} \\ 
- 	& \texttt{Uniform($\vec{\mathcal{R}}^{\,}$)} & $5$ & \textit{quant} \\ 
- 	& \texttt{Interval($\vec{\mathcal{R}}^{\,}$)} & $2.5$ & \textit{quant} \\ 
- 	& \texttt{Swap($\vec{\mathcal{R}}^{\,}$)} & $2.5$ & \textit{real}, \textit{quant} \\ 
- 	& \texttt{FastClockScale($\sigma, \vec{\mathcal{R}}^{\,}$)} & $10$ & \textit{real}  \\ 
- 	& \texttt{Scale($\sigma$)} & $10$ &  \textit{quant} \\ 
-  \hline
-     \multirow{3}{*}{adapt} & \texttt{AdaptiveOperatorSampler($\sigma$)} & $10$ & \textit{real}, \textit{quant} \\
- 	& \texttt{AdaptiveOperatorSampler($\vec{\mathcal{R}}^{\,}$)} & $30 \times \frac{2N-2}{2N-1}$ & \textit{real}, \textit{quant} \\
- 	& \texttt{AdaptiveOperatorSampler(root)} & $30 \times \frac{1}{2N-1}$ & \textit{real}, \textit{quant} \\
-  \hline
-
-\end{tabular}
-\caption{Operator configurations for Round 1. In each configuration, the weight behind $\mathcal{R}$ sums to 30 and for $\sigma$ is equal to 10 within any one rate parameterisation. 
-Operators which apply to either internal nodes or the root (but not both) are weighted according to leaf count $N$. The adapt operators are further broken down in \textbf{Table \ref{table:adaptiveSampling}}.} 
-%The total weight of all operators across all parameters was 116 in each MCMC setup.
-T%herefore a weight of 10 corresponds to sampling probability of 0.086, for example.
-\label{table:round1Results}
-\end{table}
+These results show that nocons performs better than cons on small datasets while cons performs better on large datasets (\textbf{Fig. \ref{fig:round1Results}} and \textbf{\nameref{sect:SR_appendix}}). 
+This is an expected result and is true for both the \textit{real} and the \textit{quant} parameterisations.
+The adapt configuration dramatically improved mixing for \textit{real}, by finding the right balance between these two extremes.
+However the \texttt{AdaptiveOperatorSampler} operator did not benefit for either \textit{cat} or \textit{quant}, suggesting that the default operator weighting scheme was sufficient in either case.
+Overall, the \texttt{AdaptiveOperatorSampler} operator will be included in all subsequent rounds in the tournament. 
 
 
 
+\begin{figure}[!h]
+\includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round1_real.pdf}
+\caption{\textbf{Round 1: benchmarking the \texttt{AdaptiveOperatorSampler} operator.} Top left, top right, bottom left: each plot compares the ESS/hr ($\pm 2$ standard errors) across two operator configurations with respect to relevant terms -- $L$: likelihood, $p$: prior density, $r$: clock rate ESS averaged across all leaves, $\sigma$: clock standard deviation, $h$: tree height, and $\kappa$: HKY model transition-transversion ratio.
+Bottom right: the effect of sequence length $L$ on operator weights learned by \texttt{AdaptiveOperatorSampler}. Both sets of results are fit by a logistic regression curve.
+ The benchmark datasets are displayed in \textbf{Table \ref{table:datasets}}. The \emph{cat} and \emph{quant} evaluations are presented in \nameref{sect:SR_appendix}.  }
+\label{fig:round1Results}
+\end{figure}
 
-These results show that, while nocons gives better performance than cons on smaller datasets (corresponding to low signal), and cons performs better on larger datasets (high signal), the adapt configuration gives the best performance overall.
-This trend is observed for both the \textit{real} and the \textit{quant} parameterisations.
-Therefore, the \texttt{AdaptiveOperatorSampler} operator will be included in all subsequent rounds in the tournament. 
+
+
 
 
 
@@ -1250,55 +1271,25 @@ Therefore, the \texttt{AdaptiveOperatorSampler} operator will be included in all
 \subsection*{Round 2: The \textit{real} parameterisation yields the fastest mixing }
 
 We compared the three rate parameterisations described in \textbf{\nameref{sect:rateparams}}. 
-The \textit{cat} operator configuration is described in \textbf{Table \ref{table:round2Results}}.
-\textit{real} and \textit{quant} make use of constant distance tree operators \cite{zhang2020improving} and both use the \texttt{AdaptiveOperatorSampler} operator to learn clock model operator weights.
-The three settings are validated in \textbf{\nameref{sect:WCSS_appendix}}.
-
-
-
-
-\begin{table}[h!]
-\centering
-\begin{tabular}{|l l l|} 
- \hline
-Configuration & Operator & Weight  \\
-  \hline
- \multirow{4}{*}{\textit{cat}} 
- 	& \texttt{RandomWalk($\vec{\mathcal{R}}^{\,}$)} & $10$ \\
- 	& \texttt{Uniform($\vec{\mathcal{R}}^{\,}$)} & $10$  \\ 
- 	& \texttt{Swap($\vec{\mathcal{R}}^{\,}$)} & $10$ \\ 
- 	& \texttt{Scale($\sigma$)} & $10$ \\ 
-  \hline
-\end{tabular}
-\caption{Operator configurations for \textit{cat} in Round 2. The configurations of \textit{real} (adapt) and \textit{quant} (adapt) are shown in \textbf{Table \ref{table:round1Results}}.}
-\label{table:round2Results}
-\end{table}
+adapt (\textit{real}) and adapt (\textit{quant}) both employ constant distance tree operators \cite{zhang2020improving} and both use the \texttt{AdaptiveOperatorSampler} operator to learn clock model operator weights.
+Clock model operators weights are also learned in the adapt (\textit{cat}) configuration.
 
 
 
 
 
-
-
-
-%\textbf{Fig. \ref{fig:parameterisationResults}} shows that the \textit{real 2006} performs considerably worse than any of the other settings. This is due to the poor sampling of the prior under this setting (i.e. low ESS of $p(\theta)$). The failure of \textit{real 2006} thus highlights the appeal of 1) the \textit{cat} or \textit{quant} parameterisations, both of which have trivial contributions to the prior density (i.e. uniform priors), and 2) the smarter operators used by \textit{real} (Zhang and Drummond 2020). Due to its computational burden, \textit{real 2006} was not benchmarked for all of the datasets in \textbf{Table \ref{table:datasets}}.
-
-
-
-
-%Our results show that the \textit{quant} parameterisation yields the best performance with respect to effective samples per hour. \textit{quant} outperforms \textit{quant 2006}, suggesting that the constant distance operators are effective. Furthermore, \textit{quant} outperforms \textit{real} especially at sampling from the posterior and prior distributions (i.e. high ESS/hr for $p(\theta|D)$ and $p(\theta)$). This is most likely because of the uniform prior distribution of rate quantiles.
-
-%Overall, \textit{quant} yields a median ESS/hr approximately 150 \% faster with respect to sampling the posterior probability, and approximately 30 \% faster with respect to sampling branch rates $r$ and clock standard deviation $\sigma$, compared with \textit{real}.
-
-
-
+This experiment revealed that the \textit{real} parameterisation greatly outperforms both \textit{cat} and \textit{quant} on most datasets (\textbf{Fig. \ref{fig:round2Results}}).
+This disparity is strongest for large datasets.
+In the most extreme case, $r$ and $\sigma$ both mixed around $70 \times$ faster on the 15.5 kb Seed plant dataset by \cite{Ran_2018} for \textit{real} than they did for \textit{cat}.
+The advantages in using constant distance operators would likely be even stronger for larger $L$.
+Overall, we have determined that \textit{real}, and its associated operators, makes the best parameterisation covered here and will proceed to the next rounds of the benchmarking.
 
 
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round2.pdf}
-\caption{\textbf{Rate parameterisation performance evaluation.} Comparison of ESS/hr (averaged across five independent MC3 analyses) with respect to relevant terms -- $P$: posterior density; $L$: likelihood, $p$: prior density, $r$: clock rate ESS averaged across all leaves, $\hat{r}$: branch rate mean, $v$: branch rate variance, $\sigma$: clock standard deviation, $\kappa$: HKY model transition-transversion ratio, $\lambda$: Yule model birth rate. $h$: tree height. Datasets are displayed in \textbf{Table \ref{table:datasets}}.  }
-\label{fig:parameterisationResults}
+\caption{\textbf{Round 2: benchmarking substitution rate parameterisations.} Top left, top right, bottom left: the adapt (\textit{real}), adapt (\textit{cat}), and adapt (\textit{quant}) configurations were compared. See \textbf{Fig. \ref{fig:round1Results}} caption for figure notation. Bottom right: comparison of the mean tip rate ESS/hr as a function of sequence length. }
+\label{fig:round2Results}
 \end{figure}
 
 
@@ -1368,6 +1359,12 @@ The \textbf{\nameref{sect:NER}} (NER) operators are evaluated. This protocol sel
 \paragraph*{S2 Appendix.}
 \label{sect:WCSS_appendix}
 {\textbf{Well-calibated simulation studies.} Methodologies are validated using well-calibated simulation studies.
+
+
+
+\paragraph*{S3 Appendix.}
+\label{sect:SR_appendix}
+{\textbf{Supplementary results.} Presentation and interpretation of further benchmarking results. 
 
 
 

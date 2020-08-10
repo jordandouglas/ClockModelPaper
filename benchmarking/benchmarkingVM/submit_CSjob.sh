@@ -5,9 +5,9 @@
 #~/beast/bin/beast  -overwrite -beagle_SSE ../datasets/startdummy.xml
 
 #settings=("real" "real_adaptive" "cat" "quant" "AVMN" "bactrian98" "bactrian95" "NER" "real_06" "quant_06")
-settings=("cat" "cat_adaptive" "real" "real_06" "real_adaptive" "quant_cached" "quant_cached_adaptive" "quant_06_cached" "bactrian95")
+settings=("cat" "cat_adaptive" "real" "real_06" "real_adaptive" "quant_cached" "quant_cached_adaptive" "quant_06_cached" "bactrian95" "NER")
 
-datasets=("Rightmyer_2013" "Ran_2018_dna" "Broughton_2013" "simulated" "Sauquet_2011" "Moyle_2016" "Dornburg_2012" "Kawahara_2013" "Cognato_2001")
+datasets=("Ran_2018_dna" "Rightmyer_2013" "Broughton_2013" "simulated" "Sauquet_2011" "Moyle_2016" "Dornburg_2012" "Kawahara_2013" "Cognato_2001")
 
 
 
