@@ -36,7 +36,7 @@ par(cex.main = 1.5)
 # 1) pdf
 x = seq(from = 0, to = xmax, by = 0.01)
 
-plot(0, 0, type = "n", xaxs = "i", lwd = 3, yaxs = "i", axes = F, xlab = "Branch rate $r$", ylab = "$p(r|\\sigma)$",
+plot(0, 0, type = "n", lwd = 3, yaxs = "i", axes = F, xlab = "Branch rate $r$", ylab = "$p(r|\\sigma)$",
 main = "Probability density function (Log-Normal)", xlim = c(0, xmax), ylim=c(0, 5))
 
 
@@ -62,7 +62,7 @@ axis(2, las=2)
 
 
 # 2) real
-plot(0, 1, type = "n", xaxs = "i", yaxs = "i", axes = F, xlab = "Abstraction $\\mathcal{R}$ [rate]", ylab = "Branch rate $r(\\mathcal{R})$",
+plot(0, 1, type = "n", yaxs = "i", axes = F, xlab = "Abstraction $\\mathcal{R}$ [rate]", ylab = "Branch rate $r(\\mathcal{R})$",
 main = "\\textit{real}", xlim =c(0, xmax), ylim=c(0, xmax))
 
 lines(c(0, xmax), c(0, xmax), lwd = 3)
@@ -100,16 +100,45 @@ axis(2, at = seq(from = 0, to = xmax, by = 0.5), las=2)
 
 
 # 4) quantiles
+nquant = 10
 plot(0, 1, type = "n", yaxs = "i", axes = F, xlab = "Abstraction $\\mathcal{R}$ [quantile]", ylab = "Branch rate $r(\\mathcal{R})$",
-main = paste0("\\textit{quant}"), xlim =c(0, 1), ylim=c(0, xmax))
+main = paste0("\\textit{quant} with ", nquant, " pieces"), xlim =c(0, 1), ylim=c(0, xmax))
 
 
 for (i in 1:length(Svals)){
 	S = Svals[i]
 	M = Mvals[i]
-	x = seq(from = 0, to = 1, by = 0.001)
-	y = c(qlnorm (x[-length(x)], M, S), xmax*2)
-	lines(x, y, pch = 16, col = Scols[i], lwd = 3)
+	
+
+	for (b in 0:(nquant-1)){
+		
+		q0 = b / nquant
+		q1 = (b+1) / nquant
+		
+		if (b == 0 | b == nquant - 1){
+			
+			
+			x = seq(from = q0, to = q1, length = 100)
+			y = qlnorm(x, M, S)
+			if (b == nquant-1) y[length(y)] = xmax*2
+			lines(x, y, col = Scols[i], lwd = 3)
+			if (b == nquant-1) points(q0, qlnorm(q0, M, S), pch = 16, col = Scols[i],)
+			
+			
+		}else{
+			
+
+		
+			r0 = qlnorm(q0, M, S)
+			r1 = qlnorm(q1, M, S)
+			lines(c(q0, q1), c(r0, r1), lwd = 0.6, col = Scols[i], lty = "22")
+			points(q0, r0, pch = 16, col = Scols[i])
+		
+		}
+
+	}
+
+
 }
 
 

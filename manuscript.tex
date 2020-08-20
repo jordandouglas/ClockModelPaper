@@ -383,7 +383,8 @@ In Bayesian inference, the way parameters are represented in the model can affec
 \includegraphics[width=\textwidth]{Figures/rateparameterisation.pdf}
 \caption{\textbf{Branch rate parameterisations.} Top left: the prior density of a branch rate $r$ under a Log-Normal($-0.5\sigma^2, \sigma$) distribution (with its mean fixed at 1). 
 The function for transforming $\mathcal{R}$ into branch rates $r(\mathcal{R})$ is depicted for \textit{real} (top right), \textit{cat} (bottom left), and \textit{quant} (bottom right).
-For simplicity there are 10 \textit{cat} bins displayed, however in practice there are $2N-2$ bins. }
+For visualisation purposes, there are only 10 bins/pieces displayed, however in practice there are $2N-2$ bins for \textit{cat} and 100 pieces for \textit{quant}.
+The first and final \textit{quant} pieces are equal to the underlying function however the pieces in between use linear approximations of this function. }
 \label{fig:rateparams}
 \end{figure}
 
@@ -481,18 +482,19 @@ p(\mathcal{R}_i | \sigma) = & \; p(\mathcal{R}_i) = 1
 \end{align}
 
 
-Transforming these quantiles into rates invokes the i-CDF of the underlying \textit{real} clock model distribution:
+Transforming these quantiles into rates invokes the i-CDF of the underlying \textit{real} clock model distribution.
+However, this function is computationally demanding to evaluate and therefore an approximation of the i-CDF is used:
+
 
 
 \begin{align}
-r(\mathcal{R}_i) =& \; F^{-1}(\mathcal{R}_i).
+r(\mathcal{R}_i) =& \; \hat{F}^{-1}(\mathcal{R}_i)
 \end{align}
 
-
-However, evaluation of the i-CDF is computationally demanding and this may hinder the performance of the \textit{quant} parameterisation.
-
-While this approach has clear similarities with \textit{cat}, the domain of rates here is continuous (as opposed to being confined to a discrete number of bins).
-In this project we extended the family of constant distance operators  \cite{zhang2020improving} so they are compatible with \textit{quant} (\textbf{\nameref{sect:S1Appendix}}). 
+where $\hat{F}^{-1}$ is a linear piecewise approximation with 100 pieces.
+While this approach has clear similarities with \textit{cat}, the domain of rates here is continuous instead of discrete.
+In this project we extended the family of constant distance operators  \cite{zhang2020improving} so that they are compatible with \textit{quant}.
+Further details on the \textit{quant} piecewise approximation and constant distance operators can be found in \textbf{\nameref{sect:S1Appendix}}. 
 
 
 
