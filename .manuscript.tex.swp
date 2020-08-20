@@ -962,19 +962,18 @@ Two such operators are expressed in \textbf{Algorithms \ref{alg:NER1} and \ref{a
 
 
 
-
-\subsubsection*{Screening operators by acceptance rate on simulated data}
-
-
-We selected the best NER operator variant by performing MCMC on 300 simulated datasets, where each MCMC employed all 96 NER/NERw variants. 
-Simulated datasets have $N=30$ taxa and an alignment with $L \sim \text{Uniform}(10^2, 10^4)$ sites. 
-The acceptance rate of each operator (which in this case is equivalent to the average \texttt{RF} distance) is compared to that of the null operator $\text{NER}\{\}$ (i.e. \texttt{NarrowExchange}). 
+\paragraph{4. Screening operators for acceptance rate using simulated data.}
 
 
-\textbf{Fig. \ref{fig:acceptanceRateScreening}} shows that NER variants which satisfy the genetic distances between nodes $B$ and $A$ (i.e. $\mathcal{D}_{AB}$) or between $B$ and $C$ (i.e. $\mathcal{D}_{BC}$) usually perform worse than the standard \texttt{Narrow Exchange} operator, where $B$ is the node being interchanged from the $A$ branch to the $C$ branch (\textbf{Fig. \ref{fig:narrowexchange}}). 
+The best NER operator variant to proceed to benchmarking on empirical data (\textbf{\nameref{sect:results}}) was selected by  performing MCMC on simulated data, measuring the acceptance rates of each of the 96 NER/NERw variants, and comparing them with the null operator $\text{NER}\{\}$ / \texttt{NarrowExchange}. 
+In total, there were 300 simulated datasets each with $N=30$ taxa and varying alignment lengths.
+
+
+%The acceptance rate of each operator (which in this case is equivalent to the average \texttt{RF} distance) was compared to that of the null operator $\text{NER}\{\}$ (i.e. \texttt{NarrowExchange}). 
+
+These experiments showed that NER variants which satisfy the genetic distances between nodes $B$ and $A$ (i.e. $\mathcal{D}_{AB}$) or between $B$ and $C$ (i.e. $\mathcal{D}_{BC}$) usually performed worse than the standard \texttt{NarrowExchange} operator (\textbf{Fig. \ref{fig:acceptanceRateScreening}}).
 This is an intuitive result. 
-If the posterior distribution is relatively flat, and the data presents high uncertainty in the positioning of $B$, with respect to $A$ and $C$, then the topological rearrangement performed by \texttt{Narrow Exchange} will be favoured. However, this uncertainty in the \textit{topology} is likely coupled with uncertainty in the \textit{distance} between $B$ and $A$ or between $B$ and $C$. 
-Thus, in this case, respecting the $\mathcal{D}_{AB}$ and $\mathcal{D}_{BC}$ constraints (by proposing branch rates) makes too many unnecessary changes to the state and the operator performs worse.
+If there is high uncertainty in the positioning of $B$ with respect to $A$ and $C$, then there is no value in respecting either of these distance constraints, and the proposals made to the rates may often be too bold or the Green ratio $|J|$ too small for the proposal to be accepted.
 
 
 
@@ -989,22 +988,22 @@ Thus, in this case, respecting the $\mathcal{D}_{AB}$ and $\mathcal{D}_{BC}$ con
 
 
 \textbf{Fig. \ref{fig:acceptanceRateScreening}} also reveals a cluster of NER variants which -- under the conditions of the simulation --  performed better than the null operator $\text{NER}\{\}$ around 25\% of the time and performed worse around 10\% of the time. 
-One such operator is  $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ and is presented in \textbf{Algorithm \ref{alg:NER2}}. 
-This variant conserves the genetic distance between the child nodes ($A, B, C$) and the grandparent node $E$. This is performed by proposing rates for $r_A$, $r_B$, and $r_C$ while obeying the distance constraints imposed by the operator. Exploring this operator further, we can see that $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ is at its best when there is a large variance in branch rate i.e. when clock standard deviation $\sigma$ is high ($\sigma \gtrsim 0.5$ for $N=30$), corresponding to data which is not clock-like. On the other hand, $\text{NER}\{\}$ is much preferred when the operator's acceptance rate is high ($\gtrsim 0.15$) -- corresponding to datasets with short sequences ($L < 1$kb for $N=30$) and thus poor signal.  
+One such operator is  $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$  (\textbf{Algorithm \ref{alg:NER2}}). 
+This variant conserves the genetic distance between nodes $A$, $B$, $C$ and their grandparent $E$. 
+Moreover, this operator performs well when branch rates have a large variance ($\sigma > 0.5$), corresponding to data which is not clock-like. 
+On the other hand, the null operator $\text{NER}\{\}$ performs better on shorter sequences ($L < 1$kb) and therefore weaker signal.  
 Overall, $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ outperforms the standard \texttt{NarrowExchange} operator when the data is not clock-like and contains enough signal. 
 
 
 
-
-Finally, \textbf{Fig. \ref{fig:acceptanceRateScreening}} shows that by applying a (Bactrian) random walk to $t_D$ -- the height of internal node $D$ -- the acceptance rate of NER plummets dramatically. 
-This effect is most dominant for the NER variants which satisfy distance constraints (i.e. the operators which are not $\text{NER}\{\}$). This result is unfortunate however not unexpected, and is consistent with Lakner et al. 2008 \cite{lakner2008efficiency}, who observed that tree operators perform best when they change either topology, or branch lengths, but not both.
-
+Finally, this initial screening showed that applying a (Bactrian) random walk to the node height $t_D$ made the operator worse.
+This effect was most dominant for the NER variants which satisfy distance constraints (i.e. the operators which are not $\text{NER}\{\}$).
 
 
 
 
-Although there are several operators which behaved equivalently during this initial screening process, we selected $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ to proceed to benchmarking (\textbf{\nameref{sect:results}}).
-Due to the apparent sensitivity of NER operators to the dataset, we introduce the adaptive operator \texttt{AdaptiveOperatorSampler(NER)} which allows the operator scheme to fall back on the standard \texttt{NarrowExchange} in the event of $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ performing poorly (\textbf{Table \ref{table:adaptiveNER}}).
+Although there were several operators which behaved equivalently during this initial screening process, we selected $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ to proceed to benchmarking (\textbf{\nameref{sect:results}}).
+Due to the apparent sensitivity of NER operators to the data, we introduce the adaptive operator \texttt{AdaptiveOperatorSampler(NER)} which allows the operator scheme to fall back on the standard \texttt{NarrowExchange} in the event of $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ performing poorly (\textbf{Table \ref{table:adaptiveNER}}).
 
 
 
@@ -1158,11 +1157,16 @@ Configuration & Operator & Weight & \textit{real} & \textit{cat} & \textit{quant
  	& \texttt{AdaptiveOperatorSampler($\vec{\mathcal{R}}^{\,}$)} & $30 \times \frac{2N-2}{2N-1}$ & \checkmark & & \checkmark  \\
  	& \texttt{AdaptiveOperatorSampler($\vec{\mathcal{R}}^{\,}$)} & $30$ &  & \checkmark & \\
  	& \texttt{AdaptiveOperatorSampler(root)} & $30 \times \frac{1}{2N-1}$ & \checkmark & & \checkmark  \\
+ 	 \hline
+ 	 \hline
+ 	\multirow{1}{*}{NER\{\}} & \texttt{NarrowExchange} & $15$ & \checkmark & \checkmark  & \checkmark  \\
+ 	\hline
+ 	\multirow{1}{*}{NER} & \texttt{AdaptiveOperatorSampler(NER)} & $15$ & \checkmark &  & \checkmark  \\
  	
   \hline
 
 \end{tabular}
-\caption{Operator configurations and the substitution rate parameterisations which each operator are applicable to. Within each configuration (and substitution rate parameterisation), the weight behind $\mathcal{R}$ sums to 30 and the weight of $\sigma$ is equal to 10. 
+\caption{Operator configurations and the substitution rate parameterisations which each operator are applicable to. Within each configuration (and substitution rate parameterisation), the weight behind $\mathcal{R}$ sums to 30, the weight of $\sigma$ is equal to 10, and the weight of NER is equal to 15.
 There is no cons (\textit{cat}) configuration because the parameterisation is not compatible the constant distance operators.
 Operators which apply to either internal nodes or the root (but not both) are weighted according to leaf count $N$. The adapt operators are further broken down in \textbf{Table \ref{table:adaptiveSampling}}.} 
 %The total weight of all operators across all parameters was 116 in each MCMC setup.
@@ -1191,7 +1195,7 @@ T%herefore a weight of 10 corresponds to sampling probability of 0.086, for exam
 % Cite HKY somewhere hasegawa1985dating
 
 
-To avoid a cross-product explosion, the five targets for clock model improvement are evaluated sequentially in the following order: \textbf{\nameref{sect:adaptiveSampling}} \textbf{\nameref{sect:rateparams}}, \textbf{\nameref{sect:randomwalks}}, \textbf{\nameref{sect:NER}}, and \textbf{\nameref{AVMVN_sect}}.
+To avoid a cross-product explosion, the five targets for clock model improvement are evaluated sequentially in the following order: \textbf{\nameref{sect:adaptiveSampling}}, \textbf{\nameref{sect:rateparams}}, \textbf{\nameref{sect:randomwalks}}, \textbf{\nameref{sect:NER}}, and \textbf{\nameref{AVMVN_sect}}.
 The four operators introduced in these sections are summarised in \textbf{Table \ref{table:newOperators}}.
 The setting which is considered to be the best in each step is then incorporated into the following step. This protocol and its outcomes are summarised in \textbf{Fig. \ref{fig:tournament}}.
 
@@ -1209,18 +1213,19 @@ The setting which is considered to be the best in each step is then incorporated
 Methodologies are assessed according to the following criteria.
 
 
-\textbf{1. Validation}. This is assessed by measuring the coverage of all estimated parameters in a well-calibrated simulation study, using 100 simulated datasets (with $N=100$ taxa and $L=5000$ nucleotide alignments). These are presented in \textbf{\nameref{sect:WCSS_appendix}}. \\
+\textbf{1. Validation}. This is assessed by measuring the coverage of all estimated parameters in well-calibrated simulation studies. These are presented in \textbf{\nameref{sect:WCSS_appendix}}. \\
 
 
-\textbf{2. Mixing of parameters}. Key parameters are evaluated for the number of effective samples generated per hour (ESS/hr). This calculation is performed by BEAST2 \cite{bouckaert2019beast}. \\
+\textbf{2. Mixing of parameters}. Key parameters are evaluated for the number of effective samples generated per hour (ESS/hr). 
+This calculation is performed by BEAST2 \cite{bouckaert2019beast}. \\
 
 %\textbf{3. Time to convergence}. Two independent MCMC chains are run and the time is measured until: a) the absolute difference in clade posterior probability between the two chains is less than 0.05 for all clades, b) the Rubin-Gelman statistic $\hat{R}$ \cite{gelman1992inference} of every estimated parameter is less than 1.05, and c) the effective sample size \cite{rambaut2018posterior} of every estimated parameter is greater than 200 in each chain. \\
 
 
 
 Methodologies are benchmarked using one simulated and eight empirical datasets.
-The latter were compiled \cite{lanfear2019Github} and partitioned \cite{lanfear2016partitionfinder} by Lanfear et al. as `benchmark alignments' (\textbf{Table \ref{table:datasets}}).
-Each methodology is benchmarked across 5 replicates on each dataset, using an the Intel Xeon Gold 6138 CPU (2.00 GHz).
+The latter were compiled \cite{lanfear2019Github} and partitioned \cite{lanfear2016partitionfinder} by Lanfear et al. as ``benchmark alignments'' (\textbf{Table \ref{table:datasets}}).
+Each methodology is benchmarked across 5 replicates on each dataset, using the Intel Xeon Gold 6138 CPU (2.00 GHz).
 All methodologies use identical models and operator configurations, except where a difference is specified.
 
 
@@ -1233,7 +1238,7 @@ All methodologies use identical models and operator configurations, except where
 \centering
 \begin{tabular}{|l| l l l l l|} 
  \hline
-  & $N$ & $P$ & $L$ (kb) & $L_\text{eff}$ (kb) & \textbf{Description} \\
+  & $N$ & $P$ & $L$ (kb) & $L_\text{unq}$ (kb) & \textbf{Description} \\
   \hline
  
  
@@ -1261,7 +1266,8 @@ All methodologies use identical models and operator configurations, except where
 
  \hline
 \end{tabular}
-\caption{Datasets used during benchmarking, sorted in increasing order of taxa count $N$. Number of partitions $P$, total alignment length $L$, and number of site patterns $L_\text{eff}$ in the alignment are also specified.}
+\caption{Datasets used during benchmarking, sorted in increasing order of taxa count $N$. Number of partitions $P$, total alignment length $L$, and number of unique site patterns $L_\text{unq}$ in the alignment are also specified.
+}
 \label{table:datasets}
 \end{table}
 
@@ -1269,25 +1275,27 @@ All methodologies use identical models and operator configurations, except where
 \clearpage
 \subsection*{Round 1: A simple operator-weight learning algorithm can improve performance}
 
-We compared the cons, nocons, and adapt operator configurations for the \textit{real} and \textit{quant} parameterisations (\textbf{Table \ref{table:operatorSchemes}}). 
-The nocons configuration contained the standard BEAST2 operator mix, while cons contained the operator mix used by Zhang and Drummond 2020 \cite{zhang2020improving}. 
-The adapt mix combines the above operators, as well as the simple-but-bold \texttt{SampleFromPrior} operator, and learns the weights of each operator using  \texttt{AdaptiveOperatorSampler}.
-We also tested the adapt (\textit{cat}) configuration to determine whether \textit{cat} can be further improved by learning the underlying weights behind \texttt{RandomWalk}, \texttt{Swap}, and \texttt{SampleFromPrior}.
+We compared the nocons, cons, and and adapt operator configurations (\textbf{Table \ref{table:operatorSchemes}}).
+nocons contained all of the standard BEAST2 operator configurations for \textit{real}, \textit{cat}, and \textit{quant}.
+cons additionally contained (cons)tant distance operators and employed the same operator weighting scheme used previously \cite{zhang2020improving} (\textit{real} and \textit{quant} only). 
+Finally, the adapt configuration combined all of the above applicable operators, as well as the simple-but-bold \texttt{SampleFromPrior} operator, and learned the weights of each operator using  \texttt{AdaptiveOperatorSampler}.
 
 
-These results show that nocons performs better than cons on small datasets while cons performs better on large datasets (\textbf{Fig. \ref{fig:round1Results}} and \textbf{\nameref{sect:SR_appendix}}). 
-This is an expected result and is true for both the \textit{real} and the \textit{quant} parameterisations.
-The adapt configuration dramatically improved mixing for \textit{real}, by finding the right balance between these two extremes.
-However the \texttt{AdaptiveOperatorSampler} operator did not benefit for either \textit{cat} or \textit{quant}, suggesting that the default operator weighting scheme was sufficient in either case.
+
+This experiment revealed that nocons performed better than cons on datasets with small $L$ while cons performed better on larger datasets (\textbf{Fig. \ref{fig:round1Results}} and \textbf{\nameref{sect:SR_appendix}}). 
+This result is unsurprising (\textbf{Fig. \ref{fig:rateparams}}).
+Furthermore, the adapt setup dramatically improved mixing for \textit{real} by finding the right balance between cons and nocons.
+This yielded an average ESS/hr of XXX times that of cons and YYY times that of nocons, with respect to leaf branch rates.   
+However adapt did not improve \textit{cat} or \textit{quant}, suggesting that the default operator weighting scheme was sufficient in either case.
 Overall, the \texttt{AdaptiveOperatorSampler} operator will be included in all subsequent rounds in the tournament. 
 
 
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round1_real.pdf}
-\caption{\textbf{Round 1: benchmarking the \texttt{AdaptiveOperatorSampler} operator.} Top left, top right, bottom left: each plot compares the ESS/hr ($\pm 2$ standard errors) across two operator configurations with respect to relevant terms -- $L$: likelihood, $p$: prior density, $r$: clock rate ESS averaged across all leaves, $\sigma$: clock standard deviation, $h$: tree height, and $\kappa$: HKY model transition-transversion ratio.
+\caption{\textbf{Round 1: benchmarking the \texttt{AdaptiveOperatorSampler} operator.} Top left, top right, bottom left: each plot compares the ESS/hr ($\pm 2$ standard errors) across two operator configurations with respect to relevant terms -- $L$: log likelihood, $p$: log prior density, $r$: substitution rate ESS averaged across all leaves, $\sigma$: clock standard deviation, $h$: tree height, and $\kappa$: HKY model transition-transversion ratio.
 Bottom right: the effect of sequence length $L$ on operator weights learned by \texttt{AdaptiveOperatorSampler}. Both sets of results are fit by a logistic regression curve.
- The benchmark datasets are displayed in \textbf{Table \ref{table:datasets}}. The \emph{cat} and \emph{quant} evaluations are presented in \nameref{sect:SR_appendix}.  }
+ The benchmark datasets are displayed in \textbf{Table \ref{table:datasets}}. The \emph{cat} and \emph{quant} settings are evaluated in \nameref{sect:SR_appendix}.  }
 \label{fig:round1Results}
 \end{figure}
 
@@ -1302,16 +1310,15 @@ Bottom right: the effect of sequence length $L$ on operator weights learned by \
 \subsection*{Round 2: The \textit{real} parameterisation yields the fastest mixing }
 
 We compared the three rate parameterisations described in \textbf{\nameref{sect:rateparams}}. 
-adapt (\textit{real}) and adapt (\textit{quant}) both employ constant distance tree operators \cite{zhang2020improving} and both use the \texttt{AdaptiveOperatorSampler} operator to learn clock model operator weights.
-Clock model operators weights are also learned in the adapt (\textit{cat}) configuration.
+adapt (\textit{real}) and adapt (\textit{quant}) both employed constant distance tree operators \cite{zhang2020improving} and both used the \texttt{AdaptiveOperatorSampler} operator to learn clock model operator weights.
+Clock model operators weights were also learned in the adapt (\textit{cat}) configuration.
 
 
 
 
-
-This experiment revealed that the \textit{real} parameterisation greatly outperforms both \textit{cat} and \textit{quant} on most datasets (\textbf{Fig. \ref{fig:round2Results}}).
+This experiment showed that the \textit{real} parameterisation greatly outperformed both \textit{cat} and \textit{quant} on most datasets (\textbf{Fig. \ref{fig:round2Results}}).
 This disparity is strongest for large datasets.
-In the most extreme case, $r$ and $\sigma$ both mixed around $70 \times$ faster on the 15.5 kb seed plant dataset \cite{Ran_2018} for \textit{real} than they did for \textit{cat}.
+In the most extreme case, leaf substitution rates $r$ and clock standard deviation $\sigma$ both mixed around $70 \times$ faster on the 15.5 kb seed plant dataset \cite{Ran_2018} for \textit{real} than they did for \textit{cat}.
 The advantages in using constant distance operators would likely be even stronger for larger $L$.
 Overall, we have determined that \textit{real}, and its associated operators, makes the best parameterisation covered here and will proceed to the next rounds of the benchmarking.
 
@@ -1319,7 +1326,7 @@ Overall, we have determined that \textit{real}, and its associated operators, ma
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round2.pdf}
-\caption{\textbf{Round 2: benchmarking substitution rate parameterisations.} Top left, top right, bottom left: the adapt (\textit{real}), adapt (\textit{cat}), and adapt (\textit{quant}) configurations were compared. See \textbf{Fig. \ref{fig:round1Results}} caption for figure notation. Bottom right: comparison of the mean tip rate ESS/hr as a function of sequence length. }
+\caption{\textbf{Round 2: benchmarking substitution rate parameterisations.} Top left, top right, bottom left: the adapt (\textit{real}), adapt (\textit{cat}), and adapt (\textit{quant}) configurations were compared. See \textbf{Fig. \ref{fig:round1Results}} caption for figure notation. Bottom right: comparison of the mean tip substitution rate ESS/hr as a function of sequence length. }
 \label{fig:round2Results}
 \end{figure}
 
@@ -1357,6 +1364,10 @@ The \textbf{\nameref{sect:NER}} (NER) operators are evaluated. This protocol sel
 
 \section*{Discussion} \label{sect:discussion}
 
+
+% Points to cover
+
+% - Dont change branch lengths and topology at the same time.  This result is unfortunate however not unexpected, and is consistent with Lakner et al. 2008 \cite{lakner2008efficiency}, who observed that tree operators perform best when they change either topology, or branch lengths, but not both.
 
 
 
