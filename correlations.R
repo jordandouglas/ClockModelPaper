@@ -99,8 +99,8 @@ for (L in c(100, 500)){
 
 
 	# Draw an arrow
-	arrow.col = "#FF4500" #"black" #"#FF4500"
-	font.col = arrow.col
+	arrow.col = "white" # "#FF4500" "black"
+	font.col = "black" # arrow.col
 	#points(0.3, 0.3, pch = 16, col = arrow.col)
 
 	r0 = 0.5
@@ -113,7 +113,7 @@ for (L in c(100, 500)){
 	# Randomwalk
 	Arrows(r0, t0, r0 + dr, t0, lcol = arrow.col,  arr.type="curved")
 	#text(r0 + dr + 0.05, t0, "$x^\\prime$", adj = c(0, 0.3), col = font.col)
-	text(r0 + dr/2, t0 + 0.02, "\\texttt{RW}", adj = c(0.5, 0), cex = 1.2)
+	text(r0 + dr/2, t0 + 0.02, "\\texttt{RW}", adj = c(0.5, 0), cex = 1.2, col = font.col)
 
 
 
@@ -124,7 +124,7 @@ for (L in c(100, 500)){
 	#r1 = r0*t0/t1
 	Arrows(r0, t0, r1, t1, lcol = arrow.col,  arr.type="curved")
 	#text(r1, t1 + 0.05, "$x^\\prime$", adj = c(0.5, 0), col = font.col)
-	text((r0 + r1)/2 - 0.01, (t0 + t1)/2, "\\texttt{CD}", adj = c(1, 0.5), cex = 1.2)
+	text((r0 + r1)/2 - 0.01, (t0 + t1)/2, "\\texttt{CD}", adj = c(1, 0.5), cex = 1.2, col = font.col)
 
 	points(r0, t0, pch = 21, col = "black", bg=arrow.col, cex = 2, lwd = 2)
 	#text(r0, t0, "$x$", adj = c(0, 0), col = font.col)
@@ -132,10 +132,6 @@ for (L in c(100, 500)){
 
 
 }
-
-
-
-
 
 
 
