@@ -523,15 +523,15 @@ Further details on the \textit{quant} piecewise approximation and constant dista
 \subsection*{Clock model operators}
 \label{sect:clockModelOperators}
 
-The weight of an operator determines the probability of the operator being selected at each step during MCMC.
-In BEAST2, operators can have a tunable parameter $s$ which determines the step size of the operator \cite{bouckaert2019beast}. 
-Although $s$ is learned throughout the MCMC chain, the operator weights themselves are typically held constant.
-Pre-existing BEAST2 clock model operators (i.e. those which generate proposals for either $\vec{\mathcal{R}}^{\,}$ or $\sigma$) are summarised in \textbf{Table \ref{table:kernels}}, and further operators are introduced throughout the paper.
+The weight of an operator determines the probability of the operator being selected and is typically fixed throughout MCMC.
+In BEAST2, operators can have its own tunable parameter $s$ which determines the step size of the operator, and this term is learned over the course of the MCMC \cite{bouckaert2019beast}. 
+Here, we define clock model operators as those which generate proposals for either $\vec{\mathcal{R}}^{\,}$ or $\sigma$.
+Pre-existing BEAST2 clock model operators are summarised in \textbf{Table \ref{table:kernels}}, and further operators are introduced throughout the paper.
 
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{|l p{4.2cm} l l|} 
+\begin{tabular}{l p{4.2cm} l l} 
  \hline
  Operator & Description & Parameters & Parameterisations  \\
   \hline
@@ -685,8 +685,7 @@ These are summarised in \textbf{Table \ref{table:adaptiveSampling}}.
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{|l l l|} 
- \hline
+\begin{tabular}{l l l} 
  Meta-operator & POI & Operators \\
 \hline
  \multirow{4}{*}{\texttt{AdaptiveOperatorSampler($\sigma$)}} & \multirow{4}{*}{$\sigma$} & \texttt{CisScale($\sigma, \vec{\mathcal{R}}^{\,}$)} \\ 
@@ -703,7 +702,6 @@ These are summarised in \textbf{Table \ref{table:adaptiveSampling}}.
  \hline
    \multirow{2}{*}{\texttt{AdaptiveOperatorSampler(root)}} & \multirow{2}{*}{$\vec{\mathcal{R}}^{\,}, t$} & \texttt{SimpleDistance($\vec{\mathcal{R}}^{\,}, \mathcal{T}$)}  \\ 
 &&  \texttt{SmallPulley($\vec{\mathcal{R}}^{\,}, t$)}  \\
- \hline
 \end{tabular}
 \caption{Summary of \texttt{AdaptiveOperatorSampler} operators and their parameters of interest (POI).
 Different operators are applicable to different substitution rate parameterisations (\textbf{Table \ref{table:kernels}}). 
@@ -767,10 +765,10 @@ The clock model operators which these proposal kernels apply to are described in
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{|l| p{3cm} l l|} 
- \hline
+\begin{tabular}{l p{3cm} l l} 
+
  & Operator(s) & Proposal & Parameter $x$   \\
-  \hline
+   \hline
  1 & \texttt{RandomWalk}  & $x^\prime \leftarrow x + s\Sigma$ & $\vec{\mathcal{R}}^{\,}, \sigma$  \\
   \hline
  2 & \texttt{Scale} & $x^\prime \leftarrow x \times e^{s\Sigma}$ & $\vec{\mathcal{R}}^{\,}, \sigma$   \\
@@ -782,7 +780,6 @@ The clock model operators which these proposal kernels apply to are described in
  5 & \texttt{SmallPulley} & $x^\prime \leftarrow x + s\Sigma$ & $\vec{\mathcal{R}}^{\,}$  \\
  \hline
 6 & \texttt{CisScale}  & $x^\prime \leftarrow x \times e^{s\Sigma}$ & $\sigma$   \\
- \hline
 \end{tabular}
 \caption{Proposal kernels $q(x^\prime|x)$ of clock model operators.
  In each operator, $\Sigma$ is drawn from either a $\text{Bactrian}(m)$ or $\text{Uniform}$ distribution. 
@@ -981,7 +978,9 @@ If there is high uncertainty in the positioning of $B$ with respect to $A$ and $
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{Figures/acceptanceRates.pdf}
-\caption{\textbf{Screening of NER and NERw variants by acceptance rate.} Top left: comparison of NER variants with the null operator $\text{NER}\{\}$ (i.e. \texttt{NarrowExchange}). Each of the 48 operators are represented by a single point, uniquely encoded by the point stylings. The number of times each operator is proposed and accepted is compared with that of $\text{NER}\{\}$, and one-sided z-tests are performed to assess the statistical significance between the two acceptance rates ($p = 0.001$).  This process is repeated for each of $300$ simulated datasets. The axes of each plot are the proportion of these $300$ simulations for which there is evidence that the operator is significantly better than $\text{NER}\{\}$ (x-axis) or worse than $\text{NER}\{\}$ (y-axis). Top right: comparison of NER and NERw acceptance rates. Each point is one NER/NERw variant from a single simulation. Bottom: relationship between the acceptance rates $\alpha$ of $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ and $\text{NER}\{ \}$ with the clock model standard deviation $\sigma$ and the number of sites $L$.  Each point is a single simulation. }
+\caption{\textbf{Screening of NER and NERw variants by acceptance rate.} Top left: comparison of NER variants with the null operator $\text{NER}\{\}$ / \texttt{NarrowExchange}. 
+Each operator is represented by a single point, uniquely encoded by the point stylings. 
+The number of times each operator is proposed and accepted is compared with that of $\text{NER}\{\}$, and one-sided z-tests are performed to assess the statistical significance between the two acceptance rates ($p = 0.001$).  This process is repeated across $300$ simulated datasets. The axes of each plot are the proportion of these $300$ simulations for which there is evidence that the operator is significantly better than $\text{NER}\{\}$ (x-axis) or worse than $\text{NER}\{\}$ (y-axis). Top right: comparison of NER and NERw acceptance rates. Each point is one NER/NERw variant from a single simulation. Bottom: relationship between the acceptance rates $\alpha$ of $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ and $\text{NER}\{ \}$ with the clock model standard deviation $\sigma$ and the number of sites $L$.  Each point is a single simulation. }
 \label{fig:acceptanceRateScreening}
 \end{figure}
 
@@ -1013,13 +1012,11 @@ Due to the apparent sensitivity of NER operators to the data, we introduce the a
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{|l l l|} 
- \hline
+\begin{tabular}{l l l} 
  Meta-operator & POI & Operators \\
 \hline
  \multirow{2}{*}{\texttt{AdaptiveOperatorSampler(NER)}} & \multirow{2}{*}{$\mathcal{T}$} & NER$\{  \}$ \\ 
  && NER$\{ \mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE} \}$ \\
- \hline
 \end{tabular}
 \caption{The adaptive NER operator. 
 The Robinson-Foulds distance between trees before and after every proposal accept is used to train the operator weights. In the special case of NER proposals, the \texttt{RF} distance is always equal to 1. }
@@ -1108,8 +1105,7 @@ These are summarised in \textbf{Table \ref{table:newOperators}}.
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{|l p{4cm} l|} 
- \hline
+\begin{tabular}{l p{4cm} l} 
  Operator & Description & Parameters  \\
   \hline
  \texttt{AdaptiveOperatorSampler} & Samples sub-operators proportionally to their weights, which are learned (see \nameref{sect:adaptiveSampling}). & $\vec{\mathcal{R}}^{\,}, \sigma, \mathcal{T}$ \\
@@ -1119,7 +1115,6 @@ These are summarised in \textbf{Table \ref{table:newOperators}}.
  \texttt{NarrowExchangeRate} & Moves a branch and recomputes branch rates so that genetic distances are constant (see \nameref{sect:NER}). & $\vec{\mathcal{R}}^{\,}, \mathcal{T}$\\
   \hline
  \texttt{LeafAVMVN}  & Proposals new rates for all leaves in one move (see \nameref{AVMVN_sect}) \cite{baele2017adaptive}. & $\vec{\mathcal{R}}^{\,}$ \\
-  \hline
 \end{tabular}
 \caption{Summary of clock model operators introduced throughout this article. Pre-existing clock model operators are summarised in \textbf{Table \ref{table:kernels}}}
 \label{table:newOperators}
@@ -1132,8 +1127,7 @@ In \textbf{Table \ref{table:operatorSchemes}}, we define all operator configurat
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{|l l l l l l|} 
- \hline
+\begin{tabular}{l l l l l l} 
 Configuration & Operator & Weight & \textit{real} & \textit{cat} & \textit{quant}  \\
   \hline
  \multirow{6}{*}{nocons} & \texttt{RandomWalk($\mathcal{R}$)} & $10$ & \checkmark &&  \\
@@ -1164,15 +1158,15 @@ Configuration & Operator & Weight & \textit{real} & \textit{cat} & \textit{quant
  	\multirow{1}{*}{NER\{\}} & \texttt{NarrowExchange} & $15$ & \checkmark & \checkmark  & \checkmark  \\
  	\hline
  	\multirow{1}{*}{NER} & \texttt{AdaptiveOperatorSampler(NER)} & $15$ & \checkmark &  & \checkmark  \\
- 	
-  \hline
-
 \end{tabular}
 \caption{Operator configurations and the substitution rate parameterisations which each operator are applicable to. Within each configuration (and substitution rate parameterisation), the weight behind $\mathcal{R}$ sums to 30, the weight of $\sigma$ is equal to 10, and the weight of NER is equal to 15.
-There is no cons (\textit{cat}) configuration because the parameterisation is not compatible the constant distance operators.
-Operators which apply to either internal nodes or the root (but not both) are weighted according to leaf count $N$. The adapt operators are further broken down in \textbf{Table \ref{table:adaptiveSampling}}.} 
+%There is no cons (\textit{cat}) configuration because the parameterisation is not compatible the constant distance operators.
+Operators which apply to either internal nodes or the root (but not both) are weighted according to leaf count $N$. The adapt operators are further broken down in \textbf{Table \ref{table:adaptiveSampling}}.
+All other operators (i.e. those which apply to which apply to other terms in the state such as the nucleotide substitution model) are held constant within each dataset.
+} 
+
 %The total weight of all operators across all parameters was 116 in each MCMC setup.
-T%herefore a weight of 10 corresponds to sampling probability of 0.086, for example.
+%%herefore a weight of 10 corresponds to sampling probability of 0.086, for example.
 \label{table:operatorSchemes}
 \end{table}
 
@@ -1238,8 +1232,7 @@ All methodologies use identical models and operator configurations, except where
 % https://github.com/roblanf/BenchmarkAlignments
 \begin{table}[h!]
 \centering
-\begin{tabular}{|l| l l l l l|} 
- \hline
+\begin{tabular}{l l l l l l} 
   & $N$ & $P$ & $L$ (kb) & $L_\text{unq}$ (kb) & \textbf{Description} \\
   \hline
  
@@ -1264,11 +1257,8 @@ All methodologies use identical models and operator configurations, except where
 
 
 
-
-
- \hline
 \end{tabular}
-\caption{Datasets used during benchmarking, sorted in increasing order of taxa count $N$. Number of partitions $P$, total alignment length $L$, and number of unique site patterns $L_\text{unq}$ in the alignment are also specified.
+\caption{Benchmark datasets, sorted in increasing order of taxa count $N$. Number of partitions $P$, total alignment length $L$, and number of unique site patterns $L_\text{unq}$ in the alignment are also specified.
 }
 \label{table:datasets}
 \end{table}
@@ -1277,10 +1267,10 @@ All methodologies use identical models and operator configurations, except where
 \clearpage
 \subsection*{Round 1: A simple operator-weight learning algorithm can improve performance}
 
-We compared the nocons, cons, and and adapt operator configurations (\textbf{Table \ref{table:operatorSchemes}}).
-nocons contained all of the standard BEAST2 operator configurations for \textit{real}, \textit{cat}, and \textit{quant}.
+We compared the nocons, cons, and adapt operator configurations (\textbf{Table \ref{table:operatorSchemes}}).
+nocons contained all of the standard BEAST2 operator configurations and weightings for \textit{real}, \textit{cat}, and \textit{quant}.
 cons additionally contained (cons)tant distance operators and employed the same operator weighting scheme used previously \cite{zhang2020improving} (\textit{real} and \textit{quant} only). 
-Finally, the adapt configuration combined all of the above applicable operators, as well as the simple-but-bold \texttt{SampleFromPrior} operator, and learned the weights of each operator using  \texttt{AdaptiveOperatorSampler}.
+Finally, the adapt configuration combined all of the above applicable operators, as well as the simple-but-bold \texttt{SampleFromPrior} operator, and learned the weights of each operator using the  \texttt{AdaptiveOperatorSampler}.
 
 
 
@@ -1297,7 +1287,7 @@ Overall, the \texttt{AdaptiveOperatorSampler} operator will be included in all s
 \includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round1_real.pdf}
 \caption{\textbf{Round 1: benchmarking the \texttt{AdaptiveOperatorSampler} operator.} Top left, top right, bottom left: each plot compares the ESS/hr ($\pm 2$ standard errors) across two operator configurations with respect to relevant terms -- $L$: log likelihood, $p$: log prior density, $r$: substitution rate ESS averaged across all leaves, $\sigma$: clock standard deviation, $h$: tree height, and $\kappa$: HKY model transition-transversion ratio.
 Bottom right: the effect of sequence length $L$ on operator weights learned by \texttt{AdaptiveOperatorSampler}. Both sets of results are fit by a logistic regression curve.
- The benchmark datasets are displayed in \textbf{Table \ref{table:datasets}}. The \emph{cat} and \emph{quant} settings are evaluated in \nameref{sect:SR_appendix}.  }
+ The benchmark datasets are displayed in \textbf{Table \ref{table:datasets}}. The \emph{cat} and \emph{quant} settings are evaluated in \textbf{\nameref{sect:SR_appendix}}.  }
 \label{fig:round1Results}
 \end{figure}
 
@@ -1319,7 +1309,7 @@ Clock model operators weights were also learned in the adapt (\textit{cat}) conf
 
 
 This experiment showed that the \textit{real} parameterisation greatly outperformed both \textit{cat} and \textit{quant} on most datasets (\textbf{Fig. \ref{fig:round2Results}}).
-This disparity is strongest for large datasets.
+This disparity is strongest for long alignments.
 In the most extreme case, leaf substitution rates $r$ and clock standard deviation $\sigma$ both mixed around $70 \times$ faster on the 15.5 kb seed plant dataset \cite{Ran_2018} for \textit{real} than they did for \textit{cat}.
 The advantages in using constant distance operators would likely be even stronger for larger $L$.
 Overall, we have determined that \textit{real}, and its associated operators, makes the best parameterisation covered here and will proceed to the next rounds of the benchmarking.
@@ -1342,18 +1332,20 @@ Overall, we have determined that \textit{real}, and its associated operators, ma
 \subsection*{Round 3: Bactrian proposal kernels are 10\% more efficient than uniform kernels}
 
 
-
-\subsection*{Round 4: Finding the best NER operator variant}
-
-The \textbf{\nameref{sect:NER}} (NER) operators are evaluated. This protocol selects the best among 48 NER (no random walk) and 48 NERw ($\text{Bactrian}(0.95)$ random walk) operators, and has two phases. First, the best of the 96 is selected by comparing operator acceptance rates on simulated data. Second, the selected operator is benchmarked with respect to convergence time and sampling rate on real data (\textbf{Table \ref{table:datasets}}). The analyses in this section invoke the \textit{quant} parameterisation and $\text{Bactrian}(0.95)$ proposal kernels on clock model parameters.
+We benchmarked the adapt (\textit{real}) configuration with a) standard uniform proposal kernels, and b) Bactrian(0.95) kernels.
+These kernels applied to all clock rate related operators (\textbf{Table \ref{table:bactriankernels}}).
 
 
 
+\subsection*{Round 4: Evaluating adaptive NER}
+
+
+Our initial screening of the \texttt{NarrowExchangeRate} (NER) operators revealed that the $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ operator outperformed the standard $\text{NER} \{\}$ / \texttt{NarrowExchange} operator about 25\% of the time on simulated data, however it was also very sensitive to the dataset. 
+Therefore we wrapped up the two operators ($\text{NER} \{\}$ and $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$) within an \texttt{AdaptiveOperatorSampler} operator so that the appropriate weights can be learned, using the Robinson-Foulds metric.
+In this round we benchmarked the adapt + Bactrian(0.95) (\textit{real})  setting with a) $\text{NER} \{\}$ only, and b) adaptive $\text{NER}$ (\textbf{Table \ref{table:operatorSchemes}}).
 
 
 
-
-\subsubsection*{Benchmarking convergence time}
 
 
 
