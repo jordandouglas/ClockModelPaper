@@ -7,7 +7,7 @@ library(rjson)
 
 
 
-PER_CHAIN = FALSE
+PER_CHAIN = TRUE
 
 #settings = c("cat", "real", "quant", "bactrian95", "bactrian98")
 settings = c("cat",  "real_06", "quant_06", "real", "quant", "bactrian95", "bactrian98", "NER", "AVMN")
@@ -87,7 +87,7 @@ parameters.latex.small["RateStatLogger.mean"] = "$\\bar{r}$"
 getDateTime = function(str){
 
 	year = as.numeric(strsplit(str, " +")[[1]][6])
-	month =strsplit(str, " +")[[1]][2]
+	month = strsplit(str, " +")[[1]][2]
 	day = strsplit(str, " +")[[1]][3]
 	if (nchar(day) == 1) day = paste0("0", day)
 	time = strsplit(str, " +")[[1]][4]
@@ -99,7 +99,8 @@ getDateTime = function(str){
 
 
 ESS.df = data.frame(batch = numeric(0), param = character(0), dataset = character(0), partition = numeric(0), setting = character(0), nstates = numeric(0),
- ESS = numeric(0), hr = numeric(0), ESS.hr = numeric(0), Leff = numeric(0), L = numeric(0), N = numeric(0), mean.speed = numeric(0), CD_weight = numeric(0), RW_weight = numeric(0), SPP_weight = numeric(0))
+		ESS = numeric(0), hr = numeric(0), ESS.hr = numeric(0), Leff = numeric(0), L = numeric(0), N = numeric(0), mean.speed = numeric(0), 
+		CD_weight = numeric(0), RW_weight = numeric(0), SPP_weight = numeric(0), NER_weight = numeric(0), NER_acc = numeric(0), NE_acc = numeric(0))
 
 
 
@@ -173,9 +174,9 @@ for (f in batchfolders){
 					fileName = paste0("error_", s, ".err")
 					if (!file.exists(fileName)) {
 						#print("Error cannot file file")
-						next
+						#next
 					}
-					output_in = readLines(fileName)
+					#output_in = readLines(fileName)
 
 
 					# Is it done?
@@ -195,23 +196,31 @@ for (f in batchfolders){
 						next
 					}
 					finish.date = getDateTime(finish.date)
-					runtime.hr = as.numeric(finish.date - start.date)
+					
+					
+					int = interval(start.date, finish.date)
+					runtime.hr = time_length(int, "hour")
+					
+					
+					if (FALSE) {
+						error = FALSE
+						errorLine = grep("[*][*]", output_in)
+						if (length(errorLine) > 0) {
+							error = TRUE
+						}
 
-					error = FALSE
-					errorLine = grep("[*][*]", output_in)
-					if (length(errorLine) > 0) {
-						error = TRUE
+
+						# Time per million
+					
+						time.lines = output_in[grep("Msamples", output_in)]
+						speeds = gsub(".+ ", "", time.lines)
+						speeds = gsub("/Msamples", "", speeds)
+						times = sapply(strsplit(speeds, "[a-z]"), function(ele) ifelse(length(ele) == 3, as.numeric(ele[1]) + 	as.numeric(ele[2])/60 + as.numeric(ele[3])/3600,
+																				ifelse(length(ele) == 2, 					 	as.numeric(ele[1])/60 + as.numeric(ele[2])/3600,
+																																						as.numeric(ele[1])/3600  )))
+						mean.speed = mean(times)
 					}
-
-
-					# Time per million
-					time.lines = output_in[grep("Msamples", output_in)]
-					speeds = gsub(".+ ", "", time.lines)
-					speeds = gsub("/Msamples", "", speeds)
-					times = sapply(strsplit(speeds, "[a-z]"), function(ele) ifelse(length(ele) == 3, as.numeric(ele[1]) + 	as.numeric(ele[2])/60 + as.numeric(ele[3])/3600,
-																			ifelse(length(ele) == 2, 					 	as.numeric(ele[1])/60 + as.numeric(ele[2])/3600,
-																																					as.numeric(ele[1])/3600  )))
-					mean.speed = mean(times)
+					mean.speed = 1
 
 
 					if (dataset == "simulated"){
@@ -239,28 +248,56 @@ for (f in batchfolders){
 					CD_weight = -1
 					RW_weight = -1
 					SPP_weight = -1
-					if (length(grep("adaptive", s)) == 1){
-						state.file = readLines(paste0("benchmark_", s, ".xml.0state"))
+					NER_weight = -1
+					NER_acc = -1
+					NE_acc = -1
+					
+					state.in = paste0("benchmark_", s, ".xml.0state")
+					if (file.exists(state.in)) {
+						state.file = readLines(state.in)
+						if (length(grep("adaptive", s)) == 1){
 
-						if (length(grep("<!--", state.file)) == 1){
+							if (length(grep("<!--", state.file)) == 1){
 
-							operator.lines = paste(state.file[(grep("<!--", state.file)+1):(grep("-->", state.file)-1)], collapse = " ")
-							json = fromJSON(operator.lines)
-							ops = json$operators
+								operator.lines = paste(state.file[(grep("<!--", state.file)+1):(grep("-->", state.file)-1)], collapse = " ")
+								json = fromJSON(operator.lines)
+								ops = json$operators
 
-							match = which(sapply(ops, function(ele) ele$id == "AdaptableOperatorSampler.rates.internal"))
-							if (length(match) == 1){
-								weights = as.numeric(strsplit(gsub("([[]|[]])", "", ops[[match]]$weights), ",")[[1]])
-								CD_weight = weights[1]
-								RW_weight = weights[2]
-								SPP_weight = weights[3]
+								match = which(sapply(ops, function(ele) ele$id == "AdaptableOperatorSampler.rates.internal"))
+								if (length(match) == 1){
+									weights = as.numeric(strsplit(gsub("([[]|[]])", "", ops[[match]]$weights), ",")[[1]])
+									CD_weight = weights[1]
+									RW_weight = weights[2]
+									SPP_weight = weights[3]
+								}
+
 							}
 
 						}
+						
+						if (length(grep("NER", s)) == 1){
+							
 
+							if (length(grep("<!--", state.file)) == 1){
+
+								operator.lines = paste(state.file[(grep("<!--", state.file)+1):(grep("-->", state.file)-1)], collapse = " ")
+								json = fromJSON(operator.lines)
+								ops = json$operators
+
+								match = which(sapply(ops, function(ele) ele$id == "AdaptableOperatorSampler.NER"))
+								if (length(match) == 1){
+									weights = as.numeric(strsplit(gsub("([[]|[]])", "", ops[[match]]$weights), ",")[[1]])
+									NER_weight = weights[2]
+									NE_acc = ops[[match]]$operators[[1]]$accept / (ops[[match]]$operators[[1]]$reject + ops[[match]]$operators[[1]]$accept)
+									NER_acc = ops[[match]]$operators[[2]]$accept / (ops[[match]]$operators[[2]]$reject + ops[[match]]$operators[[2]]$accept)
+									print(paste("NER weight", NER_weight, NE_acc, NER_acc))
+								}
+
+							}
+
+						}
 					}
-
-
+					
 					for (p in parameters){
 
 						pindex = grep(paste0(p, ".+ESS"), colnames(this.ESS.df))
@@ -272,7 +309,7 @@ for (f in batchfolders){
 
 						
 						ESS.df2 = data.frame(batch = batch, param = p, setting = s, dataset = dataset, ESS = ESS, hr = runtime.hr, partition = P, Leff = Leff, L = L, N = N ,
-								mean.speed = mean.speed, CD_weight = CD_weight, RW_weight = RW_weight, SPP_weight = SPP_weight)
+								mean.speed = mean.speed, CD_weight = CD_weight, RW_weight = RW_weight, SPP_weight = SPP_weight, NER_weight = NER_weight, NER_acc = NER_acc, NE_acc = NE_acc)
 						ESS.df = rbind(ESS.df, ESS.df2)
 						
 					}
@@ -312,7 +349,9 @@ for (f in batchfolders){
 #settings = c("cat", "real", "quant")
 
 ESS.df = ESS.df[!is.na(ESS.df$ESS),]
-ESS.df$ESS.hr = ESS.df$ESS / ifelse(PER_CHAIN, 1, ESS.df$hr)
+div.by = 1
+if (!PER_CHAIN) div.by = ESS.df$hr
+ESS.df$ESS.hr = ESS.df$ESS / div.by
 
 datasets = unique(ESS.df[order(ESS.df$N), "dataset"]) # sort(as.character(unique(ESS.df$dataset)))
 
@@ -325,7 +364,7 @@ plotRealCat = function(){
 
 
 	maxL = 20#max(ESS.df$L) + 2
-	plot(0, 0, type = "n", xlim = c(0,maxL), ylim = c(0, 1000), xlab = "Sequence length $L$ (kb)", ylab = "ESS/hr of tip rates $r$", axes = F, xaxs = "i", yaxs = "i", 
+	plot(0, 0, type = "n", xlim = c(0,maxL), ylim = c(0, 6000), xlab = "Sequence length $L$ (kb)", ylab = "ESS/hr of tip rates $r$", axes = F, xaxs = "i", yaxs = "i", 
 					main ="Disparity as a function of sequence length", cex.main = 1.5, cex.lab = 1.5)
 
 
@@ -440,6 +479,118 @@ plotWeights = function() {
 }
 
 
+
+
+plotNERWeights = function(rates = FALSE) {
+
+
+
+	if (!rates){
+		main = "\\texttt{AdaptiveOperatorSampler(NER)} weights"
+		ylab = "Learned operator weight"
+		ylim = c(0,1)
+	}else{
+		main = "Relative acceptance rate"
+		ylab = "$\\alpha($NER$ \\{ \\mathcal{D}_{A,E}, \\mathcal{D}_{B,E}, \\mathcal{D}_{C,E} \\}) / \\alpha($NER$\\{ \\})$"
+		ylim = c(0, 2)
+	}
+
+
+
+	maxL = 20#max(ESS.df$L) + 2
+	plot(0, 0, type = "n", xlim = c(0,maxL), ylim = ylim, xlab = "Sequence length $L$ (kb)", ylab = ylab, axes = F, xaxs = "i", yaxs = "i", 
+					main = main, cex.main = 1.5, cex.lab = 1.5)
+
+	Ls = numeric(0)
+	NERs = numeric(0)
+	NEs = numeric(0)
+
+	for (dataNum in 1:length(datasets)){
+
+
+		s = "NER"
+		d = datasets[dataNum]
+
+		sub.df = ESS.df[ESS.df$dataset == d & ESS.df$setting == s & ESS.df$NER_weight >= 0 & ESS.df$param == "height",]
+
+		if (nrow(sub.df) == 0){
+			print(paste("No operators for", d, s))
+			next
+		}
+
+
+		pches = c(16, 17) 
+
+		if (!rates){
+			NER =  mean(sub.df$NER_weight)
+			NE = 1 - NER
+			points(mean(sub.df$L), NER, col = data.cols[dataNum], pch = pches[1])
+			points(mean(sub.df$L), NE, col = data.cols[dataNum], pch = pches[2])
+			NEs = c(NEs, NE)
+			
+		
+		
+		}else{
+			NER = mean(sub.df$NER_acc) / mean(sub.df$NE_acc)
+			points(mean(sub.df$L), NER, col = data.cols[dataNum], pch = 18)
+		}
+
+		NERs = c(NERs, NER)
+		Ls = c(Ls, mean(sub.df$L))
+		
+		
+
+		
+
+
+
+
+		if (!rates) legend("bottomleft", c("NER$ \\{ \\mathcal{D}_{A,E}, \\mathcal{D}_{B,E}, \\mathcal{D}_{C,E} \\}$", "NER$\\{ \\}$"), pch = pches, bty = "n", cex = 1.15)
+
+
+	}
+
+	if (!rates) {
+		abline(0.5, 0, lty = "2525")
+	}else{
+		abline(1, 0, lty = "2525")
+	}
+
+
+	if (!rates) {
+		# Fit logit curve to NER
+		logit = glm(formula = NERs ~ Ls, family = "binomial")
+		x = seq(from = 0, to = maxL, length = 500)
+		j = exp(logit$coefficients[1] + logit$coefficients[2]*x)
+		y = j / (1+j)
+		lines(x, y)
+
+
+	
+		# Fit logit curve to NE
+		logit = glm(formula = NEs ~ Ls, family = "binomial")
+		x = seq(from = 0, to = maxL, length = 500)
+		j = exp(logit$coefficients[1] + logit$coefficients[2]*x)
+		y = j / (1+j)
+		lines(x, y)
+	}else{
+		linear = lm(formula = NERs ~ Ls)
+		x = seq(from = 0, to = maxL, length = 500)
+		y = linear$coefficients[1] + linear$coefficients[2]*x
+		lines(x, y)
+		
+	}
+
+
+	axis(1)
+	axis(2, las = 2)
+
+
+
+}
+
+
+
 plot.cell = function(s1, s2, show.legend = FALSE){
 
 
@@ -453,7 +604,7 @@ plot.cell = function(s1, s2, show.legend = FALSE){
 		#q.ESS = q.ESS[na.rm,]
 
 		xymin = 1
-		xymax = 10000
+		xymax = 20000
 
 		xyrange = c(xymin, xymax) #c(xymin, max(c(r.ESS$ESS.hr, q.ESS$ESS.hr), na.rm = TRUE))
 		#xyrange = c(0, max(c(r.ESS$MCD.states, q.ESS$MCD.states)))
@@ -527,8 +678,8 @@ plot.cell = function(s1, s2, show.legend = FALSE){
 				m2 = mean(yvals)
 				se1 = 2*sqrt(var(xvals) / length(xvals))
 				se2 = 2*sqrt(var(yvals) / length(yvals))
-				lines(c(m1 - se1, m1 + se1), c(m2, m2), col = data.cols[dataNum])
-				lines(c(m1, m1), c(m2 - se2, m2 + se2), col = data.cols[dataNum])
+				lines(c(m1 - se1, m1 + se1), c(m2, m2), col = paste0(data.cols[dataNum], "99"))
+				lines(c(m1, m1), c(m2 - se2, m2 + se2), col = paste0(data.cols[dataNum], "99"))
 				
 				#text(m1, m2, paste0(parameters.latex.small[[p]], "$_", which(datasets == d), "$"), col = data.cols[dataNum])
 				text(m1, m2, parameters.latex.small[[p]], col = data.cols[dataNum], cex = 1.4)
@@ -703,6 +854,26 @@ plot.grid("ESS_round1_catquant", c("quant_06_cached", "quant_cached", "quant_cac
 plot.grid("ESS_round2", c("cat_adaptive", "real_adaptive", "quant_cached_adaptive"), TRUE, plotRealCat)
 
 plot.grid("ESS_round3", c("real_adaptive", "bactrian95"), TRUE)
+
+
+
+
+filename = "ESS_round4"
+options(tikzMetricPackages = c("\\usepackage[utf8]{inputenc}",
+	"\\usepackage[T1]{fontenc}", "\\usetikzlibrary{calc}",
+	"\\usepackage{amssymb}"))
+## I need the amssymb package because I use \mathcal and \mathbb
+	tikz(paste0(filename, ".tex"), width = 8, height = 8 / 1.618, standAlone = TRUE,
+		packages = c("\\usepackage{tikz}",
+			 "\\usepackage[active,tightpage,psfixbb]{preview}",
+			 "\\PreviewEnvironment{pgfpicture}",
+			 "\\setlength\\PreviewBorder{0pt}",
+			 "\\usepackage{amssymb}"))
+par(mfrow = c(1,2))
+plotNERWeights(FALSE)
+plotNERWeights(TRUE)
+dev.off()
+tools::texi2pdf(paste0(filename, ".tex"))
 
 
 

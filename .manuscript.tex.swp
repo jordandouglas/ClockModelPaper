@@ -1345,6 +1345,19 @@ Therefore we wrapped up the two operators ($\text{NER} \{\}$ and $\text{NER}\{\m
 In this round we benchmarked the adapt + Bactrian(0.95) (\textit{real})  setting with a) $\text{NER} \{\}$ only, and b) adaptive $\text{NER}$ (\textbf{Table \ref{table:operatorSchemes}}).
 
 
+Our experiments confirmed that $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ is indeed superior on larger datasets (where $L > 1$kb; \textbf{Fig. \ref{fig:round4Results}}).
+Whereas, on smaller datasets the standard \texttt{NarrowExchange} operator had a higher acceptance rate.
+Using an adaptive operator (\texttt{AdaptiveOperatorSampler}) removes the burden from the user in selecting which operator is the best pick.
+The average acceptance rate of 
+
+
+\begin{figure}[!h]
+\includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round4.pdf}
+\caption{\textbf{Round 4: benchmarking the NER operators.} 
+The learned weights (left) behind the two NER operators ($\text{NER} \{\}$ and $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$), and the relative difference between their acceptance rates $\alpha$ (right), are presented as functions of sequence length.
+Logistic and linear regression models are shown, respectively. }
+\label{fig:round4Results}
+\end{figure}
 
 
 
