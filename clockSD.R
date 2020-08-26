@@ -26,6 +26,8 @@ par(cex.main = 1.4)
 
 
 
+Scols = c("#c91f37", "#36e0c8")
+
 sigma = 0.4
 mu = -0.5*sigma^2
 sigma2 = 0.8
@@ -37,10 +39,10 @@ q2 = plnorm(r, mu2, sigma2)
 
 
 # $\\vec{\\mathcal{R}}$
-plot(r, q1, type = "l", xlab = "Rate", ylab = "Quantile", main = "$\\sigma$ scale operators", xaxs = "i", yaxs = "i", axes = F, lwd=2, xlim = c(0, 2), ylim = c(0,1))
-points(r, q2, type = "l", col = "red", lwd=2)
+plot(r, q1, type = "l", xlab = "Rate", ylab = "Quantile", main = "$\\sigma$ scale operators", xaxs = "i", yaxs = "i", axes = F, lwd=3, xlim = c(0, 2), ylim = c(0,1), col = Scols[1])
+points(r, q2, type = "l", col = Scols[2], lwd=3)
 
-legend("topleft", c(paste0("$\\sigma=", sigma, "$"), paste0("$\\sigma^\\prime=", sigma2, "$")), col = c("black", "red"), lwd = 2, bty = "n")
+legend("topleft", c(paste0("$\\sigma=", sigma, "$"), paste0("$\\sigma^\\prime=", sigma2, "$")), col = Scols, lwd = 3, bty = "n")
 
 
 # Scale
@@ -49,9 +51,9 @@ s_q0 = plnorm(s_r0, mu, sigma)
 s_q1 = plnorm(s_r0, mu2, sigma2)
 lines(c(s_r0, s_r0), c(0, max(s_q0, s_q1)), lwd = 2, col = "#696969", lty = "1515")
 
-lines(c(0, s_r0), c(s_q0, s_q0), lty = "1515", col = "black", lwd = 2)
-lines(c(0, s_r0), c(s_q1, s_q1), lty = "1515", col = "red", lwd = 2)
-points(c(s_r0, s_r0), c(s_q0, s_q1), pch = 16, col = c("black", "red"))
+lines(c(0, s_r0), c(s_q0, s_q0), lty = "1515", col = Scols[1], lwd = 2)
+lines(c(0, s_r0), c(s_q1, s_q1), lty = "1515", col = Scols[2], lwd = 2)
+points(c(s_r0, s_r0), c(s_q0, s_q1), pch = 16, col = Scols)
 
 text(s_r0/2, max(s_q0, s_q1) + 0.01, "New quantiles", adj = c(0.5, 0))
 

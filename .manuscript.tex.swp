@@ -834,8 +834,8 @@ This may in turn permit proposing a new node height $t_D$ and therefore changing
 
 
 Here, we present the \texttt{NarrowExchangeRate} (NER) operator. 
-Let $r_A$, $r_B$, $r_C$, and $r_D$ be the clock rates of nodes $A$, $B$, $C$, and $D$, respectively. 
-In addition to the modest topological change applied by \texttt{NarrowExchange}, NER also proposes new clock rates ${r_A}^\prime$, ${r_B}^\prime$, ${r_C}^\prime$, and ${r_D}^\prime$. While NER does not alter $t_D$ (i.e. ${t_D}^\prime \leftarrow t_D$), we also consider NERw - a special case of the NER operator which embarks $t_D$ on a random walk:
+Let $r_A$, $r_B$, $r_C$, and $r_D$ be the substitution rates of nodes $A$, $B$, $C$, and $D$, respectively. 
+In addition to the modest topological change applied by \texttt{NarrowExchange}, NER also proposes new branch rates ${r_A}^\prime$, ${r_B}^\prime$, ${r_C}^\prime$, and ${r_D}^\prime$. While NER does not alter $t_D$ (i.e. ${t_D}^\prime \leftarrow t_D$), we also consider NERw - a special case of the NER operator which embarks $t_D$ on a random walk:
 
 \begin{align}
 	{t_D}^\prime \leftarrow t_D + s\Sigma
@@ -1032,7 +1032,7 @@ The Robinson-Foulds distance between trees before and after every proposal accep
 \subsection*{A guided adaptive leaf rate operator}
 \label{AVMVN_sect}
 
-A \textit{guided} operator incorporates knowledge about neighbouring states, while an \textit{adaptive} operator undergoes a training process to improve its efficiency over time \cite{roberts2007coupling}. In previous work, parsimony scores and conditional clade probabilities of neighbouring trees have been employed by guided tree operators \cite{hohna2012guided,zhang2020using,meyer2019adaptive} and the latter has also been explored as the basis of  adaptive tree operators \cite{hohna2012guided,meyer2019adaptive}. The (adaptive) mirror kernel \cite{thawornwattana2018designing} learns a target distribution which acts as a `mirror image' of the current point $x$.  The adaptable variance multivariate normal (AVMVN) kernel \cite{baele2017adaptive,suchard2018bayesian} learns correlations between parameters during MCMC. Baele et al. 2017  observed a large increase ($\approx 5-10 \times$) in sampling efficiency from using the AVMVN kernel on clock rates and substitution model parameters across partitions \cite{baele2017adaptive}.  
+A \textit{guided} operator incorporates knowledge about neighbouring states, while an \textit{adaptive} operator undergoes a training process to improve its efficiency over time \cite{roberts2007coupling}. In previous work, parsimony scores and conditional clade probabilities of neighbouring trees have been employed by guided tree operators \cite{hohna2012guided,zhang2020using,meyer2019adaptive} and the latter has also been explored as the basis of  adaptive tree operators \cite{hohna2012guided,meyer2019adaptive}. The (adaptive) mirror kernel \cite{thawornwattana2018designing} learns a target distribution which acts as a `mirror image' of the current point $x$.  The adaptable variance multivariate normal (AVMVN) kernel \cite{baele2017adaptive,suchard2018bayesian} learns correlations between parameters during MCMC. Baele et al. 2017  observed a large increase ($\approx 5-10 \times$) in sampling efficiency from using the AVMVN kernel on branch rates and substitution model parameters across partitions \cite{baele2017adaptive}.  
 
 
 In this article we consider application of the AVMVN kernel to the branch rates of leaf nodes. 
@@ -1277,8 +1277,9 @@ Finally, the adapt configuration combined all of the above applicable operators,
 This experiment revealed that nocons performed better than cons on datasets with small $L$ while cons performed better on larger datasets (\textbf{Fig. \ref{fig:round1Results}} and \textbf{\nameref{sect:SR_appendix}}). 
 This result is unsurprising (\textbf{Fig. \ref{fig:rateparams}}).
 Furthermore, the adapt setup dramatically improved mixing for \textit{real} by finding the right balance between cons and nocons.
-This yielded an average ESS/hr of XXX times that of cons and YYY times that of nocons, with respect to leaf branch rates.   
-However adapt did not improve \textit{cat} or \textit{quant}, suggesting that the default operator weighting scheme was sufficient in either case.
+This yielded an ESS/hr (averaged across all 9 datasets) 80\% faster than cons and 120\% faster than nocons, with respect to leaf branch rates, and 250\% and 1800\% faster for $\sigma$.
+Similar results were observed with \textit{quant}.
+However adapt neither helped nor harmed \textit{cat}, suggesting that the default operator weighting scheme was sufficient.
 Overall, the \texttt{AdaptiveOperatorSampler} operator will be included in all subsequent rounds in the tournament. 
 
 
@@ -1299,7 +1300,7 @@ Bottom right: the effect of sequence length $L$ on operator weights learned by \
 
 
 \clearpage
-\subsection*{Round 2: The \textit{real} parameterisation yields the fastest mixing }
+\subsection*{Round 2: The \textit{real} parameterisation yielded the fastest mixing }
 
 We compared the three rate parameterisations described in \textbf{\nameref{sect:rateparams}}. 
 adapt (\textit{real}) and adapt (\textit{quant}) both employed constant distance tree operators \cite{zhang2020improving} and both used the \texttt{AdaptiveOperatorSampler} operator to learn clock model operator weights.
@@ -1333,7 +1334,7 @@ Overall, we have determined that \textit{real}, and its associated operators, ma
 
 
 We benchmarked the adapt (\textit{real}) configuration with a) standard uniform proposal kernels, and b) Bactrian(0.95) kernels.
-These kernels applied to all clock rate related operators (\textbf{Table \ref{table:bactriankernels}}).
+These kernels applied to all clock model related operators (\textbf{Table \ref{table:bactriankernels}}).
 
 
 

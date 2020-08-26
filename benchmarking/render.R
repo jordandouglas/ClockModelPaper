@@ -7,7 +7,7 @@ library(rjson)
 
 
 
-PER_CHAIN = TRUE
+PER_CHAIN = FALSE
 
 #settings = c("cat", "real", "quant", "bactrian95", "bactrian98")
 settings = c("cat",  "real_06", "quant_06", "real", "quant", "bactrian95", "bactrian98", "NER", "AVMN")
@@ -100,7 +100,8 @@ getDateTime = function(str){
 
 ESS.df = data.frame(batch = numeric(0), param = character(0), dataset = character(0), partition = numeric(0), setting = character(0), nstates = numeric(0),
 		ESS = numeric(0), hr = numeric(0), ESS.hr = numeric(0), Leff = numeric(0), L = numeric(0), N = numeric(0), mean.speed = numeric(0), 
-		CD_weight = numeric(0), RW_weight = numeric(0), SPP_weight = numeric(0), NER_weight = numeric(0), NER_acc = numeric(0), NE_acc = numeric(0))
+		CD_weight = numeric(0), RW_weight = numeric(0), SPP_weight = numeric(0), NER_weight = numeric(0), NER_acc = numeric(0), NE_acc = numeric(0),
+		correctBactrian = logical(0))
 
 
 
@@ -251,17 +252,21 @@ for (f in batchfolders){
 					NER_weight = -1
 					NER_acc = -1
 					NE_acc = -1
+					correctBactrian = TRUE
 					
 					state.in = paste0("benchmark_", s, ".xml.0state")
 					if (file.exists(state.in)) {
 						state.file = readLines(state.in)
-						if (length(grep("adaptive", s)) == 1){
-
-							if (length(grep("<!--", state.file)) == 1){
-
-								operator.lines = paste(state.file[(grep("<!--", state.file)+1):(grep("-->", state.file)-1)], collapse = " ")
-								json = fromJSON(operator.lines)
-								ops = json$operators
+						
+						
+						if (length(grep("<!--", state.file)) == 1){
+						
+							operator.lines = paste(state.file[(grep("<!--", state.file)+1):(grep("-->", state.file)-1)], collapse = " ")
+							json = fromJSON(operator.lines)
+							ops = json$operators
+							
+							if (length(grep("adaptive", s)) == 1){
+							
 
 								match = which(sapply(ops, function(ele) ele$id == "AdaptableOperatorSampler.rates.internal"))
 								if (length(match) == 1){
@@ -272,17 +277,21 @@ for (f in batchfolders){
 								}
 
 							}
-
-						}
-						
-						if (length(grep("NER", s)) == 1){
 							
-
-							if (length(grep("<!--", state.file)) == 1){
-
-								operator.lines = paste(state.file[(grep("<!--", state.file)+1):(grep("-->", state.file)-1)], collapse = " ")
-								json = fromJSON(operator.lines)
-								ops = json$operators
+							if (s == "bactrian95"){
+							
+								match = which(sapply(ops, function(ele) ele$id == "AdaptableOperatorSampler.ucldStdev"))
+								correctBactrian = length(match) > 0
+								if (!correctBactrian){
+									cat(paste("\t\t\t--- Bad bactrian!", f, d, s, "\n"))
+								}else{
+									cat(paste("\t\t\t--- Good bactrian!", f, d, s, "\n"))
+								}
+								
+							}
+							
+							if (length(grep("NER", s)) == 1){
+								
 
 								match = which(sapply(ops, function(ele) ele$id == "AdaptableOperatorSampler.NER"))
 								if (length(match) == 1){
@@ -293,9 +302,11 @@ for (f in batchfolders){
 									print(paste("NER weight", NER_weight, NE_acc, NER_acc))
 								}
 
+							
 							}
-
+							
 						}
+					
 					}
 					
 					for (p in parameters){
@@ -309,7 +320,7 @@ for (f in batchfolders){
 
 						
 						ESS.df2 = data.frame(batch = batch, param = p, setting = s, dataset = dataset, ESS = ESS, hr = runtime.hr, partition = P, Leff = Leff, L = L, N = N ,
-								mean.speed = mean.speed, CD_weight = CD_weight, RW_weight = RW_weight, SPP_weight = SPP_weight, NER_weight = NER_weight, NER_acc = NER_acc, NE_acc = NE_acc)
+								mean.speed = mean.speed, CD_weight = CD_weight, RW_weight = RW_weight, SPP_weight = SPP_weight, NER_weight = NER_weight, NER_acc = NER_acc, NE_acc = NE_acc, correctBactrian = correctBactrian)
 						ESS.df = rbind(ESS.df, ESS.df2)
 						
 					}
@@ -364,42 +375,47 @@ plotRealCat = function(){
 
 
 	maxL = 20#max(ESS.df$L) + 2
-	plot(0, 0, type = "n", xlim = c(0,maxL), ylim = c(0, 6000), xlab = "Sequence length $L$ (kb)", ylab = "ESS/hr of tip rates $r$", axes = F, xaxs = "i", yaxs = "i", 
-					main ="Disparity as a function of sequence length", cex.main = 1.5, cex.lab = 1.5)
+	plot(0, 0, type = "n", xlim = c(0,maxL), ylim = c(1, 6000), xlab = "Sequence length $L$ (kb)", ylab = "ESS/hr of tip rates $r$", axes = F, xaxs = "i", yaxs = "i", 
+					main ="Disparity as a function of sequence length", cex.main = 1.5, cex.lab = 1.5, log = "y")
 
 
 
-	cols = c("#008cba", "#696969", "#a3a3a3")
+	cols = c("#008cba", "#696969")
 
+	pches = c(16, 17) 
 	for (dataNum in 1:length(datasets)){
 		s1 = "real_adaptive"
 		s2 = "cat_adaptive"
-		s3 = "quant_cached_adaptive"
+		#s3 = "quant_cached_adaptive"
 		d = datasets[dataNum]
+		col = data.cols[dataNum]
 
 		s1.df = ESS.df[ESS.df$dataset == d & ESS.df$setting == s1 & ESS.df$CD_weight >= 0 & ESS.df$param == "TipRates",]
 		s2.df = ESS.df[ESS.df$dataset == d & ESS.df$setting == s2 & ESS.df$CD_weight >= 0 & ESS.df$param == "TipRates",]
-		s3.df = ESS.df[ESS.df$dataset == d & ESS.df$setting == s3 & ESS.df$CD_weight >= 0 & ESS.df$param == "TipRates",]
+		#s3.df = ESS.df[ESS.df$dataset == d & ESS.df$setting == s3 & ESS.df$CD_weight >= 0 & ESS.df$param == "TipRates",]
 
 		L = mean(s1.df$L)
 
 		y1 = mean(s1.df$ESS.hr)
 		y2 = mean(s2.df$ESS.hr)
-		y3 = mean(s3.df$ESS.hr)
+		#y3 = mean(s3.df$ESS.hr)
+		
+		
+		#print(paste(L, y1, y2, d, col)) 
+		
 		lines(c(L, L), c(y1, y2), lty = "2525")
 		text(L, (y1 + y2)/2, paste0("$", signif(y1 / y2, 2), "\\times $"), adj = 0)
 
-		points(L, y1, col = cols[1], pch = 16)
-		points(L, y2, col = cols[2], pch = 16)
-		points(L, y3, col = cols[3], pch = 16)
+		points(L, y1, col = col, pch = pches[1])
+		points(L, y2, col = col, pch = pches[2])
 
-
-
-
-		legend("bottomleft", c("adapt (\\textit{real})", "adapt (\\textit{cat})", "adapt (\\textit{quant})"), col = cols, pch = 16, bty = "n", cex = 1.15)
 
 
 	}
+	
+	#abline(1, 0, lty = "2525")
+	
+	legend("topright", c("adapt (\\textit{real})", "adapt (\\textit{cat})"), col = "black", pch = pches, bty = "n", cex = 1.15)
 
 
 	axis(1)
@@ -504,7 +520,7 @@ plotNERWeights = function(rates = FALSE) {
 	Ls = numeric(0)
 	NERs = numeric(0)
 	NEs = numeric(0)
-
+	pches = c(16, 17) 
 	for (dataNum in 1:length(datasets)){
 
 
@@ -519,7 +535,7 @@ plotNERWeights = function(rates = FALSE) {
 		}
 
 
-		pches = c(16, 17) 
+		
 
 		if (!rates){
 			NER =  mean(sub.df$NER_weight)
@@ -537,18 +553,11 @@ plotNERWeights = function(rates = FALSE) {
 
 		NERs = c(NERs, NER)
 		Ls = c(Ls, mean(sub.df$L))
-		
-		
-
-		
-
-
-
-
-		if (!rates) legend("bottomleft", c("NER$ \\{ \\mathcal{D}_{A,E}, \\mathcal{D}_{B,E}, \\mathcal{D}_{C,E} \\}$", "NER$\\{ \\}$"), pch = pches, bty = "n", cex = 1.15)
-
 
 	}
+	
+	if (!rates) legend("bottomleft", c("NER$ \\{ \\mathcal{D}_{A,E}, \\mathcal{D}_{B,E}, \\mathcal{D}_{C,E} \\}$", "NER$\\{ \\}$"), pch = pches, bty = "n", cex = 1.15)
+
 
 	if (!rates) {
 		abline(0.5, 0, lty = "2525")
@@ -557,30 +566,32 @@ plotNERWeights = function(rates = FALSE) {
 	}
 
 
-	if (!rates) {
-		# Fit logit curve to NER
-		logit = glm(formula = NERs ~ Ls, family = "binomial")
-		x = seq(from = 0, to = maxL, length = 500)
-		j = exp(logit$coefficients[1] + logit$coefficients[2]*x)
-		y = j / (1+j)
-		lines(x, y)
+	if (length(NERs) > 0){
+
+		if (!rates) {
+			# Fit logit curve to NER
+			logit = glm(formula = NERs ~ Ls, family = "binomial")
+			x = seq(from = 0, to = maxL, length = 500)
+			j = exp(logit$coefficients[1] + logit$coefficients[2]*x)
+			y = j / (1+j)
+			lines(x, y)
 
 
-	
-		# Fit logit curve to NE
-		logit = glm(formula = NEs ~ Ls, family = "binomial")
-		x = seq(from = 0, to = maxL, length = 500)
-		j = exp(logit$coefficients[1] + logit$coefficients[2]*x)
-		y = j / (1+j)
-		lines(x, y)
-	}else{
-		linear = lm(formula = NERs ~ Ls)
-		x = seq(from = 0, to = maxL, length = 500)
-		y = linear$coefficients[1] + linear$coefficients[2]*x
-		lines(x, y)
 		
+			# Fit logit curve to NE
+			logit = glm(formula = NEs ~ Ls, family = "binomial")
+			x = seq(from = 0, to = maxL, length = 500)
+			j = exp(logit$coefficients[1] + logit$coefficients[2]*x)
+			y = j / (1+j)
+			lines(x, y)
+		}else{
+			linear = lm(formula = NERs ~ Ls)
+			x = seq(from = 0, to = maxL, length = 500)
+			y = linear$coefficients[1] + linear$coefficients[2]*x
+			lines(x, y)
+			
+		}
 	}
-
 
 	axis(1)
 	axis(2, las = 2)
@@ -622,10 +633,10 @@ plot.cell = function(s1, s2, show.legend = FALSE){
 		times = c(4, 16, 64)
 		bg.cols = c("#A9A9A9", "#BEBEBE", "#E8E8E8")
 
-		lwd_base = 2.5
+		lwd_base = 3
 		for (i in length(times):1){
 			t = times[i]
-			polygon(c(0.0001, xymax*10, xymax*10, 0.0001), c(0.0001*t, xymax*10*t, xymax*10/t, 0.0001/t), lwd =lwd_base * 0.6^(i-1), border="black") # col = bg.cols[i],
+			polygon(c(0.0001, xymax*10, xymax*10, 0.0001), c(0.0001*t, xymax*10*t, xymax*10/t, 0.0001/t), lwd =lwd_base * 0.6^(i), border="black") # col = bg.cols[i],
 		}
 
 
@@ -844,6 +855,18 @@ plot.grid = function(filename, settings, grid.like = TRUE, fn = sum) {
 
 
 
+for (p in parameters){
+	X = mean(ESS.df[ESS.df$setting == "real_adaptive" & ESS.df$param == p & ESS.df$dataset == "simulated","ESS.hr"])
+	print(paste("The mean ESS/hr for real", p, " is", X))
+}
+
+
+for (p in parameters){
+	X = mean(ESS.df[ESS.df$setting == "bactrian95" & ESS.df$param == p & ESS.df$dataset == "simulated","ESS.hr"])
+	print(paste("The mean ESS/hr for bactrian", p, " is", X))
+}
+
+
 plot.grid("ESS_round1_real", c("real_06", "real", "real_adaptive"), TRUE, plotWeights)
 
 plot.cat = function(){
@@ -890,6 +913,39 @@ bad.df = ESS.df[ESS.df$ESS < 200,]
 write.table(bad.df, "ESSbad.tsv", sep = "\t", quote = F, row.names = F)
 
 print(paste("There are", nrow(bad.df), "parameters with ESS<200"))
+
+
+cons.rel = numeric(0)
+nocons.rel = numeric(0)
+cons.rel.s = numeric(0)
+nocons.rel.s = numeric(0)
+for (dataNum in 1:length(datasets)) {
+		d = datasets[dataNum]
+		A = mean(ESS.df[ESS.df$setting == "real_adaptive" & ESS.df$param == "TipRates" & ESS.df$dataset == d,"ESS.hr"])
+		C = mean(ESS.df[ESS.df$setting == "real" & ESS.df$param == "TipRates" & ESS.df$dataset == d,"ESS.hr"])
+		N = mean(ESS.df[ESS.df$setting == "real_06" & ESS.df$param == "TipRates" & ESS.df$dataset == d,"ESS.hr"])
+		cons.rel = c(cons.rel, A/C - 1)
+		nocons.rel = c(nocons.rel, A/N - 1)
+		
+		
+		A = mean(ESS.df[ESS.df$setting == "real_adaptive" & ESS.df$param == "ucldStdev" & ESS.df$dataset == d,"ESS.hr"])
+		C = mean(ESS.df[ESS.df$setting == "real" & ESS.df$param == "ucldStdev" & ESS.df$dataset == d,"ESS.hr"])
+		N = mean(ESS.df[ESS.df$setting == "real_06" & ESS.df$param == "ucldStdev" & ESS.df$dataset == d,"ESS.hr"])
+		cons.rel.s = c(cons.rel.s, A/C - 1)
+		nocons.rel.s = c(nocons.rel.s, A/N - 1)
+			
+}
+
+
+cat(paste("\nadapt (real) is", signif(mean(cons.rel), 2)*100, "% faster than cons (real) wrt r \n"))
+cat(paste("adapt (real) is", signif(mean(nocons.rel), 2)*100, "% faster than nocons (real) wrt r \n"))
+
+cat(paste("\nadapt (real) is", signif(mean(cons.rel.s), 2)*100, "% faster than cons (real) wrt sigma \n"))
+cat(paste("adapt (real) is", signif(mean(nocons.rel.s), 2)*100, "% faster than nocons (real) wrt sigma \n"))
+
+print(cons.rel.s)
+print(nocons.rel.s)
+
 
 
 

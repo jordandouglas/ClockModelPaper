@@ -209,8 +209,8 @@
 
 			<parameter idref="ucldStdev.c:benchmark" />
 
-			<operator id="ucldStdevScaler.c:benchmark" spec="beast.evolution.operators.BactrianScaleOperator" parameter="@ucldStdev.c:benchmark" scaleFactor="0.5" weight="1">
-				<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			<operator id="fastUcldStdevScaler.c:calsim" spec="consoperators.UcldScalerOperator" distr="@LogNormalDistributionModel.rates" rates="@rates.c:benchmark" scaleFactor="0.5" stdev="@ucldStdev.c:benchmark" weight="1.0">
+				<kernel spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
 			</operator>
 			<operator id="UcldStdevRandomWalk.c:benchmark" spec="BactrianRandomWalkOperator" parameter="@ucldStdev.c:benchmark" weight="1" scaleFactor="0.1">
 				<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
@@ -225,7 +225,7 @@
 		</operator>
 		
 
-		<operator id="AdaptableOperatorSampler.rates.root" spec="AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="0.4">
+		<operator id="AdaptableOperatorSampler.rates.root" spec="AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="0.3">
 
 			<operator id="RootOperator1.c:dna" spec="consoperators.SimpleDistance" twindowSize="0.005" tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" rates="@rates.c:benchmark"  weight="1">
 				<kernel spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
@@ -240,7 +240,7 @@
 
 
 
-		<operator id="AdaptableOperatorSampler.rates.internal" spec="AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="29.6">
+		<operator id="AdaptableOperatorSampler.rates.internal" spec="AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="29.7">
 
 
 			<operator id="InternalnodesOperator.c:dna" spec="consoperators.InConstantDistanceOperator" twindowSize="0.005"  tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" rates="@rates.c:benchmark"  weight="1">
@@ -284,7 +284,6 @@
 			<log idref="treeLikelihood"/>
 
 			<log idref="ucldStdev.c:benchmark"/>
-			<log id="TipRates.t:benchmark" spec="inference.TipRateLogger" clock="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
 			<log id="RateStatLogger" spec="beast.evolution.branchratemodel.RateStatistic" branchratemodel="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
 			<log idref="birthRate.t:benchmark"/>
 		</logger>
