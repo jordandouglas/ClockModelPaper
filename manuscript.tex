@@ -1029,10 +1029,15 @@ The Robinson-Foulds distance between trees before and after every proposal accep
 
 
 \clearpage
-\subsection*{A guided adaptive leaf rate operator}
+\subsection*{An adaptive leaf rate operator}
 \label{AVMVN_sect}
 
-A \textit{guided} operator incorporates knowledge about neighbouring states, while an \textit{adaptive} operator undergoes a training process to improve its efficiency over time \cite{roberts2007coupling}. In previous work, parsimony scores and conditional clade probabilities of neighbouring trees have been employed by guided tree operators \cite{hohna2012guided,zhang2020using,meyer2019adaptive} and the latter has also been explored as the basis of  adaptive tree operators \cite{hohna2012guided,meyer2019adaptive}. The (adaptive) mirror kernel \cite{thawornwattana2018designing} learns a target distribution which acts as a `mirror image' of the current point $x$.  The adaptable variance multivariate normal (AVMVN) kernel \cite{baele2017adaptive,suchard2018bayesian} learns correlations between parameters during MCMC. Baele et al. 2017  observed a large increase ($\approx 5-10 \times$) in sampling efficiency from using the AVMVN kernel on branch rates and substitution model parameters across partitions \cite{baele2017adaptive}.  
+%, such as \texttt{AdaptiveOperatorSampler},
+Adaptive operators undergo a training process to improve their efficiency over time \cite{roberts2007coupling}. 
+For example, the conditional clade probabilities of neighbouring trees can serve as the basis of adaptive tree operators \cite{hohna2012guided,zhang2020using,meyer2019adaptive},
+and the mirror kernel learns a target distribution which acts as a `mirror image' of the current point $x$ \cite{thawornwattana2018designing}.  
+The \texttt{AdaptiveOperatorSampler} operator, introduced in this article, learns the weight of sub-operators.
+Finally, the adaptable variance multivariate normal (AVMVN) kernel  learns correlations between parameters during MCMC \cite{baele2017adaptive,suchard2018bayesian}. Baele et al. 2017  observed a large increase ($\approx 5-10 \times$) in sampling efficiency from using the AVMVN kernel on clock rates XXX(check)XXX and substitution model parameters across partitions \cite{baele2017adaptive}.  
 
 
 In this article we consider application of the AVMVN kernel to the branch rates of leaf nodes. 

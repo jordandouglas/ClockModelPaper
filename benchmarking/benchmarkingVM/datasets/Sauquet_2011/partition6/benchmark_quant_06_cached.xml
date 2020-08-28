@@ -285,7 +285,7 @@
 							    <branchRateModel id="RelaxedClock.c:benchmark" spec="beast.evolution.branchratemodel.UCRelaxedClockModel" rateQuantiles="@rates.c:benchmark" tree="@Tree.t:benchmark">
 								<parameter id="ucldMean.c:benchmark" estimate="false" name="clock.rate">1.0</parameter>
 								
-								<distr id="ApproxLogNormal" spec="beast.math.distributions.CachedDistribution">
+								<distr id="ApproxLogNormal" spec="beast.math.distributions.PiecewiseLinearDistribution" bins="100" cutOffEnd="false"> 
 									<LogNormal id="LogNormalDistributionModel.c:calsim" S="@ucldStdev.c:benchmark" meanInRealSpace="true" name="distr">
 										<parameter id="RealParameter.9" spec="parameter.RealParameter" estimate="false" lower="0.0" name="M" upper="1.0">1.0</parameter>
 									</LogNormal>

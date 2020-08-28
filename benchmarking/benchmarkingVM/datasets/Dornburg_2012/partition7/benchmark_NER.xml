@@ -74,41 +74,41 @@
 				</taxonset>
 			</tree>
 
-			
 
-			<!-- Site models parameters for ENC_1stpos --> 
+
+			<!-- Site models parameters for ENC_1stpos -->
 			<parameter id="kappa.t:ENC_1stpos" lower="0.0" name="stateNode">2.0</parameter>
-			<parameter id="freqParameter.t:ENC_1stpos" dimension="4" name="stateNode">0.25</parameter> 
+			<parameter id="freqParameter.t:ENC_1stpos" dimension="4" name="stateNode">0.25</parameter>
 			<parameter id="clockRate.t:ENC_1stpos" name="stateNode">1.0</parameter>
 
-			<!-- Site models parameters for GLYT_1stpos --> 
+			<!-- Site models parameters for GLYT_1stpos -->
 			<parameter id="kappa.t:GLYT_1stpos" lower="0.0" name="stateNode">2.0</parameter>
-			<parameter id="freqParameter.t:GLYT_1stpos" dimension="4" name="stateNode">0.25</parameter> 
+			<parameter id="freqParameter.t:GLYT_1stpos" dimension="4" name="stateNode">0.25</parameter>
 			<parameter id="clockRate.t:GLYT_1stpos" name="stateNode">1.0</parameter>
 
-			<!-- Site models parameters for MYH6_1stpos --> 
+			<!-- Site models parameters for MYH6_1stpos -->
 			<parameter id="kappa.t:MYH6_1stpos" lower="0.0" name="stateNode">2.0</parameter>
-			<parameter id="freqParameter.t:MYH6_1stpos" dimension="4" name="stateNode">0.25</parameter> 
+			<parameter id="freqParameter.t:MYH6_1stpos" dimension="4" name="stateNode">0.25</parameter>
 			<parameter id="clockRate.t:MYH6_1stpos" name="stateNode">1.0</parameter>
 
-			<!-- Site models parameters for PTR_1stpos --> 
+			<!-- Site models parameters for PTR_1stpos -->
 			<parameter id="kappa.t:PTR_1stpos" lower="0.0" name="stateNode">2.0</parameter>
-			<parameter id="freqParameter.t:PTR_1stpos" dimension="4" name="stateNode">0.25</parameter> 
+			<parameter id="freqParameter.t:PTR_1stpos" dimension="4" name="stateNode">0.25</parameter>
 			<parameter id="clockRate.t:PTR_1stpos" name="stateNode">1.0</parameter>
 
-			<!-- Site models parameters for RAG_1stpos --> 
+			<!-- Site models parameters for RAG_1stpos -->
 			<parameter id="kappa.t:RAG_1stpos" lower="0.0" name="stateNode">2.0</parameter>
-			<parameter id="freqParameter.t:RAG_1stpos" dimension="4" name="stateNode">0.25</parameter> 
+			<parameter id="freqParameter.t:RAG_1stpos" dimension="4" name="stateNode">0.25</parameter>
 			<parameter id="clockRate.t:RAG_1stpos" name="stateNode">1.0</parameter>
 
-			<!-- Site models parameters for SREB_1stpos --> 
+			<!-- Site models parameters for SREB_1stpos -->
 			<parameter id="kappa.t:SREB_1stpos" lower="0.0" name="stateNode">2.0</parameter>
-			<parameter id="freqParameter.t:SREB_1stpos" dimension="4" name="stateNode">0.25</parameter> 
+			<parameter id="freqParameter.t:SREB_1stpos" dimension="4" name="stateNode">0.25</parameter>
 			<parameter id="clockRate.t:SREB_1stpos" name="stateNode">1.0</parameter>
 
-			<!-- Site models parameters for COI_1stpos --> 
+			<!-- Site models parameters for COI_1stpos -->
 			<parameter id="kappa.t:COI_1stpos" lower="0.0" name="stateNode">2.0</parameter>
-			<parameter id="freqParameter.t:COI_1stpos" dimension="4" name="stateNode">0.25</parameter> 
+			<parameter id="freqParameter.t:COI_1stpos" dimension="4" name="stateNode">0.25</parameter>
 			<parameter id="clockRate.t:COI_1stpos" name="stateNode">1.0</parameter>
 
 
@@ -128,7 +128,7 @@
 			<distribution id="prior" spec="util.CompoundDistribution">
 
 				<distribution id="YuleModel.t:benchmark" spec="beast.evolution.speciation.YuleModel" birthDiffRate="@birthRate.t:benchmark" tree="@Tree.t:benchmark"/>
-                            
+
 				<prior id="YuleBirthRatePrior.t:benchmark" name="distribution" x="@birthRate.t:benchmark">
 					<LogNormal id="LogNormalDistributionModel.2" name="distr">
 						<parameter id="RealParameter.17" spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
@@ -137,21 +137,21 @@
 				</prior>
 
 
-				
 
-				<!-- Site model priors for ENC_1stpos --> 
+
+				<!-- Site model priors for ENC_1stpos -->
 							<prior name="distribution" x="@kappa.t:ENC_1stpos">
 							    <LogNormal name="distr">
 								<parameter spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
 								<parameter spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
 							    </LogNormal>
 							</prior>
-				
+
 							<prior name="distribution" x="@freqParameter.t:ENC_1stpos">
 							    <Dirichlet alpha="10 10 10 10" name="distr"/>
 							</prior>
-				
-				
+
+
 							<prior name="distribution" x="@clockRate.t:ENC_1stpos">
 							    <LogNormal name="distr" meanInRealSpace="true">
 									<parameter spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
@@ -159,19 +159,19 @@
 							    </LogNormal>
 							</prior>
 
-				<!-- Site model priors for GLYT_1stpos --> 
+				<!-- Site model priors for GLYT_1stpos -->
 							<prior name="distribution" x="@kappa.t:GLYT_1stpos">
 							    <LogNormal name="distr">
 								<parameter spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
 								<parameter spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
 							    </LogNormal>
 							</prior>
-				
+
 							<prior name="distribution" x="@freqParameter.t:GLYT_1stpos">
 							    <Dirichlet alpha="10 10 10 10" name="distr"/>
 							</prior>
-				
-				
+
+
 							<prior name="distribution" x="@clockRate.t:GLYT_1stpos">
 							    <LogNormal name="distr" meanInRealSpace="true">
 									<parameter spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
@@ -179,19 +179,19 @@
 							    </LogNormal>
 							</prior>
 
-				<!-- Site model priors for MYH6_1stpos --> 
+				<!-- Site model priors for MYH6_1stpos -->
 							<prior name="distribution" x="@kappa.t:MYH6_1stpos">
 							    <LogNormal name="distr">
 								<parameter spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
 								<parameter spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
 							    </LogNormal>
 							</prior>
-				
+
 							<prior name="distribution" x="@freqParameter.t:MYH6_1stpos">
 							    <Dirichlet alpha="10 10 10 10" name="distr"/>
 							</prior>
-				
-				
+
+
 							<prior name="distribution" x="@clockRate.t:MYH6_1stpos">
 							    <LogNormal name="distr" meanInRealSpace="true">
 									<parameter spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
@@ -199,19 +199,19 @@
 							    </LogNormal>
 							</prior>
 
-				<!-- Site model priors for PTR_1stpos --> 
+				<!-- Site model priors for PTR_1stpos -->
 							<prior name="distribution" x="@kappa.t:PTR_1stpos">
 							    <LogNormal name="distr">
 								<parameter spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
 								<parameter spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
 							    </LogNormal>
 							</prior>
-				
+
 							<prior name="distribution" x="@freqParameter.t:PTR_1stpos">
 							    <Dirichlet alpha="10 10 10 10" name="distr"/>
 							</prior>
-				
-				
+
+
 							<prior name="distribution" x="@clockRate.t:PTR_1stpos">
 							    <LogNormal name="distr" meanInRealSpace="true">
 									<parameter spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
@@ -219,19 +219,19 @@
 							    </LogNormal>
 							</prior>
 
-				<!-- Site model priors for RAG_1stpos --> 
+				<!-- Site model priors for RAG_1stpos -->
 							<prior name="distribution" x="@kappa.t:RAG_1stpos">
 							    <LogNormal name="distr">
 								<parameter spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
 								<parameter spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
 							    </LogNormal>
 							</prior>
-				
+
 							<prior name="distribution" x="@freqParameter.t:RAG_1stpos">
 							    <Dirichlet alpha="10 10 10 10" name="distr"/>
 							</prior>
-				
-				
+
+
 							<prior name="distribution" x="@clockRate.t:RAG_1stpos">
 							    <LogNormal name="distr" meanInRealSpace="true">
 									<parameter spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
@@ -239,19 +239,19 @@
 							    </LogNormal>
 							</prior>
 
-				<!-- Site model priors for SREB_1stpos --> 
+				<!-- Site model priors for SREB_1stpos -->
 							<prior name="distribution" x="@kappa.t:SREB_1stpos">
 							    <LogNormal name="distr">
 								<parameter spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
 								<parameter spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
 							    </LogNormal>
 							</prior>
-				
+
 							<prior name="distribution" x="@freqParameter.t:SREB_1stpos">
 							    <Dirichlet alpha="10 10 10 10" name="distr"/>
 							</prior>
-				
-				
+
+
 							<prior name="distribution" x="@clockRate.t:SREB_1stpos">
 							    <LogNormal name="distr" meanInRealSpace="true">
 									<parameter spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
@@ -259,19 +259,19 @@
 							    </LogNormal>
 							</prior>
 
-				<!-- Site model priors for COI_1stpos --> 
+				<!-- Site model priors for COI_1stpos -->
 							<prior name="distribution" x="@kappa.t:COI_1stpos">
 							    <LogNormal name="distr">
 								<parameter spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
 								<parameter spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
 							    </LogNormal>
 							</prior>
-				
+
 							<prior name="distribution" x="@freqParameter.t:COI_1stpos">
 							    <Dirichlet alpha="10 10 10 10" name="distr"/>
 							</prior>
-				
-				
+
+
 							<prior name="distribution" x="@clockRate.t:COI_1stpos">
 							    <LogNormal name="distr" meanInRealSpace="true">
 									<parameter spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
@@ -297,7 +297,7 @@
 
 			<distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
 
-				<!-- Site model for ENC_1stpos --> 
+				<!-- Site model for ENC_1stpos -->
 							<distribution id="treeLikelihood.ENC_1stpos" spec="TreeLikelihood" tree="@Tree.t:benchmark">
 							    <data spec="FilteredAlignment" data="@benchmark" filter="1-786"/>
 							    <siteModel spec="SiteModel" gammaCategoryCount="1" mutationRate="@clockRate.t:ENC_1stpos">
@@ -306,15 +306,15 @@
 							    </siteModel>
 							    <branchRateModel id="RelaxedClock.c:benchmark" spec="beast.evolution.branchratemodel.UCRelaxedClockModel" rates="@rates.c:benchmark" tree="@Tree.t:benchmark">
 								<parameter id="ucldMean.c:benchmark" estimate="false" name="clock.rate">1.0</parameter>
-								
+
 								<LogNormal id="LogNormalDistributionModel.c:calsim" S="@ucldStdev.c:benchmark" meanInRealSpace="true" name="distr">
 									<parameter id="RealParameter.9" spec="parameter.RealParameter" estimate="false" lower="0.0" name="M" upper="1.0">1.0</parameter>
 								</LogNormal>
-								
+
 							    </branchRateModel>
 							</distribution>
 
-<!-- Site model for GLYT_1stpos --> 
+<!-- Site model for GLYT_1stpos -->
 			<distribution id="treeLikelihood.GLYT_1stpos" spec="TreeLikelihood" branchRateModel="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark">
 			    <data spec="FilteredAlignment" data="@benchmark" filter="787-1588"/>
 			    <siteModel spec="SiteModel" gammaCategoryCount="1" mutationRate="@clockRate.t:GLYT_1stpos">
@@ -323,7 +323,7 @@
 			    </siteModel>
 			</distribution>
 
-<!-- Site model for MYH6_1stpos --> 
+<!-- Site model for MYH6_1stpos -->
 			<distribution id="treeLikelihood.MYH6_1stpos" spec="TreeLikelihood" branchRateModel="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark">
 			    <data spec="FilteredAlignment" data="@benchmark" filter="1589-2288"/>
 			    <siteModel spec="SiteModel" gammaCategoryCount="1" mutationRate="@clockRate.t:MYH6_1stpos">
@@ -332,7 +332,7 @@
 			    </siteModel>
 			</distribution>
 
-<!-- Site model for PTR_1stpos --> 
+<!-- Site model for PTR_1stpos -->
 			<distribution id="treeLikelihood.PTR_1stpos" spec="TreeLikelihood" branchRateModel="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark">
 			    <data spec="FilteredAlignment" data="@benchmark" filter="2289-2993"/>
 			    <siteModel spec="SiteModel" gammaCategoryCount="1" mutationRate="@clockRate.t:PTR_1stpos">
@@ -341,7 +341,7 @@
 			    </siteModel>
 			</distribution>
 
-<!-- Site model for RAG_1stpos --> 
+<!-- Site model for RAG_1stpos -->
 			<distribution id="treeLikelihood.RAG_1stpos" spec="TreeLikelihood" branchRateModel="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark">
 			    <data spec="FilteredAlignment" data="@benchmark" filter="2994-4400"/>
 			    <siteModel spec="SiteModel" gammaCategoryCount="1" mutationRate="@clockRate.t:RAG_1stpos">
@@ -350,7 +350,7 @@
 			    </siteModel>
 			</distribution>
 
-<!-- Site model for SREB_1stpos --> 
+<!-- Site model for SREB_1stpos -->
 			<distribution id="treeLikelihood.SREB_1stpos" spec="TreeLikelihood" branchRateModel="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark">
 			    <data spec="FilteredAlignment" data="@benchmark" filter="4401-5268"/>
 			    <siteModel spec="SiteModel" gammaCategoryCount="1" mutationRate="@clockRate.t:SREB_1stpos">
@@ -359,7 +359,7 @@
 			    </siteModel>
 			</distribution>
 
-<!-- Site model for COI_1stpos --> 
+<!-- Site model for COI_1stpos -->
 			<distribution id="treeLikelihood.COI_1stpos" spec="TreeLikelihood" branchRateModel="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark">
 			    <data spec="FilteredAlignment" data="@benchmark" filter="5269-5919"/>
 			    <siteModel spec="SiteModel" gammaCategoryCount="1" mutationRate="@clockRate.t:COI_1stpos">
@@ -372,7 +372,7 @@
 
 		</distribution>
 
-		
+
 
 		<!-- Site model operators for ENC_1stpos -->
 					<operator id="KappaScaler.s:ENC_1stpos" spec="ScaleOperator" parameter="@kappa.t:ENC_1stpos" scaleFactor="0.5" weight="0.2"/>
@@ -418,7 +418,7 @@
 
 		<operator id="ClockRateExchanger" spec="BactrianDeltaExchangeOperator" delta="0.01" weight="1.2">
 			<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="uniform"/>
-			
+
 				<parameter idref="clockRate.t:ENC_1stpos"/>
 				<parameter idref="clockRate.t:GLYT_1stpos"/>
 				<parameter idref="clockRate.t:MYH6_1stpos"/>
@@ -428,7 +428,7 @@
 				<parameter idref="clockRate.t:COI_1stpos"/>
 		</operator>
 
-	
+
 
 		<operator id="AdaptableOperatorSampler.ucldStdev" spec="AdaptableOperatorSampler" weight="10.0">
 
@@ -448,7 +448,7 @@
 			<operator id="SampleFromPriorOperator.c:ucldStdev" spec="SampleFromPriorOperator" parameter="@ucldStdev.c:benchmark" prior="@Gamma.2" weight="1"/>
 
 		</operator>
-		
+
 
 		<operator id="AdaptableOperatorSampler.rates.root" spec="AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="0.345">
 
@@ -475,7 +475,7 @@
 			<operator id="RatesRandomWalk.c:benchmark" spec="BactrianRandomWalkOperator" parameter="@rates.c:benchmark" weight="1" scaleFactor="0.1">
 				<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
 			</operator>
-			
+
 			<operator id="RatesScale.c:benchmark" spec="BactrianScaleOperator" scaleFactor="0.5" parameter="@rates.c:benchmark" weight="1">
 				<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
 			</operator>
@@ -499,7 +499,7 @@
 			<metric spec="beast.evolution.tree.RobinsonsFouldMetric" taxonset="@TaxonSet.benchmark"/>
 			<operator id="YuleModelNarrow.t:dummy" spec="Exchange" tree="@Tree.t:benchmark" weight="1"/>
 			<operator id="NEROperator_nowalk_dAE_dBE_dCE" spec="NERVariants.NEROperator_dAE_dBE_dCE" tree="@Tree.t:benchmark" rates="@rates.c:benchmark" weight="1"/>
-			
+
 		</operator>
 
 
@@ -511,7 +511,7 @@
 			<log idref="prior"/>
 			<log id="TreeHeight.t:benchmark" spec="beast.evolution.tree.TreeStatLogger" tree="@Tree.t:benchmark"/>
 
-			
+
 
 			<!-- Loggers for ENC_1stpos -->
 							<log idref="kappa.t:ENC_1stpos"/>

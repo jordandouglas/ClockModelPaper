@@ -7,7 +7,7 @@ library(rjson)
 
 
 
-PER_CHAIN = FALSE
+PER_CHAIN = TRUE
 
 #settings = c("cat", "real", "quant", "bactrian95", "bactrian98")
 settings = c("cat",  "real_06", "quant_06", "real", "quant", "bactrian95", "bactrian98", "NER", "AVMN")
@@ -99,9 +99,9 @@ getDateTime = function(str){
 
 
 ESS.df = data.frame(batch = numeric(0), param = character(0), dataset = character(0), partition = numeric(0), setting = character(0), nstates = numeric(0),
-		ESS = numeric(0), hr = numeric(0), ESS.hr = numeric(0), Leff = numeric(0), L = numeric(0), N = numeric(0), mean.speed = numeric(0), 
+		ESS = numeric(0), hr = numeric(0), ESS.hr = numeric(0), Leff = numeric(0), L = numeric(0), N = numeric(0), sigma = numeric(0),
 		CD_weight = numeric(0), RW_weight = numeric(0), SPP_weight = numeric(0), NER_weight = numeric(0), NER_acc = numeric(0), NE_acc = numeric(0),
-		correctBactrian = logical(0))
+		 nsamples = numeric(0))
 
 
 
@@ -110,7 +110,7 @@ ESS.df = data.frame(batch = numeric(0), param = character(0), dataset = characte
 speed.df = data.frame(batch = numeric(0), dataset = character(0), setting = character(0), state = numeric(0), speed = numeric(0))
 
 # For each batch
-batchfolders = list.dirs(recursive = F)
+batchfolders = "BatchN" #list.dirs(recursive = F)
 for (f in batchfolders){
 
 	print(f)
@@ -127,9 +127,6 @@ for (f in batchfolders){
 
 		print(d)
 
-
-		#if (d == "./Fong_2012" | d == "./McCormack_2013") next
-		
 
 		dataset = substring(d, 3)
 		matching_row_num = sapply(latex.table$ref, function(pattern) length(grep(pattern, dataset)) > 0)
@@ -166,168 +163,137 @@ for (f in batchfolders){
 				for (s in settings) {
 
 
-
-
-
-				
-					# Read in output file
+					setwd(s)
 					
-					fileName = paste0("error_", s, ".err")
-					if (!file.exists(fileName)) {
-						#print("Error cannot file file")
-						#next
-					}
-					#output_in = readLines(fileName)
-
-
-					# Is it done?
-					progress.rows = progress.df[progress.df$batch == batchNum & 
+					
+					# Total time on VM
+					runtime.hr = 1
+					progress.rows = progress.df[progress.df$batch == "V" & 
 												progress.df$dataset == gsub("/", "", dataset) &
 												progress.df$setting == s,]
 
-					start.date = progress.rows[progress.rows$status == "start", "date"]
-					if (length(start.date) == 0){
-						next
+					if (nrow(progress.rows) > 0) {
+						start.date = progress.rows[progress.rows$status == "start", "date"]
+						finish.date = progress.rows[progress.rows$status == "finish", "date"]
+						if (length(start.date) != 0 & length(finish.date) != 0){
+						
+							start.date = getDateTime(start.date)
+							finish.date = getDateTime(finish.date)
+							int = interval(start.date, finish.date)
+							runtime.hr = time_length(int, "hour")
+							
+						}
 					}
-					#print(paste("start", start.date))
-					start.date = getDateTime(start.date)
-					finish.date = progress.rows[progress.rows$status == "finish", "date"]
-					#print(paste("finish", finish.date))
-					if (length(finish.date) == 0){
-						next
-					}
-					finish.date = getDateTime(finish.date)
-					
-					
-					int = interval(start.date, finish.date)
-					runtime.hr = time_length(int, "hour")
-					
-					
-					if (FALSE) {
-						error = FALSE
-						errorLine = grep("[*][*]", output_in)
-						if (length(errorLine) > 0) {
-							error = TRUE
+
+
+
+
+					# For each batch
+					batchFolders = list.dirs(recursive = F)
+					for (bb in batchFolders) {
+				
+						setwd(bb)
+
+						# Read in ess file
+						ess.file = "ess.log"
+		
+						if (!file.exists(ess.file)){
+							#print(paste("Cannot find", d, s, bb, ess.file))
+							setwd("../")
+							next
+						}
+
+						if (length(readLines(ess.file)) <= 1){
+							print(paste("Empty file:", d, s, bb, ess.file))
+							setwd("../")
+							next
 						}
 
 
-						# Time per million
-					
-						time.lines = output_in[grep("Msamples", output_in)]
-						speeds = gsub(".+ ", "", time.lines)
-						speeds = gsub("/Msamples", "", speeds)
-						times = sapply(strsplit(speeds, "[a-z]"), function(ele) ifelse(length(ele) == 3, as.numeric(ele[1]) + 	as.numeric(ele[2])/60 + as.numeric(ele[3])/3600,
-																				ifelse(length(ele) == 2, 					 	as.numeric(ele[1])/60 + as.numeric(ele[2])/3600,
-																																						as.numeric(ele[1])/3600  )))
-						mean.speed = mean(times)
-					}
-					mean.speed = 1
+						this.ESS.df = read.table(ess.file, sep = "\t", header = T)
 
 
-					if (dataset == "simulated"){
-						ess.file = paste0("benchmark_",  s, ".log.ess")
-					}else{
-						ess.file = paste0("benchmark_",  s, P, ".log.ess")
-					}
-
-					if (!file.exists(ess.file)){
-						print(paste("Cannot find", f, d, pf, ess.file))
-						next
-					}
-
-					if (length(readLines(ess.file)) <= 1){
-						print(paste("Empty file:", f, d, pf, ess.file))
-						next
-					}
-
-					#print(paste("Processing", f, d, pf, ess.file))
-
-					this.ESS.df = read.table(ess.file, sep = "\t", header = T)
-
-
-					# Adaptive
-					CD_weight = -1
-					RW_weight = -1
-					SPP_weight = -1
-					NER_weight = -1
-					NER_acc = -1
-					NE_acc = -1
-					correctBactrian = TRUE
-					
-					state.in = paste0("benchmark_", s, ".xml.0state")
-					if (file.exists(state.in)) {
-						state.file = readLines(state.in)
+						# Adaptive
+						CD_weight = -1
+						RW_weight = -1
+						SPP_weight = -1
+						NER_weight = -1
+						NER_acc = -1
+						NE_acc = -1
+						nsamples = 0
 						
-						
-						if (length(grep("<!--", state.file)) == 1){
-						
-							operator.lines = paste(state.file[(grep("<!--", state.file)+1):(grep("-->", state.file)-1)], collapse = " ")
-							json = fromJSON(operator.lines)
-							ops = json$operators
+						state.in = paste0("tmp.xml.0state")
+						if (file.exists(state.in)) {
+							state.file = readLines(state.in)
 							
-							if (length(grep("adaptive", s)) == 1){
 							
+							# N states
+							nsamples = state.file[grep("sample=", state.file)]
+							nsamples = gsub(".+sample.'", "", nsamples)
+							nsamples = as.numeric(gsub("'.+", "", nsamples))
+							
+							if (length(grep("<!--", state.file)) > 0){
+							
+								operator.lines = paste(state.file[(grep("<!--", state.file)[1]+1):(grep("-->", state.file)[1]-1)], collapse = " ")
+								json = fromJSON(operator.lines)
+								ops = json$operators
+								
+								if (length(grep("adaptive", s)) == 1){
+								
 
-								match = which(sapply(ops, function(ele) ele$id == "AdaptableOperatorSampler.rates.internal"))
-								if (length(match) == 1){
-									weights = as.numeric(strsplit(gsub("([[]|[]])", "", ops[[match]]$weights), ",")[[1]])
-									CD_weight = weights[1]
-									RW_weight = weights[2]
-									SPP_weight = weights[3]
+									match = which(sapply(ops, function(ele) ele$id == "AdaptableOperatorSampler.rates.internal"))
+									if (length(match) == 1){
+										weights = as.numeric(strsplit(gsub("([[]|[]])", "", ops[[match]]$weights), ",")[[1]])
+										CD_weight = weights[1]
+										RW_weight = weights[2]
+										SPP_weight = weights[3]
+									}
+
 								}
+								
+								
+								
+								if (length(grep("NER", s)) == 1){
+									
 
-							}
-							
-							if (s == "bactrian95"){
-							
-								match = which(sapply(ops, function(ele) ele$id == "AdaptableOperatorSampler.ucldStdev"))
-								correctBactrian = length(match) > 0
-								if (!correctBactrian){
-									cat(paste("\t\t\t--- Bad bactrian!", f, d, s, "\n"))
-								}else{
-									cat(paste("\t\t\t--- Good bactrian!", f, d, s, "\n"))
+									match = which(sapply(ops, function(ele) ele$id == "AdaptableOperatorSampler.NER"))
+									if (length(match) == 1){
+										weights = as.numeric(strsplit(gsub("([[]|[]])", "", ops[[match]]$weights), ",")[[1]])
+										NER_weight = weights[2]
+										NE_acc = ops[[match]]$operators[[1]]$accept / (ops[[match]]$operators[[1]]$reject + ops[[match]]$operators[[1]]$accept)
+										NER_acc = ops[[match]]$operators[[2]]$accept / (ops[[match]]$operators[[2]]$reject + ops[[match]]$operators[[2]]$accept)
+										#print(paste("NER weight", NER_weight, NE_acc, NER_acc))
+									}
+
+								
 								}
 								
 							}
-							
-							if (length(grep("NER", s)) == 1){
-								
-
-								match = which(sapply(ops, function(ele) ele$id == "AdaptableOperatorSampler.NER"))
-								if (length(match) == 1){
-									weights = as.numeric(strsplit(gsub("([[]|[]])", "", ops[[match]]$weights), ",")[[1]])
-									NER_weight = weights[2]
-									NE_acc = ops[[match]]$operators[[1]]$accept / (ops[[match]]$operators[[1]]$reject + ops[[match]]$operators[[1]]$accept)
-									NER_acc = ops[[match]]$operators[[2]]$accept / (ops[[match]]$operators[[2]]$reject + ops[[match]]$operators[[2]]$accept)
-									print(paste("NER weight", NER_weight, NE_acc, NER_acc))
-								}
-
-							
-							}
-							
+						
 						}
 					
+						for (p in parameters){
+
+							pindex = grep(paste0(p, ".+ESS"), colnames(this.ESS.df))
+							ESS = mean(as.numeric(this.ESS.df[1,pindex]), na.rm = T)
+							
+							pindex = grep(paste0(p, ".+mean"), colnames(this.ESS.df))
+							sigma = as.numeric(this.ESS.df[1,"ucldStdev.mean"])
+							#print(paste(p, ESS))
+
+							
+							ESS.df2 = data.frame(batch = bb, param = p, setting = s, dataset = dataset, ESS = ESS, hr = runtime.hr, partition = P, Leff = Leff, L = L, N = N, sigma = sigma,
+									 CD_weight = CD_weight, RW_weight = RW_weight, SPP_weight = SPP_weight, NER_weight = NER_weight, NER_acc = NER_acc, NE_acc = NE_acc, nsamples = nsamples)
+							ESS.df = rbind(ESS.df, ESS.df2)
+							
+						}
+
+						setwd("../")
+
 					}
+
+					setwd("../")
 					
-					for (p in parameters){
-
-						pindex = grep(paste0(p, ".+ESS"), colnames(this.ESS.df))
-						#ESS.hr = mean(ESS_values[pindex]) / time.hr
-						#print(paste(chain, "_", p, "_", ESS.hr))
-
-						ESS = mean(as.numeric(this.ESS.df[1,pindex]), na.rm = T)
-						#print(paste(p, ESS))
-
-						
-						ESS.df2 = data.frame(batch = batch, param = p, setting = s, dataset = dataset, ESS = ESS, hr = runtime.hr, partition = P, Leff = Leff, L = L, N = N ,
-								mean.speed = mean.speed, CD_weight = CD_weight, RW_weight = RW_weight, SPP_weight = SPP_weight, NER_weight = NER_weight, NER_acc = NER_acc, NE_acc = NE_acc, correctBactrian = correctBactrian)
-						ESS.df = rbind(ESS.df, ESS.df2)
-						
-					}
-
-
-
-
 				}
 
 			}
@@ -360,7 +326,7 @@ for (f in batchfolders){
 #settings = c("cat", "real", "quant")
 
 ESS.df = ESS.df[!is.na(ESS.df$ESS),]
-div.by = 1
+div.by = ESS.df$nsamples / 1e6
 if (!PER_CHAIN) div.by = ESS.df$hr
 ESS.df$ESS.hr = ESS.df$ESS / div.by
 
@@ -375,8 +341,8 @@ plotRealCat = function(){
 
 
 	maxL = 20#max(ESS.df$L) + 2
-	plot(0, 0, type = "n", xlim = c(0,maxL), ylim = c(1, 6000), xlab = "Sequence length $L$ (kb)", ylab = "ESS/hr of tip rates $r$", axes = F, xaxs = "i", yaxs = "i", 
-					main ="Disparity as a function of sequence length", cex.main = 1.5, cex.lab = 1.5, log = "y")
+	plot(0, 0, type = "n", xlim = c(0,maxL), ylim = c(0, 500), xlab = "Sequence length $L$ (kb)", ylab = "ESS/hr of tip rates $r$", axes = F, xaxs = "i", yaxs = "i", 
+					main ="Disparity as a function of sequence length", cex.main = 1.5, cex.lab = 1.5)
 
 
 
@@ -475,7 +441,7 @@ plotWeights = function() {
 	x = seq(from = 0, to = maxL, length = 500)
 	j = exp(logit$coefficients[1] + logit$coefficients[2]*x)
 	y = j / (1+j)
-	lines(x, y)
+	lines(x, y, col = "#69696999")
 
 	
 	# Fit logit curve to RW
@@ -483,7 +449,7 @@ plotWeights = function() {
 	x = seq(from = 0, to = maxL, length = 500)
 	j = exp(logit$coefficients[1] + logit$coefficients[2]*x)
 	y = j / (1+j)
-	lines(x, y)
+	lines(x, y, col = "#69696999")
 
 
 
@@ -574,7 +540,7 @@ plotNERWeights = function(rates = FALSE) {
 			x = seq(from = 0, to = maxL, length = 500)
 			j = exp(logit$coefficients[1] + logit$coefficients[2]*x)
 			y = j / (1+j)
-			lines(x, y)
+			lines(x, y, col = "#69696999")
 
 
 		
@@ -583,12 +549,12 @@ plotNERWeights = function(rates = FALSE) {
 			x = seq(from = 0, to = maxL, length = 500)
 			j = exp(logit$coefficients[1] + logit$coefficients[2]*x)
 			y = j / (1+j)
-			lines(x, y)
+			lines(x, y, col = "#69696999")
 		}else{
 			linear = lm(formula = NERs ~ Ls)
 			x = seq(from = 0, to = maxL, length = 500)
 			y = linear$coefficients[1] + linear$coefficients[2]*x
-			lines(x, y)
+			lines(x, y, col = "#69696999")
 			
 		}
 	}
@@ -615,13 +581,13 @@ plot.cell = function(s1, s2, show.legend = FALSE){
 		#q.ESS = q.ESS[na.rm,]
 
 		xymin = 1
-		xymax = 20000
+		xymax = 1000
 
 		xyrange = c(xymin, xymax) #c(xymin, max(c(r.ESS$ESS.hr, q.ESS$ESS.hr), na.rm = TRUE))
 		#xyrange = c(0, max(c(r.ESS$MCD.states, q.ESS$MCD.states)))
 		
 		#xyrange = c(0, 2000) 
-		per = ifelse(PER_CHAIN, "ESS/chain", "ESS/hr")
+		per = ifelse(PER_CHAIN, "ESS/$10^6$ states", "ESS/hr")
 		plot(1, 1, xlim = xyrange, ylim = xyrange, xlab = paste0(per, " [", settings.names[[s1]], "]"),  ylab = paste0(per, " [", settings.names[[s2]], "]"), 
 		type = "n", main = paste0(settings.names[[s2]], " vs. ", settings.names[[s1]]), log="xy", xaxs = "i", yaxs = "i", axes = FALSE, cex.main = 1.5, cex.lab = 1.5)
 
@@ -631,12 +597,12 @@ plot.cell = function(s1, s2, show.legend = FALSE){
 
 
 		times = c(4, 16, 64)
-		bg.cols = c("#A9A9A9", "#BEBEBE", "#E8E8E8")
+		line.cols = c("#696969dd", "#696969aa", "#69696977")
 
 		lwd_base = 3
 		for (i in length(times):1){
 			t = times[i]
-			polygon(c(0.0001, xymax*10, xymax*10, 0.0001), c(0.0001*t, xymax*10*t, xymax*10/t, 0.0001/t), lwd =lwd_base * 0.6^(i), border="black") # col = bg.cols[i],
+			polygon(c(0.0001, xymax*10, xymax*10, 0.0001), c(0.0001*t, xymax*10*t, xymax*10/t, 0.0001/t), lwd =lwd_base * 0.7^(i), border=line.cols[i]) 
 		}
 
 
@@ -646,7 +612,7 @@ plot.cell = function(s1, s2, show.legend = FALSE){
 			text(xymin*t*textshift, xymin*textshift, paste0("$\\frac{1}{", t, "} \\times$"), adj = c(-0.5, -0.6), cex = 1)
 			text(xymin*textshift, xymin*t*textshift, paste0("$", t, "\\times$"), adj = c(-0.2, -2), cex = 1)
 		}
-		abline(0,1, lwd = lwd_base)
+		abline(0,1, lwd = lwd_base, col = "#696969")
 
 		colfunc = colorRampPalette(c("black", "red"))
 		#max.len = max(benchmark[,v])
@@ -854,18 +820,7 @@ plot.grid = function(filename, settings, grid.like = TRUE, fn = sum) {
 }
 
 
-
-for (p in parameters){
-	X = mean(ESS.df[ESS.df$setting == "real_adaptive" & ESS.df$param == p & ESS.df$dataset == "simulated","ESS.hr"])
-	print(paste("The mean ESS/hr for real", p, " is", X))
-}
-
-
-for (p in parameters){
-	X = mean(ESS.df[ESS.df$setting == "bactrian95" & ESS.df$param == p & ESS.df$dataset == "simulated","ESS.hr"])
-	print(paste("The mean ESS/hr for bactrian", p, " is", X))
-}
-
+plot.grid("real_quant", c("quant_cached", "real"), TRUE)
 
 plot.grid("ESS_round1_real", c("real_06", "real", "real_adaptive"), TRUE, plotWeights)
 
@@ -879,7 +834,7 @@ plot.grid("ESS_round2", c("cat_adaptive", "real_adaptive", "quant_cached_adaptiv
 plot.grid("ESS_round3", c("real_adaptive", "bactrian95"), TRUE)
 
 
-
+plot.grid("ESS_round4b", c("bactrian95", "NER"), TRUE)
 
 filename = "ESS_round4"
 options(tikzMetricPackages = c("\\usepackage[utf8]{inputenc}",
@@ -921,16 +876,16 @@ cons.rel.s = numeric(0)
 nocons.rel.s = numeric(0)
 for (dataNum in 1:length(datasets)) {
 		d = datasets[dataNum]
-		A = mean(ESS.df[ESS.df$setting == "real_adaptive" & ESS.df$param == "TipRates" & ESS.df$dataset == d,"ESS.hr"])
-		C = mean(ESS.df[ESS.df$setting == "real" & ESS.df$param == "TipRates" & ESS.df$dataset == d,"ESS.hr"])
-		N = mean(ESS.df[ESS.df$setting == "real_06" & ESS.df$param == "TipRates" & ESS.df$dataset == d,"ESS.hr"])
+		A = mean(ESS.df[ESS.df$setting == "real_adaptive" & ESS.df$param == "TipRates" & ESS.df$dataset == d,"ESS.hr"], na.rm = T)
+		C = mean(ESS.df[ESS.df$setting == "real" & ESS.df$param == "TipRates" & ESS.df$dataset == d,"ESS.hr"], na.rm = T)
+		N = mean(ESS.df[ESS.df$setting == "real_06" & ESS.df$param == "TipRates" & ESS.df$dataset == d,"ESS.hr"], na.rm = T)
 		cons.rel = c(cons.rel, A/C - 1)
 		nocons.rel = c(nocons.rel, A/N - 1)
 		
 		
-		A = mean(ESS.df[ESS.df$setting == "real_adaptive" & ESS.df$param == "ucldStdev" & ESS.df$dataset == d,"ESS.hr"])
-		C = mean(ESS.df[ESS.df$setting == "real" & ESS.df$param == "ucldStdev" & ESS.df$dataset == d,"ESS.hr"])
-		N = mean(ESS.df[ESS.df$setting == "real_06" & ESS.df$param == "ucldStdev" & ESS.df$dataset == d,"ESS.hr"])
+		A = mean(ESS.df[ESS.df$setting == "real_adaptive" & ESS.df$param == "ucldStdev" & ESS.df$dataset == d,"ESS.hr"], na.rm = T)
+		C = mean(ESS.df[ESS.df$setting == "real" & ESS.df$param == "ucldStdev" & ESS.df$dataset == d,"ESS.hr"], na.rm = T)
+		N = mean(ESS.df[ESS.df$setting == "real_06" & ESS.df$param == "ucldStdev" & ESS.df$dataset == d,"ESS.hr"], na.rm = T)
 		cons.rel.s = c(cons.rel.s, A/C - 1)
 		nocons.rel.s = c(nocons.rel.s, A/N - 1)
 			
@@ -943,9 +898,76 @@ cat(paste("adapt (real) is", signif(mean(nocons.rel), 2)*100, "% faster than noc
 cat(paste("\nadapt (real) is", signif(mean(cons.rel.s), 2)*100, "% faster than cons (real) wrt sigma \n"))
 cat(paste("adapt (real) is", signif(mean(nocons.rel.s), 2)*100, "% faster than nocons (real) wrt sigma \n"))
 
-print(cons.rel.s)
-print(nocons.rel.s)
+#print(cons.rel.s)
+#print(nocons.rel.s)
+
+
+for (dataNum in 1:length(datasets)){
+	d = datasets[dataNum]
+	sigma = mean(ESS.df[ESS.df$dataset == d,"sigma"], na.rm = T)
+
+	cat(paste(d, "has a clock sd of", sigma, "\n"))
+
+}
 
 
 
+for (p in parameters){
+
+	X = numeric(0)
+	Y = numeric(0)
+	Z = numeric(0)
+	for (dataNum in 1:length(datasets)) {
+		d = datasets[dataNum]
+		X = c(X, mean(ESS.df[ESS.df$setting == "real_adaptive" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
+		Y = c(Y, mean(ESS.df[ESS.df$setting == "bactrian95" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
+		Z = c(Z, mean(ESS.df[ESS.df$setting == "NER" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
+	}
+	print(paste("The mean ESS for", p, "is", signif(mean(Y/X, na.rm = T), 3), "times as fast for bactrian"))
+	print(paste("The mean ESS for", p, "is", signif(mean(Z/Y, na.rm = T), 3), "times as fast for NER"))
+}
+
+
+
+
+
+if (FALSE) {
+
+
+	scale = 3
+	pdf("times.pdf", width = scale*4, height = scale*2)
+	par(mfrow = c(2, 4))
+	for (s in settings[1:8]) {
+
+
+		plot(0, 1, xlim = c(1,length(datasets)), ylim = c(0.1, 20),  main = s, ylab = "Time (hr)", xlab = "dataset", axes = F)
+
+
+		for (dataNum in 1:length(datasets)){
+		
+		
+		
+		
+				d = datasets[dataNum]
+				col = data.cols[dataNum]
+				
+				time = ESS.df[ESS.df$setting == s & ESS.df$dataset == d & ESS.df$param == "prior","hr"]
+				
+				points(rep(dataNum, length(time)), time, pch = 16, col = col)
+				
+				
+				if (s == settings[1]){
+					dataset_names = sapply(strsplit(datasets, "_"), function(ele) ele[1])
+					legend("topleft", dataset_names, fill = data.cols[1:length(datasets)], bg = "white", bty = "n", cex = 1)
+				}
+				
+		}
+
+
+		axis(2, las=2)
+
+	}
+	dev.off()
+	
+}
 
