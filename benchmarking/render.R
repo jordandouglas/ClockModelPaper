@@ -11,7 +11,7 @@ PER_CHAIN = TRUE
 
 #settings = c("cat", "real", "quant", "bactrian95", "bactrian98")
 settings = c("cat",  "real_06", "quant_06", "real", "quant", "bactrian95", "bactrian98", "NER", "AVMN")
-settings = c("cat", "cat_adaptive",  "real_06", "real", "real_adaptive", "quant_06_cached", "quant_cached_adaptive", "quant_cached", "bactrian95", "NER")
+settings = c("cat", "cat_adaptive",  "real_06", "real", "real_adaptive", "quant_06_cached", "quant_cached_adaptive", "quant_cached", "bactrian95", "NER", "AVMVN")
 
 benchmark = data.frame(batch = numeric(0), param = character(0), dataset = character(0), partition = numeric(0), setting = character(0), nstates = numeric(0), finalESS = numeric(0), finalMCD = numeric(0), done = logical(0),  error = logical(0))
 
@@ -20,17 +20,18 @@ benchmark = data.frame(batch = numeric(0), param = character(0), dataset = chara
 
 settings.names = lapply(settings, function(x) x)
 settings.names["cat"] = "\\textit{cat}"
-settings.names["cat_adaptive"] = "adapt (\\textit{cat})"
+settings.names["cat_adaptive"] = "adapt(\\textit{cat})"
 
-settings.names["real"] = "cons (\\textit{real})"
-settings.names["real_06"] = "nocons (\\textit{real})"
-settings.names["real_adaptive"] = "adapt (\\textit{real})"
+settings.names["real"] = "cons(\\textit{real})"
+settings.names["real_06"] = "nocons(\\textit{real})"
+settings.names["real_adaptive"] = "adapt(\\textit{real})"
 
-settings.names["quant_cached"] = "cons (\\textit{quant})"
-settings.names["quant_06_cached"] = "nocons (\\textit{quant})"
-settings.names["quant_cached_adaptive"] = "adapt (\\textit{quant})"
-settings.names["bactrian95"] = "Bactrian (\\textit{real})"
-settings.names["NER"] = "NER (\\textit{real})"
+settings.names["quant_cached"] = "cons(\\textit{quant})"
+settings.names["quant_06_cached"] = "nocons(\\textit{quant})"
+settings.names["quant_cached_adaptive"] = "adapt(\\textit{quant})"
+settings.names["bactrian95"] = "Bactrian+adapt(\\textit{real})"
+settings.names["NER"] = "NER+Bactrian+adapt(\\textit{real})"
+settings.names["AVMVN"] = "AVMVN+NER+Bactrian+adapt(\\textit{real})"
 
 
 latex.table = read.table("../latex.table", sep = "&")
@@ -41,26 +42,26 @@ latex.table$ref = gsub(" ", "", gsub("[0-9].+", "", latex.table$ref))
 
 latex.table$completion = ""
 
-progress.df = read.csv("progress.csv", header = T)
-progress.df$batch = ifelse(progress.df$batch == 4, 5, ifelse(progress.df$batch == 5, 4, progress.df$batch))
+progress.df = read.csv("progressVM.csv", header = T)
+#progress.df$batch = ifelse(progress.df$batch == 4, 5, ifelse(progress.df$batch == 5, 4, progress.df$batch))
 
 
 #parameters = c("posterior", "likelihood", "prior", "height", "birthRate", "kappa",  "ucldStdev", "clockRate", "TipRates", "RateStatLogger.mean", "RateStatLogger.variance")
-parameters = c("prior", "likelihood", "TipRates", "height", "ucldStdev", "kappa")
+parameters = c("prior", "likelihood", "TipRates", "treeLength", "ucldStdev", "kappa")
 
 
 parameters.latex = lapply(parameters, function(x) x)
 names(parameters.latex) = parameters
 parameters.latex["posterior"] = "Posterior $P(\\theta|D)$"
-parameters.latex["likelihood"] = "Likelihood $P(D|\\theta)$"
-parameters.latex["prior"] = "Prior $P(\\theta)$"
+parameters.latex["likelihood"] = "Likelihood"
+parameters.latex["prior"] = "Prior"
 parameters.latex["birthRate"] = "Yule birth rate $\\lambda$"
 parameters.latex["gammaShape"] = "$\\Gamma$ shape"
-parameters.latex["kappa"] = "$\\kappa$"
+parameters.latex["kappa"] = "HKY model $\\kappa$"
 #parameters.latex["freqParameter"] = "Nucleotide frequency $f$"
 parameters.latex["ucldStdev"] = "Clock SD $\\sigma$"
-parameters.latex["TipRates"] = "Mean tip rate $r$"
-#parameters.latex["treeLength"] = "Tree length $l$"
+parameters.latex["TipRates"] = "Mean leaf rate"
+parameters.latex["treeLength"] = "Tree length"
 parameters.latex["height"] = "Tree height $h$"
 
 
@@ -76,7 +77,7 @@ parameters.latex.small["kappa"] = "$\\kappa$"
 #parameters.latex.small["freqParameter"] = "$f$"
 parameters.latex.small["ucldStdev"] = "$\\sigma$"
 parameters.latex.small["TipRates"] = "$r$"
-#parameters.latex.small["treeLength"] = "$l$"
+parameters.latex.small["treeLength"] = "$l$"
 parameters.latex.small["height"] = "$h$"
 parameters.latex.small["clockRate"] = "$\\mu$"
 parameters.latex.small["RateStatLogger.variance"] = "$v$"
@@ -101,7 +102,7 @@ getDateTime = function(str){
 ESS.df = data.frame(batch = numeric(0), param = character(0), dataset = character(0), partition = numeric(0), setting = character(0), nstates = numeric(0),
 		ESS = numeric(0), hr = numeric(0), ESS.hr = numeric(0), Leff = numeric(0), L = numeric(0), N = numeric(0), sigma = numeric(0),
 		CD_weight = numeric(0), RW_weight = numeric(0), SPP_weight = numeric(0), NER_weight = numeric(0), NER_acc = numeric(0), NE_acc = numeric(0),
-		 nsamples = numeric(0))
+		leafCD_weight = numeric(0), leafAVMVN_weight = numeric(0),  nsamples = numeric(0))
 
 
 
@@ -183,6 +184,8 @@ for (f in batchfolders){
 							runtime.hr = time_length(int, "hour")
 							
 						}
+					}else{
+						print(paste("Warning: cannot find runtime for", dataset, s))
 					}
 
 
@@ -220,6 +223,8 @@ for (f in batchfolders){
 						NER_weight = -1
 						NER_acc = -1
 						NE_acc = -1
+						leafCD_weight = -1
+						leafAVMVN_weight = -1
 						nsamples = 0
 						
 						state.in = paste0("tmp.xml.0state")
@@ -252,6 +257,19 @@ for (f in batchfolders){
 								}
 								
 								
+								if (length(grep("AVMVN", s)) == 1){
+								
+									match = which(sapply(ops, function(ele) ele$id == "AdaptableOperatorSampler.rates.leaf"))
+									if (length(match) == 1){
+										weights = as.numeric(strsplit(gsub("([[]|[]])", "", ops[[match]]$weights), ",")[[1]])
+										leafCD_weight = weights[1]
+										leafAVMVN_weight = weights[2]
+										#print(paste("AVMVN weights", leafCD_weight, leafAVMVN_weight))
+									}
+
+								}
+								
+								
 								
 								if (length(grep("NER", s)) == 1){
 									
@@ -271,6 +289,10 @@ for (f in batchfolders){
 							}
 						
 						}
+						
+						if (nsamples != 5e7 & nsamples != 1e8){
+							print(paste("Warning:", dataset, s, "has", nsamples, "samples"))
+						}
 					
 						for (p in parameters){
 
@@ -280,11 +302,18 @@ for (f in batchfolders){
 							pindex = grep(paste0(p, ".+mean"), colnames(this.ESS.df))
 							sigma = as.numeric(this.ESS.df[1,"ucldStdev.mean"])
 							#print(paste(p, ESS))
+							
+							
+							if (!is.na(ESS) & ESS < 200){
+								cat(paste("Warning:", p, "has ESS =", signif(ESS, 2), "for", d, s, bb, "\n"))
+							}
 
 							
 							ESS.df2 = data.frame(batch = bb, param = p, setting = s, dataset = dataset, ESS = ESS, hr = runtime.hr, partition = P, Leff = Leff, L = L, N = N, sigma = sigma,
-									 CD_weight = CD_weight, RW_weight = RW_weight, SPP_weight = SPP_weight, NER_weight = NER_weight, NER_acc = NER_acc, NE_acc = NE_acc, nsamples = nsamples)
+									 CD_weight = CD_weight, RW_weight = RW_weight, SPP_weight = SPP_weight, NER_weight = NER_weight, NER_acc = NER_acc, NE_acc = NE_acc, leafCD_weight = leafCD_weight,
+									 leafCD_weight = leafCD_weight, nsamples = nsamples)
 							ESS.df = rbind(ESS.df, ESS.df2)
+
 							
 						}
 
@@ -334,7 +363,7 @@ datasets = unique(ESS.df[order(ESS.df$N), "dataset"]) # sort(as.character(unique
 
 data.cols = c(rainbow_hcl(8, c = 250, l = 60), "#444444")
 #c("red", "blue", "green", "yellow", "orange", "black", "purple", "darkgreen", "cyan", "magenta")
-
+dataset_names = sapply(strsplit(datasets, "_"), function(ele) ele[1])
 
 plotRealCat = function(){
 
@@ -342,7 +371,7 @@ plotRealCat = function(){
 
 	maxL = 20#max(ESS.df$L) + 2
 	plot(0, 0, type = "n", xlim = c(0,maxL), ylim = c(0, 500), xlab = "Sequence length $L$ (kb)", ylab = "ESS/hr of tip rates $r$", axes = F, xaxs = "i", yaxs = "i", 
-					main ="Disparity as a function of sequence length", cex.main = 1.5, cex.lab = 1.5)
+					main ="Leaf rate mixing vs sequence length", cex.main = 1.5, cex.lab = 1.5)
 
 
 
@@ -370,7 +399,7 @@ plotRealCat = function(){
 		#print(paste(L, y1, y2, d, col)) 
 		
 		lines(c(L, L), c(y1, y2), lty = "2525")
-		text(L, (y1 + y2)/2, paste0("$", signif(y1 / y2, 2), "\\times $"), adj = 0)
+		text(L + 0.2, (y1 + y2)/2, paste0("$", signif(y1 / y2, 2), "\\times $"), adj = 0)
 
 		points(L, y1, col = col, pch = pches[1])
 		points(L, y2, col = col, pch = pches[2])
@@ -408,7 +437,7 @@ plotWeights = function() {
 		s = "real_adaptive"
 		d = datasets[dataNum]
 
-		sub.df = ESS.df[ESS.df$dataset == d & ESS.df$setting == s & ESS.df$CD_weight >= 0 & ESS.df$param == "height",]
+		sub.df = ESS.df[ESS.df$dataset == d & ESS.df$setting == s & ESS.df$CD_weight >= 0 & ESS.df$param == "prior",]
 
 		if (nrow(sub.df) == 0){
 			print(paste("No operators for", d, s))
@@ -493,7 +522,7 @@ plotNERWeights = function(rates = FALSE) {
 		s = "NER"
 		d = datasets[dataNum]
 
-		sub.df = ESS.df[ESS.df$dataset == d & ESS.df$setting == s & ESS.df$NER_weight >= 0 & ESS.df$param == "height",]
+		sub.df = ESS.df[ESS.df$dataset == d & ESS.df$setting == s & ESS.df$NER_weight >= 0 & ESS.df$param == "prior",]
 
 		if (nrow(sub.df) == 0){
 			print(paste("No operators for", d, s))
@@ -515,6 +544,10 @@ plotNERWeights = function(rates = FALSE) {
 		}else{
 			NER = mean(sub.df$NER_acc) / mean(sub.df$NE_acc)
 			points(mean(sub.df$L), NER, col = data.cols[dataNum], pch = 18)
+			
+			
+			if (NER > 1) cat(paste("For", d, "NER has an acceptance rate", signif(100*(NER-1), 2), "% higher than NarrowExchange\n"))
+			
 		}
 
 		NERs = c(NERs, NER)
@@ -522,7 +555,11 @@ plotNERWeights = function(rates = FALSE) {
 
 	}
 	
-	if (!rates) legend("bottomleft", c("NER$ \\{ \\mathcal{D}_{A,E}, \\mathcal{D}_{B,E}, \\mathcal{D}_{C,E} \\}$", "NER$\\{ \\}$"), pch = pches, bty = "n", cex = 1.15)
+	if (!rates) {
+		legend("bottomleft", c("NER$ \\{ \\mathcal{D}_{A,E}, \\mathcal{D}_{B,E}, \\mathcal{D}_{C,E} \\}$", "NER$\\{ \\}$"), pch = pches, bty = "n", cex = 1.15)
+	}else{
+		legend("bottomright", dataset_names, fill = data.cols[1:length(datasets)], bg = "white", bty = "n", cex = 1)
+	}
 
 
 	if (!rates) {
@@ -563,6 +600,80 @@ plotNERWeights = function(rates = FALSE) {
 	axis(2, las = 2)
 
 
+
+}
+
+
+plot.2 = function(filename, s1, s2) {
+
+
+	options(tikzMetricPackages = c("\\usepackage[utf8]{inputenc}",
+		"\\usepackage[T1]{fontenc}", "\\usetikzlibrary{calc}",
+		"\\usepackage{amssymb}"))
+	## I need the amssymb package because I use \mathcal and \mathbb
+		tikz(paste0(filename, ".tex"), width = 8, height = 8 / 1.618, standAlone = TRUE,
+			packages = c("\\usepackage{tikz}",
+				 "\\usepackage[active,tightpage,psfixbb]{preview}",
+				 "\\PreviewEnvironment{pgfpicture}",
+				 "\\setlength\\PreviewBorder{0pt}",
+				 "\\usepackage{amssymb}"))
+
+	par(mar = c(5,5,5,5))
+
+	plot(0, 0, type = "n", xlim = c(0, (length(parameters)+3) * length(datasets) - 3), ylim = c(0.4, 1.6), xlab = "", ylab = "Relative ESS/hr",
+				main = paste("Comparison of", settings.names[[s1]], "and", settings.names[[s2]]), axes = F, xaxs = "i", yaxs = "i")
+	i = 1
+
+	xat = numeric(0)
+	xlab = character(0)
+	abline(1, 0, lty = "2525")
+	for (p in parameters){
+	
+		param_mean = numeric(0)
+		i0 = i
+	
+		for (dataNum in 1:length(datasets)){
+			
+			d = datasets[dataNum]
+			col = data.cols[dataNum]
+
+
+			ESS1 = ESS.df[ESS.df$dataset == d & ESS.df$setting == s1 & ESS.df$param == p,"ESS.hr"]
+			ESS2 = ESS.df[ESS.df$dataset == d & ESS.df$setting == s2 & ESS.df$param == p,"ESS.hr"]
+			E = ESS1 / mean(ESS2)
+			
+			# Error bar
+			m1 = mean(E)
+			se1 = 2 * sqrt(var(E) / length(E))
+			
+			lines(c(i,i), m1 + c(se1, -se1), col = col)
+			text(i, m1, parameters.latex.small[[p]], col = data.cols[dataNum], cex = 1.4)
+			param_mean = c(param_mean, m1)
+			
+			i = i + 1
+
+		}
+		
+		param_mean = mean(param_mean)
+		toprint = 100 * signif((param_mean - 1), 2)
+		lines(c(i0, i), c(param_mean, param_mean), lwd = 0.5)
+		text((i + i0)/2, 1.5, paste0(toprint, "\\% faster"), cex = 1, adj = 0.5)
+		xat = c(xat, (i + i0)/2)
+		xlab = c(xlab, parameters.latex[[p]])
+		lines(c(i+1, i+1), c(-100, 100), lwd = 0.5, col = "#69696999")
+		
+		i = i + 2
+
+	}
+	
+	axis(1, at = c(-1, xat, 100000), labels = c("", xlab, ""), las=2, cex.axis = 0.7)
+	axis(2, at = c(0.5, 0.75, 1, 1.25, 1.5), las = 2)
+	
+	legend("bottomright", dataset_names, fill = data.cols[1:length(datasets)], bg = "white", bty = "n", cex = 1)
+	
+	
+	dev.off()
+	tools::texi2pdf(paste0(filename, ".tex"))
 
 }
 
@@ -671,7 +782,7 @@ plot.cell = function(s1, s2, show.legend = FALSE){
 		axis(2, cex = 2, las=2)
 
 
-		dataset_names = sapply(strsplit(datasets, "_"), function(ele) ele[1])
+		
 		#gsub("^a", "", gsub("_", " ", datasets))
 		if (show.legend) legend("bottomright", dataset_names, fill = data.cols[1:length(datasets)], bg = "white", bty = "n", cex = 1)
 		#legend("bottomright", as.character(parameters.latex[names(parameters.pch)[parameters.pch != names(parameters.pch)]]), pch = as.numeric(unlist(parameters.pch)[parameters.pch != names(parameters.pch)]))
@@ -820,22 +931,22 @@ plot.grid = function(filename, settings, grid.like = TRUE, fn = sum) {
 }
 
 
-plot.grid("real_quant", c("quant_cached", "real"), TRUE)
-
+# Round 1
 plot.grid("ESS_round1_real", c("real_06", "real", "real_adaptive"), TRUE, plotWeights)
-
 plot.cat = function(){
 	plot.cell("cat", "cat_adaptive", show.legend = FALSE)
 }
 plot.grid("ESS_round1_catquant", c("quant_06_cached", "quant_cached", "quant_cached_adaptive"), TRUE, plot.cat)
 
+
+# Round 2
 plot.grid("ESS_round2", c("cat_adaptive", "real_adaptive", "quant_cached_adaptive"), TRUE, plotRealCat)
 
-plot.grid("ESS_round3", c("real_adaptive", "bactrian95"), TRUE)
+# Round 3
+plot.2("ESS_round3", "bactrian95", "real_adaptive")
 
 
-plot.grid("ESS_round4b", c("bactrian95", "NER"), TRUE)
-
+# Round 4
 filename = "ESS_round4"
 options(tikzMetricPackages = c("\\usepackage[utf8]{inputenc}",
 	"\\usepackage[T1]{fontenc}", "\\usetikzlibrary{calc}",
@@ -852,13 +963,17 @@ plotNERWeights(FALSE)
 plotNERWeights(TRUE)
 dev.off()
 tools::texi2pdf(paste0(filename, ".tex"))
+plot.2("ESS_round4b", "bactrian95", "NER")
 
 
+# Round 5
+plot.2("ESS_round5", "AVMVN", "NER")
+plot.real = function(){
+	plot.cell("real", "AVMVN", show.legend = FALSE)
+}
+plot.grid("ESS_round5b", c("cat", "AVMVN"), TRUE, plot.real)
 
-
-#plot.grid("ESS_round2", c("quant", "bactrian95", "bactrian98"), FALSE, "Round 2")
-
-#plot.grid("ESS_full", settings)
+#plot.2("ESS_round5b", "AVMVN", "real", 500)
 
 
 
@@ -912,20 +1027,42 @@ for (dataNum in 1:length(datasets)){
 
 
 
+
+
+x1 = numeric(0)
 for (p in parameters){
 
 	X = numeric(0)
 	Y = numeric(0)
 	Z = numeric(0)
+	Q = numeric(0)
 	for (dataNum in 1:length(datasets)) {
 		d = datasets[dataNum]
 		X = c(X, mean(ESS.df[ESS.df$setting == "real_adaptive" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
 		Y = c(Y, mean(ESS.df[ESS.df$setting == "bactrian95" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
 		Z = c(Z, mean(ESS.df[ESS.df$setting == "NER" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
+		Q = c(Q, mean(ESS.df[ESS.df$setting == "AVMVN" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
+		
 	}
 	print(paste("The mean ESS for", p, "is", signif(mean(Y/X, na.rm = T), 3), "times as fast for bactrian"))
-	print(paste("The mean ESS for", p, "is", signif(mean(Z/Y, na.rm = T), 3), "times as fast for NER"))
+	print(paste("The mean ESS for", p, "is", signif(mean(Q/Y, na.rm = T), 3), "times as fast for AVMVN (cf bactrian)"))
+	print(paste("The mean ESS for", p, "is", signif(mean(Q/Z, na.rm = T), 3), "times as fast for AVMVN (cf NER)"))
+	
+	if (p != "kappa"){
+		x1 = c(x1,  signif(mean(Y/X, na.rm = T), 3))
+	}
+	
+	
+	
 }
+
+print(paste("Bactrian is between", min(x1), "and", max(x1), "times as fast"))
+
+
+
+
+
+
 
 
 

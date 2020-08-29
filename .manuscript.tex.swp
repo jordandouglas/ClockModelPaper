@@ -532,7 +532,6 @@ Pre-existing BEAST2 clock model operators are summarised in \textbf{Table \ref{t
 \begin{table}[h!]
 \centering
 \begin{tabular}{l p{4.2cm} l l} 
- \hline
  Operator & Description & Parameters & Parameterisations  \\
   \hline
  \texttt{RandomWalk} & Moves a single element by a tunable amount. & $\vec{\mathcal{R}}^{\,}, \sigma$ & \textit{cat}, \textit{real}, \textit{quant} \\
@@ -552,7 +551,6 @@ Pre-existing BEAST2 clock model operators are summarised in \textbf{Table \ref{t
 \texttt{SmallPulley} & Proposes new branch rates incident to the root such that their combined genetic distance is constant  \cite{zhang2020improving}.  & $\vec{\mathcal{R}}^{\,}$ & \textit{real}, \textit{quant} \\
  \hline
 \texttt{CisScale} & Applies \texttt{Scale} to $\sigma$. Then recomputes all rates such that their quantiles are constant (for \textit{real} \cite{zhang2020improving}) or recomputes all quantiles such that their rates are constant (\textit{quant}).  & $\vec{\mathcal{R}}^{\,}, \sigma$ & \textit{real}, \textit{quant} \\
- \hline
 \end{tabular}
 \caption{Summary of pre-existing BEAST2 operators, which apply to either branch rates $\vec{\mathcal{R}}^{\,}$ or the clock standard deviation $\sigma$, and the substitution rate parameterisation they apply to.
  \texttt{ConstantDistance} and \texttt{SimpleDistance} also adjust node heights in the tree $\mathcal{T}$. }
@@ -1033,20 +1031,15 @@ The Robinson-Foulds distance between trees before and after every proposal accep
 \label{AVMVN_sect}
 
 %, such as \texttt{AdaptiveOperatorSampler},
-Adaptive operators undergo a training process to improve their efficiency over time \cite{roberts2007coupling}. 
-For example, the conditional clade probabilities of neighbouring trees can serve as the basis of adaptive tree operators \cite{hohna2012guided,zhang2020using,meyer2019adaptive},
-and the mirror kernel learns a target distribution which acts as a `mirror image' of the current point $x$ \cite{thawornwattana2018designing}.  
-The \texttt{AdaptiveOperatorSampler} operator, introduced in this article, learns the weight of sub-operators.
-Finally, the adaptable variance multivariate normal (AVMVN) kernel  learns correlations between parameters during MCMC \cite{baele2017adaptive,suchard2018bayesian}. Baele et al. 2017  observed a large increase ($\approx 5-10 \times$) in sampling efficiency from using the AVMVN kernel on clock rates XXX(check)XXX and substitution model parameters across partitions \cite{baele2017adaptive}.  
-
-
-In this article we consider application of the AVMVN kernel to the branch rates of leaf nodes. 
+The adaptable variance multivariate normal (AVMVN) kernel  learns correlations between parameters during MCMC \cite{baele2017adaptive,suchard2018bayesian}. 
+Baele et al. 2017  observed a large increase ($\approx 5-10 \times$) in sampling efficiency from using the AVMVN kernel substitution model parameters \cite{baele2017adaptive}.  
+Here, we consider application of the AVMVN kernel to the branch rates of leaf nodes. 
 This operator, referred to as \texttt{LeafAVMVN}, is not readily applicable to internal node branch rates due to their dependencies on tree topology.  
 
 
 
 
-\subsubsection*{AVMVN kernel}
+\subsubsection*{Leaf rate AVMVN kernel}
 
 
 The AVMVN kernel assumes its parameters live in $x \in \mathbb{R}^N$ and that these parameters follow a Multivariate Normal distribution with covariance matrix $\Sigma_N$. Hence, the kernel operates on the logarithmic or logistic transformation of the $N$ leaf branch rates, depending on the rate parameterisation:
@@ -1065,22 +1058,59 @@ where $r_i$ is a real rate and $q_i$ is a rate quantile. The AVMVN probability d
 
 
 where $\mathcal{MVN}$ is the Multivariate Normal probability density. $\beta \; (= 0.05)$ is a constant which determines the fraction of the proposal determined by the identity matrix $\mathbb{I}_N$, as opposed to the covariance matrix $\Sigma_D$ which is trained during MCMC.
+Our BEAST2 implementation of the AVMVN kernel is adapted from that of BEAST \cite{suchard2018bayesian}.
 
-The AVMVN proposal kernel is computed as
-
-
-\begin{align}
-	x^\prime &\leftarrow x + \sum\limits_{i=1}^N \sum\limits_{j=i}^N c_{i,j} \times s\Sigma \\
-	\text {where }  c &= \text{cholesky} \left( (1-\beta) \frac{\Sigma_N}{N} + \beta \frac{\mathbb{I}_N}{N} \right).
-\end{align}
+%The AVMVN proposal kernel is computed as
 
 
-The cholesky$(Y)$ decomposition returns a lower diagonal matrix $L$, with positive real diagonal entries, such that $Y = LL^\prime$ \cite{lindstrom1988newton, pourahmadi2007cholesky}. $s$ is a tunable step size parameter and $\Sigma$ is a random variable drawn from a proposal kernel (uniform or Bactrian for instance). Our BEAST2 implementation of the AVMVN kernel is adapted from that of BEAST \cite{suchard2018bayesian}.
+%\begin{align}
+%	x^\prime &\leftarrow x + \sum\limits_{i=1}^N \sum\limits_{j=i}^N c_{i,j} \times s\Sigma \\
+%	\text {where }  c &= \text{cholesky} \left( (1-\beta) \frac{\Sigma_N}{N} + \beta \frac{\mathbb{I}_N}{N} \right).
+%\end{align}
+
+
+%The cholesky$(Y)$ decomposition returns a lower diagonal matrix $L$, with positive real diagonal entries, such that $Y = LL^\prime$ \cite{lindstrom1988newton, pourahmadi2007cholesky}. $s$ is a tunable step size parameter and $\Sigma$ is a random variable drawn from a proposal kernel (uniform or Bactrian for instance). 
+
+
+\texttt{LeafAVMVN} has the advantage of operating on all $N$ leaf rates simultaneously (as well as learning their correlations), as opposed to \texttt{ConstantDistance} which operates on at most 2, or \texttt{Scale} which operates on at most 1 leaf rate at a time. 
+As the size of the covariance matrix $\Sigma_N$ grows with the number of taxa $N$, \texttt{LeafAVMVN} is likely to be less efficient with larger taxon sets.
+Therefore, we learn the weight behind this operator using \texttt{AdaptiveOperatorSampler}.
 
 
 
-In \nameref{sect:results}, we evaluate the \texttt{LeafAVMVN} operator for its ability to estimate leaf rates. 
-As the size of the covariance matrix $\Sigma_N$ grows with the number of taxa $N$, AVMVN is hypothesised to work well on small trees but become less efficient with larger taxon sets.
+To avoid the learned weight behind \texttt{LeafAVMVN} dominating the \texttt{AdaptiveOperatorSampler} weighting scheme and therefore inhibiting the mixing of internal node rates, we 
+introduce the \texttt{AdaptiveOperatorSampler(leaf)} and \texttt{AdaptiveOperatorSampler(internal)} meta-operators which operate exclusively on leaf node rates $\vec{\mathcal{R}}^{\,}_\text{leaf}$ and internal node rates $\vec{\mathcal{R}}^{\,}_\text{int}$ respectively  (\textbf{Table \ref{table:AVMVNoperators}}). 
+The former employs the \texttt{LeafAVMVN} operator and learns its weight during MCMC (after providing it sufficient with time to learn $\Sigma_N$).
+
+
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{l l l} 
+ Meta-operator & POI & Operators \\
+\hline
+ \multirow{7}{*}{\texttt{AdaptiveOperatorSampler(leaf)}} & \multirow{7}{*}{$\vec{\mathcal{R}}^{\,}_\text{leaf}, t$} & \texttt{ConstantDistance($\vec{\mathcal{R}}^{\,}_\text{leaf}, \mathcal{T}$)}   \\ 
+&& \texttt{LeafAVMVN($\vec{\mathcal{R}}^{\,}_\text{leaf}$)}  \\
+&& \texttt{RandomWalk($\vec{\mathcal{R}}^{\,}_\text{leaf}$)}  \\
+&& \texttt{Scale($\vec{\mathcal{R}}^{\,}_\text{leaf}$)}   \\
+&& \texttt{Interval($\vec{\mathcal{R}}^{\,}_\text{leaf}$)}   \\
+&& \texttt{Swap($\vec{\mathcal{R}}^{\,}_\text{leaf}$)}  \\
+&& \texttt{SampleFromPrior($\vec{\mathcal{R}}^{\,}_\text{leaf}$)} \\
+\hline
+ \multirow{6}{*}{\texttt{AdaptiveOperatorSampler(internal)}} & \multirow{6}{*}{$\vec{\mathcal{R}}^{\,}_\text{int}, t$} & \texttt{ConstantDistance($\vec{\mathcal{R}}^{\,}_\text{int}, \mathcal{T}$)}   \\ 
+&& \texttt{RandomWalk($\vec{\mathcal{R}}^{\,}_\text{int}$)}  \\
+&& \texttt{Scale($\vec{\mathcal{R}}^{\,}_\text{int}$)}   \\
+&& \texttt{Interval($\vec{\mathcal{R}}^{\,}_\text{int}$)}   \\
+&& \texttt{Swap($\vec{\mathcal{R}}^{\,}_\text{int}$)}  \\
+&& \texttt{SampleFromPrior($\vec{\mathcal{R}}^{\,}_\text{int}$)} \\
+\end{tabular}
+\caption{Leaf rate $\vec{\mathcal{R}}^{\,}_\text{leaf}$ and internal node rate $\vec{\mathcal{R}}^{\,}_\text{int}$ operators. 
+This division enables the two meta-operators to be weighted proportionally to the number of nodes (leaves or internal) which it applies to.
+This facilitates incorporation of the  \texttt{LeafAVMVN} operator, which is only applicable to leaf nodes.
+In this setup, the \texttt{RandomWalk($x$)}, \texttt{Scale($x$)}, and \texttt{SampleFromPrior($x$)} operators apply to the corresponding set of branch rates $x$, whereas \texttt{ConstantDistance($x, \mathcal{T}$)} is only applicable to internal nodes which have at least one child of type $x \in \{\vec{\mathcal{R}}^{\,}_\text{leaf}, \vec{\mathcal{R}}^{\,}_\text{int}\}$.}
+\label{table:AVMVNoperators}
+\end{table}
+
 
 
 
@@ -1159,6 +1189,11 @@ Configuration & Operator & Weight & \textit{real} & \textit{cat} & \textit{quant
  	& \texttt{AdaptiveOperatorSampler($\vec{\mathcal{R}}^{\,}$)} & $30$ &  & \checkmark & \\
  	& \texttt{AdaptiveOperatorSampler(root)} & $30 \times \frac{1}{2N-1}$ & \checkmark & & \checkmark  \\
  	 \hline
+ 	 \multirow{4}{*}{AVMVN} & \texttt{AdaptiveOperatorSampler($\sigma$)} & $10$ & \checkmark &  & \checkmark  \\
+ 	& \texttt{AdaptiveOperatorSampler(leaf)} & $30 \times \frac{N}{2N-1}$ & \checkmark & & \checkmark  \\
+ 	& \texttt{AdaptiveOperatorSampler(internal)} & $30 \times \frac{N-2}{2N-1}$ &  \checkmark &  & \checkmark \\
+ 	 & \texttt{AdaptiveOperatorSampler(root)} & $30 \times \frac{1}{2N-1}$ & \checkmark & & \checkmark  \\
+ 	 \hline
  	 \hline
  	\multirow{1}{*}{NER\{\}} & \texttt{NarrowExchange} & $15$ & \checkmark & \checkmark  & \checkmark  \\
  	\hline
@@ -1166,7 +1201,7 @@ Configuration & Operator & Weight & \textit{real} & \textit{cat} & \textit{quant
 \end{tabular}
 \caption{Operator configurations and the substitution rate parameterisations which each operator are applicable to. Within each configuration (and substitution rate parameterisation), the weight behind $\mathcal{R}$ sums to 30, the weight of $\sigma$ is equal to 10, and the weight of NER is equal to 15.
 %There is no cons (\textit{cat}) configuration because the parameterisation is not compatible the constant distance operators.
-Operators which apply to either internal nodes or the root (but not both) are weighted according to leaf count $N$. The adapt operators are further broken down in \textbf{Table \ref{table:adaptiveSampling}}.
+Operators which apply to either internal nodes or the root (but not both) are weighted according to leaf count $N$. The adaptive operators are further broken down in \textbf{Tables \ref{table:adaptiveSampling}, \ref{table:adaptiveNER}, and \ref{table:AVMVNoperators}}.
 All other operators (i.e. those which apply to which apply to other terms in the state such as the nucleotide substitution model) are held constant within each dataset.
 } 
 
@@ -1226,7 +1261,8 @@ This calculation is performed by BEAST2 \cite{bouckaert2019beast}. \\
 
 Methodologies are benchmarked using one simulated and eight empirical datasets.
 The latter were compiled \cite{lanfear2019Github} and partitioned \cite{lanfear2016partitionfinder} by Lanfear et al. as ``benchmark alignments'' (\textbf{Table \ref{table:datasets}}).
-Each methodology is benchmarked across 5 replicates on each dataset, using the Intel Xeon Gold 6138 CPU (2.00 GHz).
+Each methodology is benchmarked for million-states-per-hour using the Intel Xeon Gold 6138 CPU (2.00 GHz).
+These terms are multipled by the ESS-per-state across 10 replicates on the New Zealand eScience Infrastructure (NeSI) cluster to compute the total ESS/hr of each dataset under each setting.
 All methodologies use identical models and operator configurations, except where a difference is specified.
 
 
@@ -1279,7 +1315,7 @@ Finally, the adapt configuration combined all of the above applicable operators,
 
 
 
-This experiment revealed that nocons performed better than cons on datasets with small $L$ while cons performed better on larger datasets (\textbf{Fig. \ref{fig:round1Results}} and \textbf{\nameref{sect:SR_appendix}}). 
+This experiment revealed that nocons usually performed better than cons on smaller datasets (i.e. small $L$) while cons consistently performed better on larger datasets (\textbf{Fig. \ref{fig:round1Results}} and \textbf{\nameref{sect:SR_appendix}}). 
 This result is unsurprising (\textbf{Fig. \ref{fig:rateparams}}).
 Furthermore, the adapt setup dramatically improved mixing for \textit{real} by finding the right balance between cons and nocons.
 This yielded an ESS/hr (averaged across all 9 datasets) 80\% faster than cons and 120\% faster than nocons, with respect to leaf branch rates, and 250\% and 1800\% faster for $\sigma$.
@@ -1291,7 +1327,7 @@ Overall, the \texttt{AdaptiveOperatorSampler} operator will be included in all s
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round1_real.pdf}
-\caption{\textbf{Round 1: benchmarking the \texttt{AdaptiveOperatorSampler} operator.} Top left, top right, bottom left: each plot compares the ESS/hr ($\pm 2$ standard errors) across two operator configurations with respect to relevant terms -- $L$: log likelihood, $p$: log prior density, $r$: substitution rate ESS averaged across all leaves, $\sigma$: clock standard deviation, $h$: tree height, and $\kappa$: HKY model transition-transversion ratio.
+\caption{\textbf{Round 1: benchmarking the \texttt{AdaptiveOperatorSampler} operator.} Top left, top right, bottom left: each plot compares the ESS/hr ($\pm 2$ standard errors) across two operator configurations with respect to relevant terms -- $L$: log likelihood, $p$: log prior density, $r$: substitution rate ESS averaged across all leaves, $\sigma$: clock standard deviation, $l$: tree length (i.e. sum of all branch lengths), and $\kappa$: HKY model transition-transversion ratio.
 Bottom right: the effect of sequence length $L$ on operator weights learned by \texttt{AdaptiveOperatorSampler}. Both sets of results are fit by a logistic regression curve.
  The benchmark datasets are displayed in \textbf{Table \ref{table:datasets}}. The \emph{cat} and \emph{quant} settings are evaluated in \textbf{\nameref{sect:SR_appendix}}.  }
 \label{fig:round1Results}
@@ -1335,26 +1371,45 @@ Overall, we have determined that \textit{real}, and its associated operators, ma
 
 
 
-\subsection*{Round 3: Bactrian proposal kernels are 10\% more efficient than uniform kernels}
+\subsection*{Round 3: Bactrian proposal kernels are around 15\% more efficient than uniform kernels}
 
 
-We benchmarked the adapt (\textit{real}) configuration with a) standard uniform proposal kernels, and b) Bactrian(0.95) kernels.
+We benchmarked the adapt (\textit{real}) configuration with a) standard uniform proposal kernels, and b) Bactrian(0.95) kernels \cite{yang2013searching}.
 These kernels applied to all clock model related operators (\textbf{Table \ref{table:bactriankernels}}).
+These results confirmed that the Bactrian kernel yields faster mixing than the standard uniform kernel (\textbf{Fig. \ref{fig:round3Results}}).
+All relevant continuous parameters considered had an ESS/hr, averaged across the 9 datasets, between 12 and 17\% faster compared to with the standard uniform kernel.
+Bactrian proposal kernels will proceed to round 4 of the relaxed clock model optimisation protocol. 
 
 
 
-\subsection*{Round 4: Evaluating adaptive NER}
+
+\begin{figure}[!h]
+\includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round3.pdf}
+\caption{\textbf{Round 3: benchmarking the Bactrian kernel.} }
+\label{fig:round3Results}
+\end{figure}
+
+
+
+
+\subsection*{Round 4: NER operators outperform on larger datasets}
 
 
 Our initial screening of the \texttt{NarrowExchangeRate} (NER) operators revealed that the $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ operator outperformed the standard $\text{NER} \{\}$ / \texttt{NarrowExchange} operator about 25\% of the time on simulated data, however it was also very sensitive to the dataset. 
 Therefore we wrapped up the two operators ($\text{NER} \{\}$ and $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$) within an \texttt{AdaptiveOperatorSampler} operator so that the appropriate weights can be learned, using the Robinson-Foulds metric.
-In this round we benchmarked the adapt + Bactrian(0.95) (\textit{real})  setting with a) $\text{NER} \{\}$ only, and b) adaptive $\text{NER}$ (\textbf{Table \ref{table:operatorSchemes}}).
+In this round we benchmarked the Bactrian + adapt (\textit{real})  setting with a) $\text{NER} \{\}$ only, and b) adaptive $\text{NER}$ (\textbf{Table \ref{table:operatorSchemes}}).
 
 
-Our experiments confirmed that $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ is indeed superior on larger datasets (where $L > 1$kb; \textbf{Fig. \ref{fig:round4Results}}).
-Whereas, on smaller datasets the standard \texttt{NarrowExchange} operator had a higher acceptance rate.
-Using an adaptive operator (\texttt{AdaptiveOperatorSampler}) removes the burden from the user in selecting which operator is the best pick.
-The average acceptance rate of 
+Our experiments confirmed that $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ was indeed superior on larger datasets (where $L > 2$kb; \textbf{Fig. \ref{fig:round4Results}}).
+While there was no significant difference in the ESS/hr of continuous parameters, $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ did have an acceptance rate 40\% higher than that of the standard \texttt{NarrowExchange} operator in the most extreme case (the 7kb alignment by Broughton et al.\cite{Broughton_2013}).
+Every proposal acceptance changes the topology and thus facilitates traversal of tree space. 
+
+
+In contrast, the standard \texttt{NarrowExchange} operator outperformed on smaller datasets.
+Thus, the new operator is not always helpful and sometimes it even hinders performance.
+Using an adaptive operator (\texttt{AdaptiveOperatorSampler}) removes the burden from the user in making the decision of which operator to use.
+The \texttt{AdaptiveOperatorSampler(NER)} operator will proceed to the next round of the tournament.
+
 
 
 \begin{figure}[!h]
@@ -1366,31 +1421,51 @@ Logistic and linear regression models are shown, respectively. }
 \end{figure}
 
 
-
-
-
 \subsection*{Round 5: The AVMVN leaf rate operator works well for small taxon sets}
 
 
+We sought to test the applicability of the adaptive AVMVN kernel to leaf rate proposals, by learning the correlation between their substitution rates.
+To do this, we wrapped the \texttt{LeafAVMVN} operator within an \texttt{AdaptiveOperatorSampler} (\textbf{Table \ref{table:AVMVNoperators}}).
+The two congifuations compared here were a) adapt + Bactrian + NER (\textit{real}) and b) AVMVN + NER + Bactrian + adapt (\textit{real})  (\textbf{Table \ref{table:operatorSchemes}}).
+
+
+These results showed that XXX (\textbf{Table \ref{fig:round5Results}}).
+
+
+\begin{figure}[!h]
+\includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round5.pdf}
+\caption{\textbf{Round 5: benchmarking the \texttt{LeafAVMVN} operator.}  }
+\label{fig:round5Results}
+\end{figure}
 
 
 
+Overall, this operator configuration, is the final winner in the tournamant and is greatly superior to both the historic BEAST2 \textit{cat} configuration as well as the recently developed cons (\text{real}) \cite{zhang2020improving} scheme.
+
+
+
+\begin{figure}[!h]
+%\includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round5b.pdf}
+\caption{\textbf{Comparing the winner of the tournament setting with the previous standards.}  }
+\label{fig:tournamentSummary}
+\end{figure}
+
+\newpage
 \section*{Discussion} \label{sect:discussion}
 
 
-% Points to cover
-
-% - Dont change branch lengths and topology at the same time.  This result is unfortunate however not unexpected, and is consistent with Lakner et al. 2008 \cite{lakner2008efficiency}, who observed that tree operators perform best when they change either topology, or branch lengths, but not both.
-
-
+In this article, we delved into the highly correlated structure of relaxed clock models, in order to develop MCMC operators which efficiently traverse  its posterior space.
+We introduced a range of relaxed clock model operators and compared three molecular substitution rate parameterisations.
+These methodologies were compared by constructing phylogenetic models using a range of empirical datasets (\textbf{Fig. \ref{fig:parameterisationResults}}) and comparing their abilties to converge in a tournament-like protocol (\textbf{Fig. \ref{fig:tournament}}).
+This work has produced an operator configuration which explores relaxed clock model space up to XXX times more efficiently than previous setups.
 
 
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{Figures/cognato.pdf}
 \includegraphics[width=\textwidth]{Figures/broughton.pdf}
-\caption{\textbf{Maximum clade credibility trees.} 
-Phylogenetic trees of bark beetles (Cognato et al. 2001 \cite{Cognato_2001}; top) and bony fishes (Broughton et al. 2013 \cite{Broughton_2013}; bottom) are presented. 
+\caption{\textbf{Relaxed clock phylogenies.} 
+Maximum clade credibility trees of bark beetles (Cognato et al. 2001 \cite{Cognato_2001}; top) and bony fishes (Broughton et al. 2013 \cite{Broughton_2013}; bottom) are presented. 
 Branches are coloured by substitution rate (units: substitutions per site per unit of time) and the y-axis shows time, such that there is on average 1 substitution per unit of time.
  Internal nodes are labelled with posterior clade support. Figures generated by UglyTrees \cite{uglytrees}.  }
 \label{fig:parameterisationResults}
@@ -1399,9 +1474,46 @@ Branches are coloured by substitution rate (units: substitutions per site per un
 
 
 
+% Points to cover
+
+\subsection*{Adaptive operators and modern proposal kernels}
+	%   1 Adaptive operators and smart proposal kernels
+	%	Connect the work done here with others work
+	%   Bactrian was 10--15\% faster and how does this compare witn Yang??
+	% Incorporation of the Bactrian kernel into pre-existing operators is a computationally straightforward task \cite{yang2013searching} and should be rountinely implemented in Bayesian MCMC software packages.
+	
+	%			Adaptive operators undergo a training process to improve their efficiency over time \cite{roberts2007coupling}. 
+	%			For example, the conditional clade probabilities of neighbouring trees can serve as the basis of adaptive tree operators \cite{hohna2012guided,zhang2020using,meyer2019adaptive},
+	%			and the mirror kernel learns a target distribution which acts as a `mirror image' of the current point $x$ \cite{thawornwattana2018designing}.  
+	%			The \texttt{AdaptiveOperatorSampler} operator, introduced in this article, learns the weight of sub-operators.
+	
+\subsection*{Larger datasets require smarter operators}
+	%   2 Posterior space is different on large datasets
+	% - Better to have methods which underperform on small than on large datasets
+	% - eg. Constant distance on node heights and on tree topology
+	% - Adaptive operators relieve the burden anyhow
+
+\subsection*{Traversing topology and branch length space}
+	%   3 Can change branch lengths or topology but not both
+	% - We introduced NER operators
+	% - Random walks always made the operator worse
+	% - Dont change branch lengths and topology at the same time.  This result is unfortunate however not unexpected, and is consistent with Lakner et al. 2008 \cite{lakner2008efficiency}, who observed that tree operators perform best when they change either topology, or branch lengths, but not both.
+
+
+
+
+
+
+
+
 
 
 \section*{Conclusion}
+
+% Deep diving into the intrinsic nature of the relaxed clock and its correlations to help develop faster operators
+% We introduced several new operators and compared three different rate parameterisations
+% We found that the best was XXX
+% This is XXX times faster
 
 
 \newpage
