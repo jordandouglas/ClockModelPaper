@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='' namespace="consoperators:beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" required="BEAST v2.5.0" version="2.5">
+
+
+
+    <map name="Uniform" >beast.math.distributions.Uniform</map>
+    <map name="Exponential" >beast.math.distributions.Exponential</map>
+    <map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
+    <map name="Normal" >beast.math.distributions.Normal</map>
+    <map name="Beta" >beast.math.distributions.Beta</map>
+    <map name="Gamma" >beast.math.distributions.Gamma</map>
+    <map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
+    <map name="prior" >beast.math.distributions.Prior</map>
+    <map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
+    <map name="OneOnX" >beast.math.distributions.OneOnX</map>
+    <map name="Dirichlet" >beast.math.distributions.Dirichlet</map>
+
+
+	
+
+	PUT_LOG_LINE_HERE
+	<data spec='beast.app.seqgen.SimulatedAlignment' id="calsim" sequencelength="2000" outputFileName="simulated_alignment_SIMNUM.xml">
+
+
+		<tree id='simulated_tree' spec='beast.util.TreeParser' newick="INSERT_TREE_HERE" IsLabelledNewick="true"/>
+
+
+		<data spec='Alignment' id="input_alignment" dataType="nucleotide">
+			<sequence taxon="1">?</sequence>
+			<sequence taxon="2">?</sequence>
+			<sequence taxon="3">?</sequence>
+			<sequence taxon="4">?</sequence>
+			<sequence taxon="5">?</sequence>
+			<sequence taxon="6">?</sequence>
+			<sequence taxon="7">?</sequence>
+			<sequence taxon="8">?</sequence>
+			<sequence taxon="9">?</sequence>
+			<sequence taxon="10">?</sequence>
+			<sequence taxon="11">?</sequence>
+			<sequence taxon="12">?</sequence>
+			<sequence taxon="13">?</sequence>
+			<sequence taxon="14">?</sequence>
+			<sequence taxon="15">?</sequence>
+			<sequence taxon="16">?</sequence>
+			<sequence taxon="17">?</sequence>
+			<sequence taxon="18">?</sequence>
+			<sequence taxon="19">?</sequence>
+			<sequence taxon="20">?</sequence>
+			<sequence taxon="21">?</sequence>
+			<sequence taxon="22">?</sequence>
+			<sequence taxon="23">?</sequence>
+			<sequence taxon="24">?</sequence>
+			<sequence taxon="25">?</sequence>
+			<sequence taxon="26">?</sequence>
+			<sequence taxon="27">?</sequence>
+			<sequence taxon="28">?</sequence>
+			<sequence taxon="29">?</sequence>
+			<sequence taxon="30">?</sequence>
+		</data>
+
+
+		<siteModel spec="SiteModel">
+			<substModel spec="HKY">
+				<parameter name='kappa' value="INSERT_KAPPA_HERE" lower="0.0"/>
+				<frequencies spec="Frequencies" frequencies="INSERT_FREQUENCIES_HERE"/>
+			</substModel>
+		</siteModel>
+
+		<branchRateModel id="true:clockModel" spec="beast.evolution.branchratemodel.UCRelaxedClockModel" tree="@simulated_tree">
+			<parameter id="ucldMean" estimate="false" name="clock.rate">1.0</parameter>
+			<parameter name="rates" spec="parameter.RealParameter" value="1"/>
+			<distr id='lognormal' spec="beast.math.distributions.LogNormalDistributionModel" meanInRealSpace="true">
+				<parameter name='M' id='M' value="1.0"/>
+				<parameter name='S' id='ucld.stdev' value="INSERT_CLOCK_SD_HERE"/>
+			</distr>
+		</branchRateModel>
+
+
+	</data>
+
+
+
+	<parameter id="rates.c:benchmark" spec="parameter.CompoundRealParameter">
+			<parameter idref="leafRates"/>
+			<parameter idref="internalRates"/>
+	</parameter>
+
+
+	<run id="mcmc" spec="MCMC"  chainLength="50000000">
+
+		<state id="state" spec="State" storeEvery="1000">
+
+			<tree id="Tree.t:benchmark" spec="beast.evolution.tree.Tree" name="stateNode">
+				<taxonset id="TaxonSet.benchmark" spec="TaxonSet">
+					<alignment idref="calsim"/>
+				</taxonset>
+			</tree>
+
+			
+			<parameter id="kappa.t" lower="0.0" name="stateNode">2.0</parameter>
+			<parameter id="freqParameter.t" dimension="4" name="stateNode">0.25</parameter>
+
+
+			<parameter id="ucldStdev.c:benchmark" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.1</parameter>
+			<parameter id="birthRate.t:benchmark" spec="parameter.RealParameter" name="stateNode">1.0</parameter>
+
+			<stateNode id="leafRates" spec="parameter.RealParameter" dimension="30">1</stateNode>
+			<stateNode id="internalRates" spec="parameter.RealParameter" dimension="28">1</stateNode>
+
+
+
+		</state>
+
+		<init spec="beast.util.ClusterTree" id="NJtree" initial="@Tree.t:benchmark" clusterType="neighborjoining" taxa="@calsim"/>
+
+		<distribution id="posterior" spec="util.CompoundDistribution">
+
+			<distribution id="prior" spec="util.CompoundDistribution">
+
+				<distribution id="YuleModel.t:benchmark" spec="beast.evolution.speciation.YuleModel" birthDiffRate="@birthRate.t:benchmark" tree="@Tree.t:benchmark"/>
+                            
+				<prior id="YuleBirthRatePrior.t:benchmark" name="distribution" x="@birthRate.t:benchmark">
+					<LogNormal id="LogNormalDistributionModel.2" name="distr">
+						<parameter id="RealParameter.17" spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
+						<parameter id="RealParameter.18" spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
+					</LogNormal>
+				</prior>
+
+
+
+				<prior name="distribution" x="@kappa.t">
+				    <LogNormal name="distr">
+				<parameter spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
+				<parameter spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
+				    </LogNormal>
+				</prior>
+				
+				<prior name="distribution" x="@freqParameter.t">
+				    <Dirichlet alpha="10 10 10 10" name="distr"/>
+				</prior>
+				    
+
+
+
+				<prior id="ucldStdevPrior.c:benchmark" name="distribution" x="@ucldStdev.c:benchmark">
+					<Gamma id="Gamma.2" name="distr">
+						<parameter id="RealParameter.10" spec="parameter.RealParameter" estimate="false" name="alpha">0.5396</parameter>
+						<parameter id="RealParameter.11" spec="parameter.RealParameter" estimate="false" name="beta">0.3819</parameter>
+					</Gamma>
+				</prior>
+
+
+				<prior id="FastRatePriorDistrbution.c:dna:internal" name="distribution" x="@internalRates">
+					<LogNormal id="LogNormalDistributionModel.rates" S="@ucldStdev.c:benchmark" M="1" meanInRealSpace="true" name="distr"/>
+				</prior>
+
+				
+				<prior id="FastRatePriorDistrbution.c:dna:rates" name="distribution" x="@leafRates">
+					<distr idref="LogNormalDistributionModel.rates"/>
+				</prior>
+
+			</distribution>
+
+			<distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
+
+				<distribution id="treeLikelihood" spec="TreeLikelihood" tree="@Tree.t:benchmark" data="@calsim">
+				    <siteModel spec="SiteModel" gammaCategoryCount="1">
+					<parameter spec="parameter.RealParameter" estimate="false" name="shape">1.0</parameter>
+					<parameter estimate="false" name="mutationRate">1.0</parameter>
+					<substModel spec="HKY" kappa="@kappa.t"><frequencies spec="Frequencies" frequencies="@freqParameter.t"/></substModel>
+				    </siteModel>
+				    <branchRateModel id="RelaxedClock.c:benchmark" spec="beast.evolution.branchratemodel.UCRelaxedClockModel" rates="@rates.c:benchmark" tree="@Tree.t:benchmark">
+					<parameter id="ucldMean.c:benchmark" estimate="false" name="clock.rate">1.0</parameter>
+					<LogNormal id="LogNormalDistributionModel.c:calsim" S="@ucldStdev.c:benchmark" meanInRealSpace="true" name="distr">
+						<parameter id="RealParameter.9" spec="parameter.RealParameter" estimate="false" lower="0.0" name="M" upper="1.0">1.0</parameter>
+					</LogNormal>
+					
+				    </branchRateModel>
+				</distribution>
+
+			</distribution>
+
+		</distribution>
+
+		
+
+		<operator id="KappaScaler.s" spec="ScaleOperator" parameter="@kappa.t" scaleFactor="0.5" weight="0.2"/>
+		<operator id="FrequenciesExchanger.s" spec="DeltaExchangeOperator" delta="0.01" weight="0.2">
+		    <parameter idref="freqParameter.t"/>
+		</operator>
+
+
+
+		<operator id="AdaptableOperatorSampler.ucldStdev" spec="AdaptableOperatorSampler" weight="10.0">
+
+			<parameter idref="ucldStdev.c:benchmark" />
+
+
+			<operator id="fastUcldStdevScaler.c:calsim" spec="consoperators.UcldScalerOperator" distr="@LogNormalDistributionModel.rates" rates="@rates.c:benchmark" scaleFactor="0.5" stdev="@ucldStdev.c:benchmark" weight="1.0"/>
+			
+			<operator id="UcldStdevRandomWalk.c:benchmark" spec="RealRandomWalkOperator" parameter="@ucldStdev.c:benchmark" weight="1" windowSize="1"/>
+			<operator id="UcldStdevScale.c:benchmark" spec="ScaleOperator" scaleFactor="0.5" parameter="@ucldStdev.c:benchmark" weight="1"/>
+			<operator id="SampleFromPriorOperator.c:ucldStdev" spec="SampleFromPriorOperator" parameter="@ucldStdev.c:benchmark" prior="@Gamma.2" weight="1"/>
+
+
+
+		</operator>
+		
+
+
+		<operator id="AdaptableOperatorSampler.rates.root" spec="AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="1">
+
+			<operator id="RootOperator1.c:dna" spec="consoperators.SimpleDistance" twindowSize="0.005" tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" rates="@rates.c:benchmark"  weight="1">
+				<kernel spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
+
+			<operator id="RootOperator2.c:dna" spec="consoperators.SmallPulley" dwindowSize="0.005" tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" rates="@rates.c:benchmark"  weight="1">
+				<kernel spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
+
+
+		</operator>
+
+
+
+		<operator id="AdaptableOperatorSampler.rates.internal" spec="AdaptableOperatorSampler" parameter="@internalRates" tree="@Tree.t:benchmark" weight="14">
+
+
+			<operator id="InternalnodesOperator.c:dna" spec="consoperators.InConstantDistanceOperator" include="internal" twindowSize="0.005"  tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" rates="@rates.c:benchmark"  weight="1">
+				<kernel spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
+
+			<operator id="RatesRandomWalk.c:benchmark" spec="BactrianRandomWalkOperator" parameter="@internalRates" weight="1" scaleFactor="0.1">
+				<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
+			
+			<operator id="RatesScale.c:benchmark" spec="BactrianScaleOperator" scaleFactor="0.5" parameter="@internalRates" weight="1">
+				<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
+
+			<operator id="SampleFromPriorOperator.c:benchmark" spec="SampleFromPriorOperator" parameter="@internalRates" np="1" prior="@LogNormalDistributionModel.rates" weight="1"/>
+
+		</operator>
+		
+		
+		
+		<operator id="AdaptableOperatorSampler.rates.leaf" spec="AdaptableOperatorSampler" parameter="@leafRates" tree="@Tree.t:benchmark" weight="15" burnin="30000">
+
+			<operator id="InternalnodesOperator.c:dna.leaf" spec="consoperators.InConstantDistanceOperator"  include="leaf" twindowSize="0.005"  tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" rates="@rates.c:benchmark"  weight="1">
+				<kernel spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
+
+			<operator id="AdaptableVarianceMultivariateNormalOperator" spec="beast.evolution.operators.AdaptableVarianceMultivariateNormalOperator" 
+                weight="1"
+                coefficient="1"
+                scaleFactor="1"
+                beta="0.05"
+                initial="1000"
+                burnin="500"
+                every="1">
+				<transformations spec="beast.util.Transform$LogTransform">
+					<f idref="leafRates"/>
+				</transformations>
+			</operator>
+
+			<operator id="RatesRandomWalk.c:benchmark.leaf" spec="BactrianRandomWalkOperator" parameter="@leafRates" weight="1" scaleFactor="0.1">
+				<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
+			
+			<operator id="RatesScale.c:benchmark.leaf" spec="BactrianScaleOperator" scaleFactor="0.5" parameter="@leafRates" weight="1">
+				<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+			</operator>
+
+			<operator id="SampleFromPriorOperator.c:leaf" spec="SampleFromPriorOperator" parameter="@leafRates" np="1" prior="@LogNormalDistributionModel.rates" weight="1"/>
+
+		</operator>
+
+
+		<operator id="YuleBirthRateScaler.t:dummy" spec="ScaleOperator" parameter="@birthRate.t:benchmark" scaleFactor="0.75" weight="2.0"/>
+		<operator id="YuleModelTreeScaler.t:dummy" spec="ScaleOperator" scaleFactor="0.5" tree="@Tree.t:benchmark" weight="3.0"/>
+		<operator id="YuleModelTreeRootScaler.t:dummy" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@Tree.t:benchmark" weight="3.0"/>
+		<operator id="YuleModelUniformOperator.t:dummy" spec="Uniform" tree="@Tree.t:benchmark" weight="30.0"/>
+		<operator id="YuleModelSubtreeSlide.t:dummy" spec="SubtreeSlide" tree="@Tree.t:benchmark" weight="15.0"/>
+		<operator id="YuleModelWide.t:dummy" spec="Exchange" isNarrow="false" tree="@Tree.t:benchmark" weight="3.0"/>
+		<operator id="YuleModelWilsonBalding.t:dummy" spec="WilsonBalding" tree="@Tree.t:benchmark" weight="3.0"/>
+
+
+		<operator id="AdaptableOperatorSampler.NER" spec="AdaptableOperatorSampler" tree="@Tree.t:benchmark" weight="15">
+
+			<metric spec="beast.evolution.tree.RobinsonsFouldMetric" taxonset="@TaxonSet.benchmark"/>
+			<operator id="YuleModelNarrow.t:dummy" spec="Exchange" tree="@Tree.t:benchmark" weight="1"/>
+			<operator id="NEROperator_nowalk_dAE_dBE_dCE" spec="NERVariants.NEROperator_dAE_dBE_dCE" tree="@Tree.t:benchmark" rates="@rates.c:benchmark" weight="1"/>
+			
+		</operator>
+
+
+
+
+
+		<logger id="tracelog" spec="Logger" fileName="OUTPUT_RATES.log" logEvery="2000" model="@posterior" sanitiseHeaders="true" sort="smart">
+			<log idref="posterior"/>
+			<log idref="likelihood"/>
+			<log idref="prior"/>
+			<log id="TreeHeight.t:benchmark" spec="beast.evolution.tree.TreeStatLogger" tree="@Tree.t:benchmark"/>
+
+			<log idref="kappa.t"/>
+			<log idref="freqParameter.t"/>
+
+			<log idref="ucldStdev.c:benchmark"/>
+			<log id="RateStatLogger:mcmc" spec="beast.evolution.branchratemodel.RateStatistic" branchratemodel="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
+			<log id="RateStatLogger:true" spec="beast.evolution.branchratemodel.RateStatistic" branchratemodel="@true:clockModel" tree="@simulated_tree"/>
+			<log idref="birthRate.t:benchmark"/>
+		</logger>
+
+		<logger id="screenlog" spec="Logger" logEvery="1000">
+			<log idref="posterior"/>
+			<log idref="likelihood"/>
+			<log idref="prior"/>
+		</logger>
+
+
+
+	</run>
+
+
+</beast>
+
+
+

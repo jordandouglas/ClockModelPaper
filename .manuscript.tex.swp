@@ -1252,17 +1252,19 @@ Methodologies are assessed according to the following criteria.
 \textbf{1. Validation}. This is assessed by measuring the coverage of all estimated parameters in well-calibrated simulation studies. These are presented in \textbf{\nameref{sect:WCSS_appendix}}. \\
 
 
-\textbf{2. Mixing of parameters}. Key parameters are evaluated for the number of effective samples generated per hour (ESS/hr). 
-This calculation is performed by BEAST2 \cite{bouckaert2019beast}. \\
+\textbf{2. Mixing of parameters}. Key parameters are evaluated for the number of effective samples generated per hour (ESS/hr).
+These key parameters are the likelihood $\mathcal{L}$ and prior $p$ densities,  tree length $l$ (i.e. the sum of all branch lengths), mean branch rate $\bar{r}$, branch rate of all leaf nodes $r$, and relaxed clock standard deviation $\sigma$.
+Ee also include the HKY substitution model term $\kappa$. 
+The mixing of $\kappa$ should not be strongly affected by any of the clock model operators, and thus it serves as a positive control in each experiment. \\
 
 %\textbf{3. Time to convergence}. Two independent MCMC chains are run and the time is measured until: a) the absolute difference in clade posterior probability between the two chains is less than 0.05 for all clades, b) the Rubin-Gelman statistic $\hat{R}$ \cite{gelman1992inference} of every estimated parameter is less than 1.05, and c) the effective sample size \cite{rambaut2018posterior} of every estimated parameter is greater than 200 in each chain. \\
 
 
 
 Methodologies are benchmarked using one simulated and eight empirical datasets.
-The latter were compiled \cite{lanfear2019Github} and partitioned \cite{lanfear2016partitionfinder} by Lanfear et al. as ``benchmark alignments'' (\textbf{Table \ref{table:datasets}}).
+The latter were compiled \cite{lanfear2019Github} and partitioned \cite{lanfear2016partitionfinder} by Lanfear as ``benchmark alignments'' (\textbf{Table \ref{table:datasets}}).
 Each methodology is benchmarked for million-states-per-hour using the Intel Xeon Gold 6138 CPU (2.00 GHz).
-These terms are multipled by the ESS-per-state across 10 replicates on the New Zealand eScience Infrastructure (NeSI) cluster to compute the total ESS/hr of each dataset under each setting.
+These terms are multipled by the ESS-per-state across 20 replicates on the New Zealand eScience Infrastructure (NeSI) cluster to compute the total ESS/hr of each dataset under each setting.
 All methodologies use identical models and operator configurations, except where a difference is specified.
 
 
@@ -1321,13 +1323,20 @@ Furthermore, the adapt setup dramatically improved mixing for \textit{real} by f
 This yielded an ESS/hr (averaged across all 9 datasets) 80\% faster than cons and 120\% faster than nocons, with respect to leaf branch rates, and 250\% and 1800\% faster for $\sigma$.
 Similar results were observed with \textit{quant}.
 However adapt neither helped nor harmed \textit{cat}, suggesting that the default operator weighting scheme was sufficient.
+
+
+This experiment also revealed that the standard \texttt{Scale} operator was preferred over \texttt{CisScale} for the \textit{real} configuration. Averaged across all datasets, the learned weights behind these two operators were XXX and YYY.
+This is due to the computationally demanding nature of \texttt{CisScale} which invokes the i-CDF function.
+In contrast, \texttt{Scale} and \texttt{CisScale} performed equally well under the \texttt{quant} configuration and were weighted at XXX and YYY.
+
+
 Overall, the \texttt{AdaptiveOperatorSampler} operator will be included in all subsequent rounds in the tournament. 
 
 
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round1_real.pdf}
-\caption{\textbf{Round 1: benchmarking the \texttt{AdaptiveOperatorSampler} operator.} Top left, top right, bottom left: each plot compares the ESS/hr ($\pm 2$ standard errors) across two operator configurations with respect to relevant terms -- $L$: log likelihood, $p$: log prior density, $r$: substitution rate ESS averaged across all leaves, $\sigma$: clock standard deviation, $l$: tree length (i.e. sum of all branch lengths), and $\kappa$: HKY model transition-transversion ratio.
+\caption{\textbf{Round 1: benchmarking the \texttt{AdaptiveOperatorSampler} operator.} Top left, top right, bottom left: each plot compares the ESS/hr ($\pm 1$ standard error) across two operator configurations.
 Bottom right: the effect of sequence length $L$ on operator weights learned by \texttt{AdaptiveOperatorSampler}. Both sets of results are fit by a logistic regression curve.
  The benchmark datasets are displayed in \textbf{Table \ref{table:datasets}}. The \emph{cat} and \emph{quant} settings are evaluated in \textbf{\nameref{sect:SR_appendix}}.  }
 \label{fig:round1Results}
@@ -1350,17 +1359,19 @@ Clock model operators weights were also learned in the adapt (\textit{cat}) conf
 
 
 
-This experiment showed that the \textit{real} parameterisation greatly outperformed both \textit{cat} and \textit{quant} on most datasets (\textbf{Fig. \ref{fig:round2Results}}).
+This experiment showed that the \textit{real} parameterisation greatly outperformed \textit{cat} on most datasets (\textbf{Fig. \ref{fig:round2Results}}).
 This disparity is strongest for long alignments.
-In the most extreme case, leaf substitution rates $r$ and clock standard deviation $\sigma$ both mixed around $70 \times$ faster on the 15.5 kb seed plant dataset \cite{Ran_2018} for \textit{real} than they did for \textit{cat}.
+In the most extreme case, leaf substitution rates $r$ and clock standard deviation $\sigma$ both mixed around XXX $\times$ faster on the 15.5 kb seed plant dataset \cite{Ran_2018} for \textit{real} than they did for \textit{cat}.
 The advantages in using constant distance operators would likely be even stronger for larger $L$.
+Furthermore, \textit{real} outperformed \textit{quant} on most datasets, but this is mostly due to the slow computational performance of \textit{quant} compared with real, as opposed to differences in mixing prowess (\textbf{\nameref{sect:SR_appendix}}).
+
 Overall, we have determined that \textit{real}, and its associated operators, makes the best parameterisation covered here and will proceed to the next rounds of the benchmarking.
 
 
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round2.pdf}
-\caption{\textbf{Round 2: benchmarking substitution rate parameterisations.} Top left, top right, bottom left: the adapt (\textit{real}), adapt (\textit{cat}), and adapt (\textit{quant}) configurations were compared. See \textbf{Fig. \ref{fig:round1Results}} caption for figure notation. Bottom right: comparison of the mean tip substitution rate ESS/hr as a function of sequence length. }
+\caption{\textbf{Round 2: benchmarking substitution rate parameterisations.} Top left, top right, bottom left: the adapt (\textit{real}), adapt (\textit{cat}), and adapt (\textit{quant}) configurations were compared. Bottom right: comparison of the mean tip substitution rate ESS/hr as a function of alignment length $L$. }
 \label{fig:round2Results}
 \end{figure}
 
@@ -1377,7 +1388,7 @@ Overall, we have determined that \textit{real}, and its associated operators, ma
 We benchmarked the adapt (\textit{real}) configuration with a) standard uniform proposal kernels, and b) Bactrian(0.95) kernels \cite{yang2013searching}.
 These kernels applied to all clock model related operators (\textbf{Table \ref{table:bactriankernels}}).
 These results confirmed that the Bactrian kernel yields faster mixing than the standard uniform kernel (\textbf{Fig. \ref{fig:round3Results}}).
-All relevant continuous parameters considered had an ESS/hr, averaged across the 9 datasets, between 12 and 17\% faster compared to with the standard uniform kernel.
+All relevant continuous parameters considered had an ESS/hr, averaged across the 9 datasets, between XXX and YYY\% faster compared to with the standard uniform kernel.
 Bactrian proposal kernels will proceed to round 4 of the relaxed clock model optimisation protocol. 
 
 
@@ -1385,7 +1396,10 @@ Bactrian proposal kernels will proceed to round 4 of the relaxed clock model opt
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round3.pdf}
-\caption{\textbf{Round 3: benchmarking the Bactrian kernel.} }
+\caption{\textbf{Round 3: benchmarking the Bactrian kernel.}
+The ESS/hr ($\pm 1$ s.e.) under the Bactrian congifuration, divided by that under the uniform kernel, is shown in the y-axis for each dataset and relevant parameter.
+Horizontal bars show the geometric mean under each parameter.
+ }
 \label{fig:round3Results}
 \end{figure}
 
@@ -1416,48 +1430,47 @@ The \texttt{AdaptiveOperatorSampler(NER)} operator will proceed to the next roun
 \includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round4.pdf}
 \caption{\textbf{Round 4: benchmarking the NER operators.} 
 The learned weights (left) behind the two NER operators ($\text{NER} \{\}$ and $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$), and the relative difference between their acceptance rates $\alpha$ (right), are presented as functions of sequence length.
-Logistic and linear regression models are shown, respectively. }
+Logistic and logarithmic regression models are shown, respectively. }
 \label{fig:round4Results}
 \end{figure}
 
 
-\subsection*{Round 5: The AVMVN leaf rate operator works well for small taxon sets}
+\subsection*{Round 5: The AVMVN leaf rate operator is computationally demanding and improves mixing slightly}
 
 
 We sought to test the applicability of the adaptive AVMVN kernel to leaf rate proposals, by learning the correlation between their substitution rates.
 To do this, we wrapped the \texttt{LeafAVMVN} operator within an \texttt{AdaptiveOperatorSampler} (\textbf{Table \ref{table:AVMVNoperators}}).
-The two congifuations compared here were a) adapt + Bactrian + NER (\textit{real}) and b) AVMVN + NER + Bactrian + adapt (\textit{real})  (\textbf{Table \ref{table:operatorSchemes}}).
+The two configuations compared here were a) adapt + Bactrian + NER (\textit{real}) and b) AVMVN + NER + Bactrian + adapt (\textit{real})  (\textbf{Table \ref{table:operatorSchemes}}).
 
 
-These results showed that XXX (\textbf{Table \ref{fig:round5Results}}).
+These results showed that the AVMVN operator yielded slightly better mixing for the tree likelihood, the tree length and the mean branch rate (\textbf{Table \ref{fig:round5Results}}).
+However, it also produced slightly slower mixing for $\kappa$, reflecting the high computational costs associated with the \texttt{LeafAVMVN} operator (\textbf{\nameref{sect:SR_appendix}}).
+The learned weight of the \texttt{LeafAVMVN} operator was quite small (ranging from XXX to YYY across all datasets), again reflecting its high computational costs, but also reinforcing the value in having an adaptive weight operator which penalises slow operators.
+Overall, the \texttt{LeafAVMVN} operator provided some, but not much, benefit in its current form. 
 
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round5.pdf}
-\caption{\textbf{Round 5: benchmarking the \texttt{LeafAVMVN} operator.}  }
+\caption{\textbf{Round 5: benchmarking the \texttt{LeafAVMVN} operator.} See \textbf{Fig. \ref{fig:round3Results}} caption for figure notation.  }
 \label{fig:round5Results}
 \end{figure}
 
 
 
-Overall, this operator configuration, is the final winner in the tournamant and is greatly superior to both the historic BEAST2 \textit{cat} configuration as well as the recently developed cons (\text{real}) \cite{zhang2020improving} scheme.
+Overall, this operator configuration is the final winner in the tournamant. In conjunction with all settings which came before it, this setup outperformed both the historic BEAST2 \textit{cat} configuration as well as the recently developed cons (\text{real}) \cite{zhang2020improving} scheme.
+Averaged across all datasets, this configuration yielded a mixing rate between XXX and YYY times as fast as \textit{cat} and between XXX and YYY times as fast as \textit{real}, depending on the parameter.
+In the most extreme case (Ran et al. 2018 \cite{Ran_2018}), the new settings were XXX and YYY times as fast respectively.
+This is likely to be even more extreme for larger alignments.
 
-
-
-\begin{figure}[!h]
-%\includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round5b.pdf}
-\caption{\textbf{Comparing the winner of the tournament setting with the previous standards.}  }
-\label{fig:tournamentSummary}
-\end{figure}
 
 \newpage
 \section*{Discussion} \label{sect:discussion}
 
 
-In this article, we delved into the highly correlated structure of relaxed clock models, in order to develop MCMC operators which efficiently traverse  its posterior space.
+In this article, we delved into the highly correlated structure of relaxed clock models, in order to develop MCMC operators which traverse its posterior space efficiently.
 We introduced a range of relaxed clock model operators and compared three molecular substitution rate parameterisations.
-These methodologies were compared by constructing phylogenetic models using a range of empirical datasets (\textbf{Fig. \ref{fig:parameterisationResults}}) and comparing their abilties to converge in a tournament-like protocol (\textbf{Fig. \ref{fig:tournament}}).
-This work has produced an operator configuration which explores relaxed clock model space up to XXX times more efficiently than previous setups.
+These methodologies were compared by constructing phylogenetic models from several empirical datasets (\textbf{Fig. \ref{fig:parameterisationResults}}) and comparing their abilties to converge in a tournament-like protocol (\textbf{Fig. \ref{fig:tournament}}).
+This work has produced an operator configuration which explores relaxed clock model space between XXX and YYY times more efficiently than previous setups.
 
 
 

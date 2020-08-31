@@ -7,11 +7,11 @@ library(rjson)
 
 
 
-PER_CHAIN = TRUE
+PER_CHAIN = FALSE
 
 #settings = c("cat", "real", "quant", "bactrian95", "bactrian98")
 settings = c("cat",  "real_06", "quant_06", "real", "quant", "bactrian95", "bactrian98", "NER", "AVMN")
-settings = c("cat", "cat_adaptive",  "real_06", "real", "real_adaptive", "quant_06_cached", "quant_cached_adaptive", "quant_cached", "bactrian95", "NER", "AVMVN")
+settings = c("cat", "cat_adaptive",  "real_06", "real", "real_adaptive", "quant_06_cached", "quant_cached", "quant_cached_adaptive", "bactrian95", "NER", "AVMVN")
 
 benchmark = data.frame(batch = numeric(0), param = character(0), dataset = character(0), partition = numeric(0), setting = character(0), nstates = numeric(0), finalESS = numeric(0), finalMCD = numeric(0), done = logical(0),  error = logical(0))
 
@@ -34,6 +34,14 @@ settings.names["NER"] = "NER+Bactrian+adapt(\\textit{real})"
 settings.names["AVMVN"] = "AVMVN+NER+Bactrian+adapt(\\textit{real})"
 
 
+
+
+settings.names.short = settings.names
+settings.names.short["bactrian95"] = "Bactrian"
+settings.names.short["NER"] = "NER"
+settings.names.short["AVMVN"] = "AVMVN"
+
+
 latex.table = read.table("../latex.table", sep = "&")
 colnames(latex.table) = c("ID", "N", "P", "L", "Leff", "ref")
 latex.table$ref = gsub(" ", "", gsub("[0-9].+", "", latex.table$ref))
@@ -48,6 +56,7 @@ progress.df = read.csv("progressVM.csv", header = T)
 
 #parameters = c("posterior", "likelihood", "prior", "height", "birthRate", "kappa",  "ucldStdev", "clockRate", "TipRates", "RateStatLogger.mean", "RateStatLogger.variance")
 parameters = c("prior", "likelihood", "TipRates", "treeLength", "ucldStdev", "kappa")
+parameters = c("prior", "likelihood", "TipRates", "RateStatLogger.mean", "treeLength", "ucldStdev", "kappa")
 
 
 parameters.latex = lapply(parameters, function(x) x)
@@ -60,7 +69,8 @@ parameters.latex["gammaShape"] = "$\\Gamma$ shape"
 parameters.latex["kappa"] = "HKY model $\\kappa$"
 #parameters.latex["freqParameter"] = "Nucleotide frequency $f$"
 parameters.latex["ucldStdev"] = "Clock SD $\\sigma$"
-parameters.latex["TipRates"] = "Mean leaf rate"
+parameters.latex["TipRates"] = "Leaf rate"
+parameters.latex["RateStatLogger.mean"] = "Mean branch rate"
 parameters.latex["treeLength"] = "Tree length"
 parameters.latex["height"] = "Tree height $h$"
 
@@ -69,7 +79,7 @@ parameters.latex["height"] = "Tree height $h$"
 parameters.latex.small = lapply(parameters, function(x) x)
 names(parameters.latex.small) = parameters
 parameters.latex.small["posterior"] = "$P$"
-parameters.latex.small["likelihood"] = "$L$"
+parameters.latex.small["likelihood"] = "$\\mathcal{L}$"
 parameters.latex.small["prior"] = "$p$"
 parameters.latex.small["birthRate"] = "$\\lambda$"
 parameters.latex.small["gammaShape"] = "$\\Gamma$"
@@ -102,7 +112,7 @@ getDateTime = function(str){
 ESS.df = data.frame(batch = numeric(0), param = character(0), dataset = character(0), partition = numeric(0), setting = character(0), nstates = numeric(0),
 		ESS = numeric(0), hr = numeric(0), ESS.hr = numeric(0), Leff = numeric(0), L = numeric(0), N = numeric(0), sigma = numeric(0),
 		CD_weight = numeric(0), RW_weight = numeric(0), SPP_weight = numeric(0), NER_weight = numeric(0), NER_acc = numeric(0), NE_acc = numeric(0),
-		leafCD_weight = numeric(0), leafAVMVN_weight = numeric(0),  nsamples = numeric(0))
+		leafCD_weight = numeric(0), leafAVMVN_weight = numeric(0), cis_weight = numeric(0), trans_weight = numeric(0),  nsamples = numeric(0))
 
 
 
@@ -126,8 +136,9 @@ for (f in batchfolders){
 	datasetFolders = list.dirs(recursive = F)
 	for (d in datasetFolders) {
 
+		
+		if (length(grep("Ran_", d)) > 0) next
 		print(d)
-
 
 		dataset = substring(d, 3)
 		matching_row_num = sapply(latex.table$ref, function(pattern) length(grep(pattern, dataset)) > 0)
@@ -183,9 +194,11 @@ for (f in batchfolders){
 							int = interval(start.date, finish.date)
 							runtime.hr = time_length(int, "hour")
 							
+							if(runtime.hr < 0.01) cat(paste("Warning:", dataset, s, "has a runtime of", runtime.hr, "\n"))
+							
 						}
 					}else{
-						print(paste("Warning: cannot find runtime for", dataset, s))
+						cat(paste("Warning: cannot find runtime for", dataset, s, "\n"))
 					}
 
 
@@ -226,6 +239,8 @@ for (f in batchfolders){
 						leafCD_weight = -1
 						leafAVMVN_weight = -1
 						nsamples = 0
+						cis_weight = -1
+						trans_weight = -1
 						
 						state.in = paste0("tmp.xml.0state")
 						if (file.exists(state.in)) {
@@ -252,6 +267,17 @@ for (f in batchfolders){
 										CD_weight = weights[1]
 										RW_weight = weights[2]
 										SPP_weight = weights[3]
+									}
+									
+									
+									match = which(sapply(ops, function(ele) ele$id == "AdaptableOperatorSampler.ucldStdev"))
+									if (length(match) == 1){
+									
+									
+										weights = as.numeric(strsplit(gsub("([[]|[]])", "", ops[[match]]$weights), ",")[[1]])
+										cis_weight = weights[1]
+										trans_weight = weights[3]
+				
 									}
 
 								}
@@ -293,25 +319,32 @@ for (f in batchfolders){
 						if (nsamples != 5e7 & nsamples != 1e8){
 							print(paste("Warning:", dataset, s, "has", nsamples, "samples"))
 						}
+						
+													
+						sigma = as.numeric(this.ESS.df[1,"ucldStdev.mean"])
+						if (sigma > 1.5){
+							cat(paste("Warning: ", d, s, bb, "has sigma =", sigma, "\n"))
+							setwd("../")
+							next
+							
+						}
 					
 						for (p in parameters){
 
 							pindex = grep(paste0(p, ".+ESS"), colnames(this.ESS.df))
 							ESS = mean(as.numeric(this.ESS.df[1,pindex]), na.rm = T)
 							
-							pindex = grep(paste0(p, ".+mean"), colnames(this.ESS.df))
-							sigma = as.numeric(this.ESS.df[1,"ucldStdev.mean"])
+
 							#print(paste(p, ESS))
-							
-							
+		
 							if (!is.na(ESS) & ESS < 200){
-								cat(paste("Warning:", p, "has ESS =", signif(ESS, 2), "for", d, s, bb, "\n"))
+								#cat(paste("Warning:", p, "has ESS =", signif(ESS, 2), "for", d, s, bb, "\n"))
 							}
 
 							
 							ESS.df2 = data.frame(batch = bb, param = p, setting = s, dataset = dataset, ESS = ESS, hr = runtime.hr, partition = P, Leff = Leff, L = L, N = N, sigma = sigma,
 									 CD_weight = CD_weight, RW_weight = RW_weight, SPP_weight = SPP_weight, NER_weight = NER_weight, NER_acc = NER_acc, NE_acc = NE_acc, leafCD_weight = leafCD_weight,
-									 leafCD_weight = leafCD_weight, nsamples = nsamples)
+									 leafCD_weight = leafCD_weight, cis_weight = cis_weight, trans_weight = trans_weight, nsamples = nsamples)
 							ESS.df = rbind(ESS.df, ESS.df2)
 
 							
@@ -355,9 +388,16 @@ for (f in batchfolders){
 #settings = c("cat", "real", "quant")
 
 ESS.df = ESS.df[!is.na(ESS.df$ESS),]
-div.by = ESS.df$nsamples / 1e6
-if (!PER_CHAIN) div.by = ESS.df$hr
-ESS.df$ESS.hr = ESS.df$ESS / div.by
+if (PER_CHAIN) {
+	div.by = ESS.df$nsamples / 1e6
+	ESS.df$ESS.hr = ESS.df$ESS / div.by
+}else{
+	ESS.per.state = ESS.df$ESS / ESS.df$nsamples
+	state.per.hr = 1e7 / ESS.df$hr
+	ESS.df$ESS.hr = ESS.per.state * state.per.hr
+}
+
+
 
 datasets = unique(ESS.df[order(ESS.df$N), "dataset"]) # sort(as.character(unique(ESS.df$dataset)))
 
@@ -370,7 +410,7 @@ plotRealCat = function(){
 
 
 	maxL = 20#max(ESS.df$L) + 2
-	plot(0, 0, type = "n", xlim = c(0,maxL), ylim = c(0, 500), xlab = "Sequence length $L$ (kb)", ylab = "ESS/hr of tip rates $r$", axes = F, xaxs = "i", yaxs = "i", 
+	plot(0, 0, type = "n", xlim = c(0,maxL), ylim = c(0, 20000), xlab = "Sequence length $L$ (kb)", ylab = "ESS/hr of tip rates $r$", axes = F, xaxs = "i", yaxs = "i", 
 					main ="Leaf rate mixing vs sequence length", cex.main = 1.5, cex.lab = 1.5)
 
 
@@ -495,22 +535,30 @@ plotWeights = function() {
 plotNERWeights = function(rates = FALSE) {
 
 
+	maxL = 20#max(ESS.df$L) + 2
 
 	if (!rates){
 		main = "\\texttt{AdaptiveOperatorSampler(NER)} weights"
 		ylab = "Learned operator weight"
 		ylim = c(0,1)
+		
+		plot(0, 0, type = "n", xlim = c(0,maxL), ylim = ylim, xlab = "Sequence length $L$ (kb)", ylab = ylab, axes = F, xaxs = "i", yaxs = "i", 
+					main = main, cex.main = 1.5, cex.lab = 1.5)
+		
 	}else{
 		main = "Relative acceptance rate"
 		ylab = "$\\alpha($NER$ \\{ \\mathcal{D}_{A,E}, \\mathcal{D}_{B,E}, \\mathcal{D}_{C,E} \\}) / \\alpha($NER$\\{ \\})$"
-		ylim = c(0, 2)
+		ylim = c(0.5, 2)
+		
+		plot(0, 0, type = "n", xlim = c(0,maxL), ylim = ylim, xlab = "Sequence length $L$ (kb)", ylab = ylab, axes = F, xaxs = "i", yaxs = "i", 
+					main = main, cex.main = 1.5, cex.lab = 1.5, log = "y")
+		
 	}
 
 
 
-	maxL = 20#max(ESS.df$L) + 2
-	plot(0, 0, type = "n", xlim = c(0,maxL), ylim = ylim, xlab = "Sequence length $L$ (kb)", ylab = ylab, axes = F, xaxs = "i", yaxs = "i", 
-					main = main, cex.main = 1.5, cex.lab = 1.5)
+	
+	
 
 	Ls = numeric(0)
 	NERs = numeric(0)
@@ -565,7 +613,7 @@ plotNERWeights = function(rates = FALSE) {
 	if (!rates) {
 		abline(0.5, 0, lty = "2525")
 	}else{
-		abline(1, 0, lty = "2525")
+		lines(c(0,maxL), c(1, 1), lty = "2525")
 	}
 
 
@@ -588,16 +636,102 @@ plotNERWeights = function(rates = FALSE) {
 			y = j / (1+j)
 			lines(x, y, col = "#69696999")
 		}else{
-			linear = lm(formula = NERs ~ Ls)
+			logN = log(NERs)
+			linear = lm(formula = logN ~ Ls)
 			x = seq(from = 0, to = maxL, length = 500)
-			y = linear$coefficients[1] + linear$coefficients[2]*x
+			y = exp(linear$coefficients[1] + linear$coefficients[2]*x)
 			lines(x, y, col = "#69696999")
 			
 		}
 	}
 
 	axis(1)
-	axis(2, las = 2)
+	
+	if (!rates){
+		axis(2, las = 2)
+	}else{
+		axis(2, at = c(1/2, 2/3, 1, 3/2, 2/1), labels = paste0(c("$\\frac{1}{2}", "$\\frac{2}{3}", "$1", "$\\frac{3}{2}", "$\\frac{2}{1}"), "\\times$"), las = 2)
+	}
+
+
+
+}
+
+
+plot.speed = function(filename){
+
+
+
+	# Time per setting
+	s0 = "cat"
+	options(tikzMetricPackages = c("\\usepackage[utf8]{inputenc}",
+		"\\usepackage[T1]{fontenc}", "\\usetikzlibrary{calc}",
+		"\\usepackage{amssymb}"))
+	## I need the amssymb package because I use \mathcal and \mathbb
+		tikz(paste0(filename, ".tex"), width = 8, height = 8 / 1.618, standAlone = TRUE,
+			packages = c("\\usepackage{tikz}",
+				 "\\usepackage[active,tightpage,psfixbb]{preview}",
+				 "\\PreviewEnvironment{pgfpicture}",
+				 "\\setlength\\PreviewBorder{0pt}",
+				 "\\usepackage{amssymb}"))
+
+
+	plot(0, 0, type = "n",  xlim = c(0, (length(settings)+1) * (length(datasets)+2) + 3), log = "y", ylim = c(0.5, 2), axes = F, xaxs = "i", yaxs = "i", xlab = "", ylab = "Relative samples/hr", main = "Relative speed compared with \\textit{cat}")
+	
+
+	i = 1
+	xat = numeric(0)
+	xlab = character(0)
+	lines(c(0, (length(settings)-1) * (length(datasets)+2)), c(1,1), lty = "2525")
+	for (s in settings[settings != s0]){
+
+		setting_mean = numeric(0)
+		i0 = i
+	
+		for (dataNum in 1:length(datasets)){
+			
+			d = datasets[dataNum]
+			col = data.cols[dataNum]
+
+			time0 = mean(ESS.df[ESS.df$dataset == d & ESS.df$setting == s0,"hr"])
+			time = mean(ESS.df[ESS.df$dataset == d & ESS.df$setting == s,"hr"])
+			E = log(time / time0)
+			
+			# Error bar in log space
+			m1 = mean(E)
+
+			#text(i, m1, parameters.latex.small[[p]], col = data.cols[dataNum], cex = 1.4)
+			points(i, exp(m1), col = data.cols[dataNum], pch = 16)
+			setting_mean = c(setting_mean, exp(m1))
+			
+			i = i + 1
+		
+		}
+		
+		
+		setting_mean = mean(setting_mean)
+		diff = 100 * signif((setting_mean - 1), 2)
+		toprint = paste0(abs(diff), "\\% ", ifelse(diff > 0, "slower", "faster"))
+		lines(c(i0, i), c(setting_mean, setting_mean), lwd = 0.5)
+		text((i + i0)/2, 1.9, toprint, cex = 0.7, adj = 0.5)
+		xat = c(xat, (i + i0)/2)
+		xlab = c(xlab, settings.names.short[[s]])
+		lines(c(i+1, i+1), c(0.0001, 100), lwd = 0.5, col = "#69696999")
+		
+		i = i + 2
+		
+	}
+
+
+	
+	axis(1, at = c(-1, xat, 100000), labels = c("", xlab, ""), las=2, cex.axis = 0.6)
+	axis(2, at = c(1/2, 3/4, 1, 4/3, 2/1), labels = paste0(c("$\\frac{1}{2}", "$\\frac{3}{4}", "$1", "$\\frac{4}{3}", "$\\frac{2}{1}"), "\\times$"), las = 2)
+
+	legend("right", dataset_names, fill = data.cols[1:length(datasets)], bg = "white", bty = "n", cex = 1)
+
+
+	dev.off()
+	tools::texi2pdf(paste0(filename, ".tex"))
 
 
 
@@ -618,15 +752,15 @@ plot.2 = function(filename, s1, s2) {
 				 "\\setlength\\PreviewBorder{0pt}",
 				 "\\usepackage{amssymb}"))
 
-	par(mar = c(5,5,5,5))
+	par(mar = c(5,4,3,2))
 
-	plot(0, 0, type = "n", xlim = c(0, (length(parameters)+3) * length(datasets) - 3), ylim = c(0.4, 1.6), xlab = "", ylab = "Relative ESS/hr",
-				main = paste("Comparison of", settings.names[[s1]], "and", settings.names[[s2]]), axes = F, xaxs = "i", yaxs = "i")
+	plot(0, 0, type = "n", xlim = c(0, (length(parameters)+1) * (length(datasets)+2) + 3), ylim = c(2/3, 1.7), xlab = "", ylab = "Relative ESS/hr",
+				main = paste("Comparison of", settings.names[[s1]], "and", settings.names[[s2]]), axes = F, xaxs = "i", yaxs = "i", log = "y")
 	i = 1
 
 	xat = numeric(0)
 	xlab = character(0)
-	abline(1, 0, lty = "2525")
+	lines(c(0, (length(parameters)) * (length(datasets)+2)), c(1,1), lty = "2525")
 	for (p in parameters){
 	
 		param_mean = numeric(0)
@@ -640,15 +774,17 @@ plot.2 = function(filename, s1, s2) {
 
 			ESS1 = ESS.df[ESS.df$dataset == d & ESS.df$setting == s1 & ESS.df$param == p,"ESS.hr"]
 			ESS2 = ESS.df[ESS.df$dataset == d & ESS.df$setting == s2 & ESS.df$param == p,"ESS.hr"]
-			E = ESS1 / mean(ESS2)
+			n = min(length(ESS1), length(ESS2))
+			E = log(ESS1[1:n] / ESS2[1:n])
 			
-			# Error bar
+			# Error bar in log space
 			m1 = mean(E)
-			se1 = 2 * sqrt(var(E) / length(E))
+			se1 = 1 * sqrt(var(E) / n)
 			
-			lines(c(i,i), m1 + c(se1, -se1), col = col)
-			text(i, m1, parameters.latex.small[[p]], col = data.cols[dataNum], cex = 1.4)
-			param_mean = c(param_mean, m1)
+			lines(c(i,i), exp(m1 + c(se1, -se1)), col = col)
+			#text(i, m1, parameters.latex.small[[p]], col = data.cols[dataNum], cex = 1.4)
+			points(i, exp(m1), col = data.cols[dataNum], pch = 16)
+			param_mean = c(param_mean, exp(m1))
 			
 			i = i + 1
 
@@ -657,19 +793,21 @@ plot.2 = function(filename, s1, s2) {
 		param_mean = mean(param_mean)
 		toprint = 100 * signif((param_mean - 1), 2)
 		lines(c(i0, i), c(param_mean, param_mean), lwd = 0.5)
-		text((i + i0)/2, 1.5, paste0(toprint, "\\% faster"), cex = 1, adj = 0.5)
+		text((i + i0)/2, 1.5, paste0(toprint, "\\% faster"), cex = 0.9, adj = 0.5)
 		xat = c(xat, (i + i0)/2)
 		xlab = c(xlab, parameters.latex[[p]])
-		lines(c(i+1, i+1), c(-100, 100), lwd = 0.5, col = "#69696999")
+		lines(c(i+1, i+1), c(0.0001, 100), lwd = 0.5, col = "#69696999")
 		
 		i = i + 2
 
 	}
 	
-	axis(1, at = c(-1, xat, 100000), labels = c("", xlab, ""), las=2, cex.axis = 0.7)
-	axis(2, at = c(0.5, 0.75, 1, 1.25, 1.5), las = 2)
+	axis(1, at = c(-1, xat, 100000), labels = c("", xlab, ""), las=2, cex.axis = 0.6)
+	axis(2, at = c(2/3, 3/4, 7/8, 1, 8/7, 4/3, 3/2), labels = paste0(c("$\\frac{2}{3}", "$\\frac{3}{4}", "$\\frac{7}{8}", "$1", "$\\frac{8}{7}", "$\\frac{4}{3}", "$\\frac{3}{2}"), "\\times$"), las = 2)
 	
-	legend("bottomright", dataset_names, fill = data.cols[1:length(datasets)], bg = "white", bty = "n", cex = 1)
+	#abline(1, 0, lty = "2525")
+	
+	legend("right", dataset_names, fill = data.cols[1:length(datasets)], bg = "white", bty = "n", cex = 1)
 	
 	
 	dev.off()
@@ -692,7 +830,7 @@ plot.cell = function(s1, s2, show.legend = FALSE){
 		#q.ESS = q.ESS[na.rm,]
 
 		xymin = 1
-		xymax = 1000
+		xymax = 20000
 
 		xyrange = c(xymin, xymax) #c(xymin, max(c(r.ESS$ESS.hr, q.ESS$ESS.hr), na.rm = TRUE))
 		#xyrange = c(0, max(c(r.ESS$MCD.states, q.ESS$MCD.states)))
@@ -764,12 +902,12 @@ plot.cell = function(s1, s2, show.legend = FALSE){
 
 				m1 = mean(xvals)
 				m2 = mean(yvals)
-				se1 = 2*sqrt(var(xvals) / length(xvals))
-				se2 = 2*sqrt(var(yvals) / length(yvals))
-				lines(c(m1 - se1, m1 + se1), c(m2, m2), col = paste0(data.cols[dataNum], "99"))
-				lines(c(m1, m1), c(m2 - se2, m2 + se2), col = paste0(data.cols[dataNum], "99"))
+				se1 = 1*sqrt(var(xvals) / length(xvals))
+				se2 = 1*sqrt(var(yvals) / length(yvals))
+				lines(c(m1 - se1, m1 + se1), c(m2, m2), col = paste0(data.cols[dataNum], "55"))
+				lines(c(m1, m1), c(m2 - se2, m2 + se2), col = paste0(data.cols[dataNum], "55"))
 				
-				#text(m1, m2, paste0(parameters.latex.small[[p]], "$_", which(datasets == d), "$"), col = data.cols[dataNum])
+				#text(m1, m2, paste0(parameters.latex.small[[p]], "$_", which(datasets == d), "$"), col = paste0(data.cols[dataNum], "99"))
 				text(m1, m2, parameters.latex.small[[p]], col = data.cols[dataNum], cex = 1.4)
 
 			}
@@ -977,12 +1115,12 @@ plot.grid("ESS_round5b", c("cat", "AVMVN"), TRUE, plot.real)
 
 
 
+
+plot.speed("ESS_timesettings")
+
+
 write.table(ESS.df, "ESSall.tsv", sep = "\t", quote = F, row.names = F)
 
-bad.df = ESS.df[ESS.df$ESS < 200,]
-write.table(bad.df, "ESSbad.tsv", sep = "\t", quote = F, row.names = F)
-
-print(paste("There are", nrow(bad.df), "parameters with ESS<200"))
 
 
 cons.rel = numeric(0)
@@ -1028,41 +1166,73 @@ for (dataNum in 1:length(datasets)){
 
 
 
-
+extreme_cat = -Inf
+extreme_real = -Inf
 x1 = numeric(0)
+x2 = numeric(0)
 for (p in parameters){
 
 	X = numeric(0)
 	Y = numeric(0)
 	Z = numeric(0)
-	Q = numeric(0)
 	for (dataNum in 1:length(datasets)) {
 		d = datasets[dataNum]
-		X = c(X, mean(ESS.df[ESS.df$setting == "real_adaptive" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
-		Y = c(Y, mean(ESS.df[ESS.df$setting == "bactrian95" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
-		Z = c(Z, mean(ESS.df[ESS.df$setting == "NER" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
-		Q = c(Q, mean(ESS.df[ESS.df$setting == "AVMVN" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
+		X = c(X, mean(ESS.df[ESS.df$setting == "cat" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
+		Y = c(Y, mean(ESS.df[ESS.df$setting == "real" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
+		Z = c(Z, mean(ESS.df[ESS.df$setting == "AVMVN" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
 		
 	}
-	print(paste("The mean ESS for", p, "is", signif(mean(Y/X, na.rm = T), 3), "times as fast for bactrian"))
-	print(paste("The mean ESS for", p, "is", signif(mean(Q/Y, na.rm = T), 3), "times as fast for AVMVN (cf bactrian)"))
-	print(paste("The mean ESS for", p, "is", signif(mean(Q/Z, na.rm = T), 3), "times as fast for AVMVN (cf NER)"))
+	print(paste("The mean ESS under AVMVN for", p, "is", signif(mean(Z/X, na.rm = T), 3), "times as fast wrt cat"))
+	print(paste("The mean ESS under AVMVN for", p, "is", signif(mean(Z/Y, na.rm = T), 3), "times as fast wrt real"))
+	
+	
+	if (any(Z/X > extreme_cat)){
+		extreme_cat = max(Z/X)
+	}
+	
+	
+	if (any(Z/Y > extreme_real)){
+		extreme_real = max(Z/Y)
+	}
 	
 	if (p != "kappa"){
-		x1 = c(x1,  signif(mean(Y/X, na.rm = T), 3))
+		x1 = c(x1,  signif(mean(Z/X, na.rm = T), 3))
+		x2 = c(x2,  signif(mean(Z/Y, na.rm = T), 3))
 	}
 	
 	
 	
 }
 
-print(paste("Bactrian is between", min(x1), "and", max(x1), "times as fast"))
+print(paste("AVMVN is between", min(x1), "and", max(x1), "times as fast as cat"))
+print(paste("In the most extreme case, AVMVN was", signif(extreme_cat, 3), "times as fast as cat"))
+
+print(paste("AVMVN is between", min(x2), "and", max(x2), "times as fast as real"))
+print(paste("In the most extreme case, AVMVN was", signif(extreme_real, 3), "times as fast as real"))
 
 
 
-
-
-
+# Cis / trans weights
+cis_real = numeric(0)
+trans_real = numeric(0)
+cis_quant = numeric(0)
+trans_quant = numeric(0)
+for (dataNum in 1:length(datasets)) {
+	d = datasets[dataNum]
+	
+	
+	x1 = ESS.df[ESS.df$setting == "real_adaptive" & ESS.df$dataset == d,"cis_weight"]
+	x2 = ESS.df[ESS.df$setting == "real_adaptive" & ESS.df$dataset == d,"trans_weight"]
+	x3 = ESS.df[ESS.df$setting == "quant_cached_adaptive" & ESS.df$dataset == d,"cis_weight"]
+	x4 = ESS.df[ESS.df$setting == "quant_cached_adaptive" & ESS.df$dataset == d,"trans_weight"]
+	
+	cis_real = c(cis_real, mean(x1[x1 != -1]))
+	trans_real = c(trans_real, mean(x2[x2 != -1]))
+	cis_quant = c(cis_quant, mean(x3[x3 != -1]))
+	trans_quant = c(trans_quant, mean(x4[x4 != -1]))
+}
+cat(paste("For real, CisScale has a mean weight of", signif(mean(cis_real), 3), "and scale has", signif(mean(trans_real), 3), "\n" ))
+cat(paste("For quant, CisScale has a mean weight of", signif(mean(cis_quant), 3), "and scale has", signif(mean(trans_quant), 3), "\n" ))
 
 
 
