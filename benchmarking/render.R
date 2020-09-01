@@ -137,7 +137,6 @@ for (f in batchfolders){
 	for (d in datasetFolders) {
 
 		
-		if (length(grep("Ran_", d)) > 0) next
 		print(d)
 
 		dataset = substring(d, 3)
@@ -344,7 +343,7 @@ for (f in batchfolders){
 							
 							ESS.df2 = data.frame(batch = bb, param = p, setting = s, dataset = dataset, ESS = ESS, hr = runtime.hr, partition = P, Leff = Leff, L = L, N = N, sigma = sigma,
 									 CD_weight = CD_weight, RW_weight = RW_weight, SPP_weight = SPP_weight, NER_weight = NER_weight, NER_acc = NER_acc, NE_acc = NE_acc, leafCD_weight = leafCD_weight,
-									 leafCD_weight = leafCD_weight, cis_weight = cis_weight, trans_weight = trans_weight, nsamples = nsamples)
+									 leafCD_weight = leafCD_weight, cis_weight = cis_weight, trans_weight = trans_weight, leafAVMVN_weight = leafAVMVN_weight, nsamples = nsamples)
 							ESS.df = rbind(ESS.df, ESS.df2)
 
 							
@@ -410,7 +409,7 @@ plotRealCat = function(){
 
 
 	maxL = 20#max(ESS.df$L) + 2
-	plot(0, 0, type = "n", xlim = c(0,maxL), ylim = c(0, 20000), xlab = "Sequence length $L$ (kb)", ylab = "ESS/hr of tip rates $r$", axes = F, xaxs = "i", yaxs = "i", 
+	plot(0, 0, type = "n", xlim = c(0,maxL), ylim = c(0, 12000), xlab = "Sequence length $L$ (kb)", ylab = "ESS/hr of tip rates $r$", axes = F, xaxs = "i", yaxs = "i", 
 					main ="Leaf rate mixing vs sequence length", cex.main = 1.5, cex.lab = 1.5)
 
 
@@ -594,7 +593,7 @@ plotNERWeights = function(rates = FALSE) {
 			points(mean(sub.df$L), NER, col = data.cols[dataNum], pch = 18)
 			
 			
-			if (NER > 1) cat(paste("For", d, "NER has an acceptance rate", signif(100*(NER-1), 2), "% higher than NarrowExchange\n"))
+			cat(paste("For", d, "NER has an acceptance rate", signif(100*(NER-1), 2), "% higher than NarrowExchange\n"))
 			
 		}
 
@@ -695,7 +694,7 @@ plot.speed = function(filename){
 
 			time0 = mean(ESS.df[ESS.df$dataset == d & ESS.df$setting == s0,"hr"])
 			time = mean(ESS.df[ESS.df$dataset == d & ESS.df$setting == s,"hr"])
-			E = log(time / time0)
+			E = log(time0 / time)
 			
 			# Error bar in log space
 			m1 = mean(E)
@@ -711,7 +710,7 @@ plot.speed = function(filename){
 		
 		setting_mean = mean(setting_mean)
 		diff = 100 * signif((setting_mean - 1), 2)
-		toprint = paste0(abs(diff), "\\% ", ifelse(diff > 0, "slower", "faster"))
+		toprint = paste0(abs(diff), "\\% ", ifelse(diff < 0, "slower", "faster"))
 		lines(c(i0, i), c(setting_mean, setting_mean), lwd = 0.5)
 		text((i + i0)/2, 1.9, toprint, cex = 0.7, adj = 0.5)
 		xat = c(xat, (i + i0)/2)
@@ -791,9 +790,10 @@ plot.2 = function(filename, s1, s2) {
 		}
 		
 		param_mean = mean(param_mean)
-		toprint = 100 * signif((param_mean - 1), 2)
+		diff = 100 * signif((param_mean - 1), 2)
+		toprint = paste0(abs(diff), "\\% ", ifelse(diff < 0, "slower", "faster"))
 		lines(c(i0, i), c(param_mean, param_mean), lwd = 0.5)
-		text((i + i0)/2, 1.5, paste0(toprint, "\\% faster"), cex = 0.9, adj = 0.5)
+		text((i + i0)/2, 1.5, toprint, cex = 0.9, adj = 0.5)
 		xat = c(xat, (i + i0)/2)
 		xlab = c(xlab, parameters.latex[[p]])
 		lines(c(i+1, i+1), c(0.0001, 100), lwd = 0.5, col = "#69696999")
@@ -1168,6 +1168,8 @@ for (dataNum in 1:length(datasets)){
 
 extreme_cat = -Inf
 extreme_real = -Inf
+extreme_cat_d = ""
+extreme_real_d = ""
 x1 = numeric(0)
 x2 = numeric(0)
 for (p in parameters){
@@ -1177,23 +1179,31 @@ for (p in parameters){
 	Z = numeric(0)
 	for (dataNum in 1:length(datasets)) {
 		d = datasets[dataNum]
-		X = c(X, mean(ESS.df[ESS.df$setting == "cat" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
-		Y = c(Y, mean(ESS.df[ESS.df$setting == "real" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
-		Z = c(Z, mean(ESS.df[ESS.df$setting == "AVMVN" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"]))
+		x = mean(ESS.df[ESS.df$setting == "cat" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"])
+		y = mean(ESS.df[ESS.df$setting == "real" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"])
+		z = mean(ESS.df[ESS.df$setting == "AVMVN" & ESS.df$param == p & ESS.df$dataset == d,"ESS.hr"])
+		X = c(X,x)
+		Y = c(Y,y)
+		Z = c(Z,z)
+		
+		if (any(z/x > extreme_cat)){
+			extreme_cat = max(z/x)
+			extreme_cat_d = d
+		}
+	
+	
+		if (any(z/y > extreme_real)){
+			extreme_real = max(z/y)
+			extreme_real_d = d
+		}
+		
 		
 	}
 	print(paste("The mean ESS under AVMVN for", p, "is", signif(mean(Z/X, na.rm = T), 3), "times as fast wrt cat"))
 	print(paste("The mean ESS under AVMVN for", p, "is", signif(mean(Z/Y, na.rm = T), 3), "times as fast wrt real"))
 	
 	
-	if (any(Z/X > extreme_cat)){
-		extreme_cat = max(Z/X)
-	}
-	
-	
-	if (any(Z/Y > extreme_real)){
-		extreme_real = max(Z/Y)
-	}
+
 	
 	if (p != "kappa"){
 		x1 = c(x1,  signif(mean(Z/X, na.rm = T), 3))
@@ -1205,10 +1215,10 @@ for (p in parameters){
 }
 
 print(paste("AVMVN is between", min(x1), "and", max(x1), "times as fast as cat"))
-print(paste("In the most extreme case, AVMVN was", signif(extreme_cat, 3), "times as fast as cat"))
+print(paste("In the most extreme case, AVMVN was", signif(extreme_cat, 3), "times as fast as cat (", extreme_cat_d, ")"))
 
 print(paste("AVMVN is between", min(x2), "and", max(x2), "times as fast as real"))
-print(paste("In the most extreme case, AVMVN was", signif(extreme_real, 3), "times as fast as real"))
+print(paste("In the most extreme case, AVMVN was", signif(extreme_real, 3), "times as fast as real (", extreme_real_d, ")"))
 
 
 
@@ -1217,6 +1227,7 @@ cis_real = numeric(0)
 trans_real = numeric(0)
 cis_quant = numeric(0)
 trans_quant = numeric(0)
+AVMVN_weight = numeric(0)
 for (dataNum in 1:length(datasets)) {
 	d = datasets[dataNum]
 	
@@ -1230,9 +1241,16 @@ for (dataNum in 1:length(datasets)) {
 	trans_real = c(trans_real, mean(x2[x2 != -1]))
 	cis_quant = c(cis_quant, mean(x3[x3 != -1]))
 	trans_quant = c(trans_quant, mean(x4[x4 != -1]))
+	
+	
+	x5 = ESS.df[ESS.df$setting == "AVMVN" & ESS.df$dataset == d,"leafAVMVN_weight"]
+	AVMVN_weight = c(AVMVN_weight,  mean(x5[x5 != -1]))
+	
+	
 }
 cat(paste("For real, CisScale has a mean weight of", signif(mean(cis_real), 3), "and scale has", signif(mean(trans_real), 3), "\n" ))
 cat(paste("For quant, CisScale has a mean weight of", signif(mean(cis_quant), 3), "and scale has", signif(mean(trans_quant), 3), "\n" ))
+cat(paste("The AVMVN operator has a weight ranging from", signif(min(AVMVN_weight), 3), "to", signif(max(AVMVN_weight), 3),  "\n" ))
 
 
 

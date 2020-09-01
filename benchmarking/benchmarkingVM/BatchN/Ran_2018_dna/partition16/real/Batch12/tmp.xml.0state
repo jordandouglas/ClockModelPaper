@@ -1,54 +1,106 @@
-<itsabeastystatewerein version='2.0' sample='16999999'>
-<statenode id='Tree.t:benchmark'>((5:0.33984279808815715,(20:0.2748196830561132,((1:0.206222024000587,(((4:0.0968207404203556,31:0.0968207404203556)43:0.04551531178854512,(14:0.11603594694577732,29:0.11603594694577732)41:0.026300105263123402)42:0.026492187574005316,35:0.16882823978290604)44:0.03739378421768097)45:0.03377884930266675,((((6:0.0836290370839084,22:0.0836290370839084)46:0.06127175065917975,18:0.14490078774308815)47:0.016692524495796612,24:0.16159331223888476)48:0.03992509563298388,17:0.20151840787186864)40:0.038482465431385116)49:0.03481880975285945)51:0.06502311503204394)50:0.056017409486521785,((((0:0.03547308007844253,(25:0.028033521610241613,32:0.028033521610241613)38:0.007439558468200914)39:0.15597773856067026,(((((((2:0.024042047108789075,34:0.024042047108789075)70:0.019937514912202883,(28:0.025028791672058133,33:0.025028791672058133)71:0.018950770348933825)72:0.0037433726713943724,7:0.04772293469238633)73:0.011771906631722527,(9:0.044337313488296934,((12:0.024357224008431468,26:0.024357224008431468)66:0.0140087265249281,19:0.03836595053335957)67:0.005971362954937366)68:0.015157527835811924)65:0.039577071278089127,30:0.09907191260219798)64:0.017172035131498745,(3:0.09116718917271566,(21:0.026582194951568744,27:0.026582194951568744)62:0.06458499422114691)63:0.02507675856098107)61:0.038631113829339286,((10:0.038981693634280584,37:0.038981693634280584)58:0.031073410992136716,13:0.0700551046264173)59:0.08481995693661872)60:0.03657575707607677)69:0.04739004384366993,(11:0.18777551217521013,(15:0.12417933673905147,36:0.12417933673905147)55:0.06359617543615866)56:0.05106535030757259)57:0.06546379378645936,((8:0.12817630519402484,23:0.12817630519402484)52:0.03479452345789211,16:0.16297082865191695)53:0.14133382761732513)54:0.09155555130543686)74:0.0</statenode>
-<statenode id='kappa.t:CDS_OG004987_1stpos'>kappa.t:CDS_OG004987_1stpos[1 1] (0.0,Infinity): 2.559350782441504 </statenode>
-<statenode id='freqParameter.t:CDS_OG004987_1stpos'>freqParameter.t:CDS_OG004987_1stpos[4 1] (-Infinity,Infinity): 0.29040613628344236 0.19368560883314187 0.24427409253494306 0.27163416234847226 </statenode>
-<statenode id='clockRate.t:CDS_OG004987_1stpos'>clockRate.t:CDS_OG004987_1stpos[1 1] (0.0,Infinity): 0.9972827653219463 </statenode>
-<statenode id='kappa.t:CDS_OG007261_F_M_1stpos'>kappa.t:CDS_OG007261_F_M_1stpos[1 1] (0.0,Infinity): 3.177896572302301 </statenode>
-<statenode id='freqParameter.t:CDS_OG007261_F_M_1stpos'>freqParameter.t:CDS_OG007261_F_M_1stpos[4 1] (-Infinity,Infinity): 0.27314089529629343 0.24010165780443363 0.2068869813144483 0.2798704655848247 </statenode>
-<statenode id='clockRate.t:CDS_OG007261_F_M_1stpos'>clockRate.t:CDS_OG007261_F_M_1stpos[1 1] (0.0,Infinity): 0.8566798119524351 </statenode>
-<statenode id='kappa.t:CDS_OG002498_1stpos'>kappa.t:CDS_OG002498_1stpos[1 1] (0.0,Infinity): 2.8998356088431776 </statenode>
-<statenode id='freqParameter.t:CDS_OG002498_1stpos'>freqParameter.t:CDS_OG002498_1stpos[4 1] (-Infinity,Infinity): 0.2927668604854179 0.24057818387091973 0.22066218219632744 0.2459927734473346 </statenode>
-<statenode id='clockRate.t:CDS_OG002498_1stpos'>clockRate.t:CDS_OG002498_1stpos[1 1] (0.0,Infinity): 0.8774898829642194 </statenode>
-<statenode id='kappa.t:CDS_OG004913_F_M_1stpos'>kappa.t:CDS_OG004913_F_M_1stpos[1 1] (0.0,Infinity): 2.6393487433840055 </statenode>
-<statenode id='freqParameter.t:CDS_OG004913_F_M_1stpos'>freqParameter.t:CDS_OG004913_F_M_1stpos[4 1] (-Infinity,Infinity): 0.2897216572493659 0.22861372157784407 0.23438396377842433 0.247280657394365 </statenode>
-<statenode id='clockRate.t:CDS_OG004913_F_M_1stpos'>clockRate.t:CDS_OG004913_F_M_1stpos[1 1] (0.0,Infinity): 1.2095051217793233 </statenode>
-<statenode id='kappa.t:CDS_OG004900_1stpos'>kappa.t:CDS_OG004900_1stpos[1 1] (0.0,Infinity): 2.8769607291251145 </statenode>
-<statenode id='freqParameter.t:CDS_OG004900_1stpos'>freqParameter.t:CDS_OG004900_1stpos[4 1] (-Infinity,Infinity): 0.30736760665745694 0.18294291250222663 0.2175922555484299 0.2920972252918837 </statenode>
-<statenode id='clockRate.t:CDS_OG004900_1stpos'>clockRate.t:CDS_OG004900_1stpos[1 1] (0.0,Infinity): 1.142201134843692 </statenode>
-<statenode id='kappa.t:CDS_OG003126_1stpos'>kappa.t:CDS_OG003126_1stpos[1 1] (0.0,Infinity): 2.540126143432071 </statenode>
-<statenode id='freqParameter.t:CDS_OG003126_1stpos'>freqParameter.t:CDS_OG003126_1stpos[4 1] (-Infinity,Infinity): 0.29093654771377414 0.20710984924031486 0.23824472109563682 0.26370888195027264 </statenode>
-<statenode id='clockRate.t:CDS_OG003126_1stpos'>clockRate.t:CDS_OG003126_1stpos[1 1] (0.0,Infinity): 1.2642017945997714 </statenode>
-<statenode id='kappa.t:CDS_OG003927_1stpos'>kappa.t:CDS_OG003927_1stpos[1 1] (0.0,Infinity): 2.601087927766545 </statenode>
-<statenode id='freqParameter.t:CDS_OG003927_1stpos'>freqParameter.t:CDS_OG003927_1stpos[4 1] (-Infinity,Infinity): 0.2741655026463272 0.2151108027991359 0.23431696665410823 0.27640672790042936 </statenode>
-<statenode id='clockRate.t:CDS_OG003927_1stpos'>clockRate.t:CDS_OG003927_1stpos[1 1] (0.0,Infinity): 1.0385783484084337 </statenode>
-<statenode id='kappa.t:CDS_OG007144_F_1stpos'>kappa.t:CDS_OG007144_F_1stpos[1 1] (0.0,Infinity): 2.8587073635953675 </statenode>
-<statenode id='freqParameter.t:CDS_OG007144_F_1stpos'>freqParameter.t:CDS_OG007144_F_1stpos[4 1] (-Infinity,Infinity): 0.23837161171676224 0.2139830771146965 0.2636062562443156 0.2840390549242248 </statenode>
-<statenode id='clockRate.t:CDS_OG007144_F_1stpos'>clockRate.t:CDS_OG007144_F_1stpos[1 1] (0.0,Infinity): 1.1280295402808462 </statenode>
-<statenode id='kappa.t:CDS_OG006959_1stpos'>kappa.t:CDS_OG006959_1stpos[1 1] (0.0,Infinity): 2.5260410857326727 </statenode>
-<statenode id='freqParameter.t:CDS_OG006959_1stpos'>freqParameter.t:CDS_OG006959_1stpos[4 1] (-Infinity,Infinity): 0.26073520193848904 0.22573444164564715 0.2285365701065834 0.2849937863092807 </statenode>
-<statenode id='clockRate.t:CDS_OG006959_1stpos'>clockRate.t:CDS_OG006959_1stpos[1 1] (0.0,Infinity): 1.066125270601529 </statenode>
-<statenode id='kappa.t:CDS_OG006802_1stpos'>kappa.t:CDS_OG006802_1stpos[1 1] (0.0,Infinity): 2.853855999638183 </statenode>
-<statenode id='freqParameter.t:CDS_OG006802_1stpos'>freqParameter.t:CDS_OG006802_1stpos[4 1] (-Infinity,Infinity): 0.29119819861491436 0.21508723242887556 0.22452198257599376 0.26919258638021704 </statenode>
-<statenode id='clockRate.t:CDS_OG006802_1stpos'>clockRate.t:CDS_OG006802_1stpos[1 1] (0.0,Infinity): 0.9325059824708555 </statenode>
-<statenode id='kappa.t:CDS_OG002975_F_M_1stpos'>kappa.t:CDS_OG002975_F_M_1stpos[1 1] (0.0,Infinity): 3.297973920616016 </statenode>
-<statenode id='freqParameter.t:CDS_OG002975_F_M_1stpos'>freqParameter.t:CDS_OG002975_F_M_1stpos[4 1] (-Infinity,Infinity): 0.2896500186343751 0.22639216326211858 0.18271850926624494 0.301239308837259 </statenode>
-<statenode id='clockRate.t:CDS_OG002975_F_M_1stpos'>clockRate.t:CDS_OG002975_F_M_1stpos[1 1] (0.0,Infinity): 0.7500014422917833 </statenode>
-<statenode id='kappa.t:CDS_OG004636_F_M_1stpos'>kappa.t:CDS_OG004636_F_M_1stpos[1 1] (0.0,Infinity): 2.806692933315366 </statenode>
-<statenode id='freqParameter.t:CDS_OG004636_F_M_1stpos'>freqParameter.t:CDS_OG004636_F_M_1stpos[4 1] (-Infinity,Infinity): 0.27873100785469895 0.2321544862199993 0.20106647601999794 0.2880480299053021 </statenode>
-<statenode id='clockRate.t:CDS_OG004636_F_M_1stpos'>clockRate.t:CDS_OG004636_F_M_1stpos[1 1] (0.0,Infinity): 0.8971347414212963 </statenode>
-<statenode id='kappa.t:CDS_OG003629_1stpos'>kappa.t:CDS_OG003629_1stpos[1 1] (0.0,Infinity): 2.728032691485601 </statenode>
-<statenode id='freqParameter.t:CDS_OG003629_1stpos'>freqParameter.t:CDS_OG003629_1stpos[4 1] (-Infinity,Infinity): 0.30593164080441376 0.20570880758314739 0.22720844008085972 0.26115111153157927 </statenode>
-<statenode id='clockRate.t:CDS_OG003629_1stpos'>clockRate.t:CDS_OG003629_1stpos[1 1] (0.0,Infinity): 1.1001344649854246 </statenode>
-<statenode id='kappa.t:CDS_OG006798_F_1stpos'>kappa.t:CDS_OG006798_F_1stpos[1 1] (0.0,Infinity): 2.735613676596778 </statenode>
-<statenode id='freqParameter.t:CDS_OG006798_F_1stpos'>freqParameter.t:CDS_OG006798_F_1stpos[4 1] (-Infinity,Infinity): 0.2783613780752571 0.25677009954216734 0.2312294588502064 0.23363906353236769 </statenode>
-<statenode id='clockRate.t:CDS_OG006798_F_1stpos'>clockRate.t:CDS_OG006798_F_1stpos[1 1] (0.0,Infinity): 1.1191620822283375 </statenode>
-<statenode id='kappa.t:CDS_OG007244_1stpos'>kappa.t:CDS_OG007244_1stpos[1 1] (0.0,Infinity): 2.7992360035384993 </statenode>
-<statenode id='freqParameter.t:CDS_OG007244_1stpos'>freqParameter.t:CDS_OG007244_1stpos[4 1] (-Infinity,Infinity): 0.27612901081651187 0.20685226728070621 0.22199713482290248 0.29502158707987886 </statenode>
-<statenode id='clockRate.t:CDS_OG007244_1stpos'>clockRate.t:CDS_OG007244_1stpos[1 1] (0.0,Infinity): 0.85893270948265 </statenode>
-<statenode id='kappa.t:CDS_OG005549_F_M_1stpos'>kappa.t:CDS_OG005549_F_M_1stpos[1 1] (0.0,Infinity): 2.5921340832595723 </statenode>
-<statenode id='freqParameter.t:CDS_OG005549_F_M_1stpos'>freqParameter.t:CDS_OG005549_F_M_1stpos[4 1] (-Infinity,Infinity): 0.2562991847826169 0.250580173939198 0.2090202656778653 0.2841003756003192 </statenode>
-<statenode id='clockRate.t:CDS_OG005549_F_M_1stpos'>clockRate.t:CDS_OG005549_F_M_1stpos[1 1] (0.0,Infinity): 0.7620349063674651 </statenode>
-<statenode id='ucldStdev.c:benchmark'>ucldStdev.c:benchmark[1 1] (0.0,Infinity): 0.3840321901659795 </statenode>
-<statenode id='rates.c:benchmark'>rates.c:benchmark[74 1] (0.0,Infinity): 0.7658375768359212 0.7234634984866459 0.8356066621570504 0.786275393052831 2.092200797816349 0.4140438360524601 0.9692544015568133 0.7625570487139567 1.3576018026203052 0.4396197085733176 1.1075970947395806 0.9323200036849886 0.7310466683272229 0.9727903359562188 1.2356913490038457 1.0440492001647321 0.9449808679837556 0.4926950158138203 0.7732830395205642 0.6461922709547148 0.5740851191327774 0.741993307639089 0.7811971293716201 0.7876722009477151 0.559747209059011 1.0992532162927982 1.1164965053560396 0.7133535252048545 0.6713266790414872 1.0634782166448322 0.6194521999896855 1.6895758588347287 0.6885706560602476 0.7735346297173509 1.0987724161807566 0.58349510687254 1.0348812763132735 1.6744038482094938 1.6172374210132907 0.3733347972072417 0.6450265483668715 0.7174359896651413 0.7865215071730461 0.7899436625918409 1.3023476758808075 0.9902429402441112 2.5150926671907308 1.5898135631612573 1.658565005553045 1.0114993335469367 0.5607024200389268 0.551350200921119 2.376729684660428 1.2104683199723039 0.8423196671901992 0.7281191456373427 1.4277870093328422 1.0034969858941236 1.3907284314338195 0.4876506360518891 0.44424546966110484 1.188015908895263 1.2383540517120444 0.6939619059700265 0.7423282910938904 0.6745802553490755 1.5800134134236112 1.5241277729858802 2.66938054198291 0.9336503618284229 0.5275759184930647 1.3125350449221844 1.1269469610508842 0.7512314981629016 </statenode>
-<statenode id='birthRate.t:benchmark'>birthRate.t:benchmark[1 1] (-Infinity,Infinity): 8.363752270058832 </statenode>
+<itsabeastystatewerein version='2.0' sample='45999999'>
+<statenode id='Tree.t:benchmark'>(((((0:0.04331723535476187,(25:0.034520897391429994,32:0.034520897391429994)38:0.008796337963331874)39:0.1462185786084673,(((((((2:0.024158505669738595,34:0.024158505669738595)70:0.025987694014123625,(28:0.031173286387027026,33:0.031173286387027026)71:0.018972913296835193)72:0.002732411763397863,7:0.05287861144726008)65:0.012029920269436972,(9:0.04199399641742499,((12:0.01794763225936923,26:0.01794763225936923)66:0.01433540237035132,19:0.03228303462972055)67:0.00971096178770444)68:0.022914535299272065)64:0.04441416695325284,30:0.1093226986699499)61:0.018267400850209725,(3:0.08672511918565483,(21:0.034500554220993435,27:0.034500554220993435)62:0.052224564964661394)63:0.040864980334504794)69:0.04142506170900004,((10:0.08900664575796095,37:0.08900664575796095)58:0.027875628530688965,13:0.11688227428864992)59:0.05213288694050974)73:0.0205206527340695)60:0.04349850529812474,(11:0.12776411865369336,(15:0.08413812599742382,36:0.08413812599742382)55:0.04362599265626954)56:0.10527020060766054)57:0.07150608687081203,((8:0.11806754452624457,23:0.11806754452624457)52:0.09669236128313458,16:0.21475990580937915)53:0.08978050032278678)54:0.054888238247987386,((((1:0.19900704127246618,(((4:0.10522803998890229,31:0.10522803998890229)43:0.022166560611435987,(14:0.08915637910284913,29:0.08915637910284913)41:0.03823822149748915)42:0.019979048484077,35:0.14737364908441528)44:0.05163339218805091)40:0.023851305673957712,((((6:0.07779372875224388,22:0.07779372875224388)46:0.06380172398632075,18:0.14159545273856464)47:0.011459376561891138,24:0.15305482930045577)48:0.05179402201695296,17:0.20484885131740874)45:0.01800949562901516)49:0.05049432959991082,20:0.2733526765463347)50:0.03119306974165703,5:0.30454574628799175)51:0.05488289809216157)74:0.0</statenode>
+<statenode id='kappa.t:CDS_OG004987_1stpos'>kappa.t:CDS_OG004987_1stpos[1 1] (0.0,Infinity): 2.4460415419569363 </statenode>
+<statenode id='freqParameter.t:CDS_OG004987_1stpos'>freqParameter.t:CDS_OG004987_1stpos[4 1] (-Infinity,Infinity): 0.3097576441221903 0.19570395314829303 0.23729540197753876 0.25724300075197776 </statenode>
+<statenode id='clockRate.t:CDS_OG004987_1stpos'>clockRate.t:CDS_OG004987_1stpos[1 1] (0.0,Infinity): 1.0348816971692407 </statenode>
+<statenode id='kappa.t:CDS_OG007261_F_M_1stpos'>kappa.t:CDS_OG007261_F_M_1stpos[1 1] (0.0,Infinity): 2.870315613893671 </statenode>
+<statenode id='freqParameter.t:CDS_OG007261_F_M_1stpos'>freqParameter.t:CDS_OG007261_F_M_1stpos[4 1] (-Infinity,Infinity): 0.2742146093018691 0.219972258128736 0.21571788674717463 0.29009524582221957 </statenode>
+<statenode id='clockRate.t:CDS_OG007261_F_M_1stpos'>clockRate.t:CDS_OG007261_F_M_1stpos[1 1] (0.0,Infinity): 0.8365189705036614 </statenode>
+<statenode id='kappa.t:CDS_OG002498_1stpos'>kappa.t:CDS_OG002498_1stpos[1 1] (0.0,Infinity): 2.651104659116516 </statenode>
+<statenode id='freqParameter.t:CDS_OG002498_1stpos'>freqParameter.t:CDS_OG002498_1stpos[4 1] (-Infinity,Infinity): 0.2810992679317549 0.24645208797888526 0.22152568058128597 0.25092296350807125 </statenode>
+<statenode id='clockRate.t:CDS_OG002498_1stpos'>clockRate.t:CDS_OG002498_1stpos[1 1] (0.0,Infinity): 0.8551490980641268 </statenode>
+<statenode id='kappa.t:CDS_OG004913_F_M_1stpos'>kappa.t:CDS_OG004913_F_M_1stpos[1 1] (0.0,Infinity): 2.6069200902193423 </statenode>
+<statenode id='freqParameter.t:CDS_OG004913_F_M_1stpos'>freqParameter.t:CDS_OG004913_F_M_1stpos[4 1] (-Infinity,Infinity): 0.3037370177385702 0.2287697283296452 0.22878818447090124 0.23870506946088071 </statenode>
+<statenode id='clockRate.t:CDS_OG004913_F_M_1stpos'>clockRate.t:CDS_OG004913_F_M_1stpos[1 1] (0.0,Infinity): 1.2126944828831148 </statenode>
+<statenode id='kappa.t:CDS_OG004900_1stpos'>kappa.t:CDS_OG004900_1stpos[1 1] (0.0,Infinity): 2.9511009096561387 </statenode>
+<statenode id='freqParameter.t:CDS_OG004900_1stpos'>freqParameter.t:CDS_OG004900_1stpos[4 1] (-Infinity,Infinity): 0.2964864620699117 0.19589349351839822 0.20134969705968186 0.3062703473520092 </statenode>
+<statenode id='clockRate.t:CDS_OG004900_1stpos'>clockRate.t:CDS_OG004900_1stpos[1 1] (0.0,Infinity): 1.1016998186096345 </statenode>
+<statenode id='kappa.t:CDS_OG003126_1stpos'>kappa.t:CDS_OG003126_1stpos[1 1] (0.0,Infinity): 2.5802712082769395 </statenode>
+<statenode id='freqParameter.t:CDS_OG003126_1stpos'>freqParameter.t:CDS_OG003126_1stpos[4 1] (-Infinity,Infinity): 0.27723987130437977 0.2191998051662555 0.23539493885429352 0.26816538467507 </statenode>
+<statenode id='clockRate.t:CDS_OG003126_1stpos'>clockRate.t:CDS_OG003126_1stpos[1 1] (0.0,Infinity): 1.3157111640341885 </statenode>
+<statenode id='kappa.t:CDS_OG003927_1stpos'>kappa.t:CDS_OG003927_1stpos[1 1] (0.0,Infinity): 2.6773471495874586 </statenode>
+<statenode id='freqParameter.t:CDS_OG003927_1stpos'>freqParameter.t:CDS_OG003927_1stpos[4 1] (-Infinity,Infinity): 0.2704258803750885 0.20263703864351124 0.23924250320073892 0.2876945777806602 </statenode>
+<statenode id='clockRate.t:CDS_OG003927_1stpos'>clockRate.t:CDS_OG003927_1stpos[1 1] (0.0,Infinity): 1.0266109730953417 </statenode>
+<statenode id='kappa.t:CDS_OG007144_F_1stpos'>kappa.t:CDS_OG007144_F_1stpos[1 1] (0.0,Infinity): 2.5651234896877515 </statenode>
+<statenode id='freqParameter.t:CDS_OG007144_F_1stpos'>freqParameter.t:CDS_OG007144_F_1stpos[4 1] (-Infinity,Infinity): 0.26013980425584027 0.21311669285471796 0.2377855605991009 0.28895794229033983 </statenode>
+<statenode id='clockRate.t:CDS_OG007144_F_1stpos'>clockRate.t:CDS_OG007144_F_1stpos[1 1] (0.0,Infinity): 1.0879802023805722 </statenode>
+<statenode id='kappa.t:CDS_OG006959_1stpos'>kappa.t:CDS_OG006959_1stpos[1 1] (0.0,Infinity): 2.3834568736938544 </statenode>
+<statenode id='freqParameter.t:CDS_OG006959_1stpos'>freqParameter.t:CDS_OG006959_1stpos[4 1] (-Infinity,Infinity): 0.2590432025994182 0.2324113935821979 0.2243372904979906 0.28420811332039086 </statenode>
+<statenode id='clockRate.t:CDS_OG006959_1stpos'>clockRate.t:CDS_OG006959_1stpos[1 1] (0.0,Infinity): 1.0688507194569739 </statenode>
+<statenode id='kappa.t:CDS_OG006802_1stpos'>kappa.t:CDS_OG006802_1stpos[1 1] (0.0,Infinity): 2.79602809601541 </statenode>
+<statenode id='freqParameter.t:CDS_OG006802_1stpos'>freqParameter.t:CDS_OG006802_1stpos[4 1] (-Infinity,Infinity): 0.29000838719990796 0.21102370350521754 0.2218949831706561 0.2770729261242204 </statenode>
+<statenode id='clockRate.t:CDS_OG006802_1stpos'>clockRate.t:CDS_OG006802_1stpos[1 1] (0.0,Infinity): 0.9621655245312504 </statenode>
+<statenode id='kappa.t:CDS_OG002975_F_M_1stpos'>kappa.t:CDS_OG002975_F_M_1stpos[1 1] (0.0,Infinity): 3.0809494851386385 </statenode>
+<statenode id='freqParameter.t:CDS_OG002975_F_M_1stpos'>freqParameter.t:CDS_OG002975_F_M_1stpos[4 1] (-Infinity,Infinity): 0.28221959434856264 0.21738068905935654 0.19510701425943194 0.3052927023326477 </statenode>
+<statenode id='clockRate.t:CDS_OG002975_F_M_1stpos'>clockRate.t:CDS_OG002975_F_M_1stpos[1 1] (0.0,Infinity): 0.7676982331046899 </statenode>
+<statenode id='kappa.t:CDS_OG004636_F_M_1stpos'>kappa.t:CDS_OG004636_F_M_1stpos[1 1] (0.0,Infinity): 2.9020195631250183 </statenode>
+<statenode id='freqParameter.t:CDS_OG004636_F_M_1stpos'>freqParameter.t:CDS_OG004636_F_M_1stpos[4 1] (-Infinity,Infinity): 0.2755635764187989 0.23236278912679872 0.1972223931861561 0.29485124126824624 </statenode>
+<statenode id='clockRate.t:CDS_OG004636_F_M_1stpos'>clockRate.t:CDS_OG004636_F_M_1stpos[1 1] (0.0,Infinity): 0.9128087034168264 </statenode>
+<statenode id='kappa.t:CDS_OG003629_1stpos'>kappa.t:CDS_OG003629_1stpos[1 1] (0.0,Infinity): 2.8410707131855073 </statenode>
+<statenode id='freqParameter.t:CDS_OG003629_1stpos'>freqParameter.t:CDS_OG003629_1stpos[4 1] (-Infinity,Infinity): 0.2803768425993765 0.2204120108419422 0.22116062408581386 0.27805052247286605 </statenode>
+<statenode id='clockRate.t:CDS_OG003629_1stpos'>clockRate.t:CDS_OG003629_1stpos[1 1] (0.0,Infinity): 1.1108800428198589 </statenode>
+<statenode id='kappa.t:CDS_OG006798_F_1stpos'>kappa.t:CDS_OG006798_F_1stpos[1 1] (0.0,Infinity): 2.6745406424738585 </statenode>
+<statenode id='freqParameter.t:CDS_OG006798_F_1stpos'>freqParameter.t:CDS_OG006798_F_1stpos[4 1] (-Infinity,Infinity): 0.2759867455916259 0.2633318212378972 0.23203766339161738 0.22864376977885928 </statenode>
+<statenode id='clockRate.t:CDS_OG006798_F_1stpos'>clockRate.t:CDS_OG006798_F_1stpos[1 1] (0.0,Infinity): 1.1052490145738316 </statenode>
+<statenode id='kappa.t:CDS_OG007244_1stpos'>kappa.t:CDS_OG007244_1stpos[1 1] (0.0,Infinity): 3.066178564192806 </statenode>
+<statenode id='freqParameter.t:CDS_OG007244_1stpos'>freqParameter.t:CDS_OG007244_1stpos[4 1] (-Infinity,Infinity): 0.2772191657345452 0.19212460928664257 0.21862646297358893 0.31202976200522387 </statenode>
+<statenode id='clockRate.t:CDS_OG007244_1stpos'>clockRate.t:CDS_OG007244_1stpos[1 1] (0.0,Infinity): 0.8768338334011441 </statenode>
+<statenode id='kappa.t:CDS_OG005549_F_M_1stpos'>kappa.t:CDS_OG005549_F_M_1stpos[1 1] (0.0,Infinity): 2.7208365072106315 </statenode>
+<statenode id='freqParameter.t:CDS_OG005549_F_M_1stpos'>freqParameter.t:CDS_OG005549_F_M_1stpos[4 1] (-Infinity,Infinity): 0.2958739976593912 0.2310046724605694 0.20647695154424453 0.266644378335799 </statenode>
+<statenode id='clockRate.t:CDS_OG005549_F_M_1stpos'>clockRate.t:CDS_OG005549_F_M_1stpos[1 1] (0.0,Infinity): 0.7242675219555261 </statenode>
+<statenode id='ucldStdev.c:benchmark'>ucldStdev.c:benchmark[1 1] (0.0,Infinity): 0.42888634785101837 </statenode>
+<statenode id='rates.c:benchmark'>rates.c:benchmark[74 1] (0.0,Infinity): 0.6550262784821043 0.7286916528044878 0.8398926397922347 0.8039737204778966 1.9031225688538946 0.487983177296981 0.9757893852223118 0.6542099629356793 1.378560504718548 0.3937598748565329 0.5333106437754432 1.380709793498605 1.0222479602831676 0.5962370203975627 1.7018394597998883 1.5510558243385104 0.7112133822323581 0.4947337170242295 0.7898922969674131 0.7426443024194849 0.5779005523984597 0.5562732342331883 0.8961268813442451 0.9421394404600518 0.5846764723049752 0.9892763147094588 1.4569561715100052 0.6006384230992239 0.5532375388802292 1.4091105291851562 0.5694576239629761 1.4351396991162177 0.51284484728389 0.672444181831412 1.1809850476747294 0.6635321567372856 1.4344551495327476 0.7321029850690755 1.333653456011737 0.35758228978404216 1.4895006667778568 0.5879137685047306 0.9132112201057004 1.7609440484687433 0.8659291286496268 1.2180351436710397 2.4611676208312203 1.9143188885133697 1.2475031446880869 0.730294687961806 1.0660961431624563 1.2789541062276182 0.8772538187180504 2.003313248253201 0.6275212677533613 1.1376206339314572 0.7508372078059187 0.9838736798793007 1.5329225257849 0.7164815820313468 1.0327751159825354 0.6999033241738873 1.545963465934608 0.41197193335184995 0.5573401224715141 0.600757152380143 1.478007111517861 1.0578549836846236 1.6598108656122623 1.1171864155642026 0.5082113791357907 1.3573065599523015 1.203615397654806 0.8009345112179357 </statenode>
+<statenode id='birthRate.t:benchmark'>birthRate.t:benchmark[1 1] (-Infinity,Infinity): 6.867512753549414 </statenode>
 </itsabeastystatewerein>
+<!--
+{"operators":[
+{"id":"KappaScaler.s:CDS_OG004987_1stpos","p":0.7598218579843471,"accept":13365,"reject":61256,"acceptFC":13363,"rejectFC":61225,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG004987_1stpos","p":0.03273055503225516,"accept":18083,"reject":56644,"acceptFC":18069,"rejectFC":56638,"rejectIv":0,"rejectOp":0},
+{"id":"KappaScaler.s:CDS_OG007261_F_M_1stpos","p":0.7075854299110733,"accept":13665,"reject":61018,"acceptFC":13662,"rejectFC":61010,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG007261_F_M_1stpos","p":0.04212141198684456,"accept":18401,"reject":56487,"acceptFC":18387,"rejectFC":56482,"rejectIv":0,"rejectOp":0},
+{"id":"KappaScaler.s:CDS_OG002498_1stpos","p":0.7403245290825692,"accept":12518,"reject":62339,"acceptFC":12515,"rejectFC":62310,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG002498_1stpos","p":0.0333139809357093,"accept":18321,"reject":56266,"acceptFC":18308,"rejectFC":56256,"rejectIv":0,"rejectOp":0},
+{"id":"KappaScaler.s:CDS_OG004913_F_M_1stpos","p":0.8037065460376633,"accept":12389,"reject":62437,"acceptFC":12385,"rejectFC":62418,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG004913_F_M_1stpos","p":0.02409139922786846,"accept":18917,"reject":55569,"acceptFC":18906,"rejectFC":55555,"rejectIv":0,"rejectOp":0},
+{"id":"KappaScaler.s:CDS_OG004900_1stpos","p":0.6950855600446053,"accept":14309,"reject":60369,"acceptFC":14308,"rejectFC":60339,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG004900_1stpos","p":0.04407422668588529,"accept":18933,"reject":55261,"acceptFC":18922,"rejectFC":55247,"rejectIv":0,"rejectOp":0},
+{"id":"KappaScaler.s:CDS_OG003126_1stpos","p":0.7659288574350223,"accept":12944,"reject":61206,"acceptFC":12939,"rejectFC":61182,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG003126_1stpos","p":0.029868726202883705,"accept":19465,"reject":55008,"acceptFC":19450,"rejectFC":55000,"rejectIv":0,"rejectOp":0},
+{"id":"KappaScaler.s:CDS_OG003927_1stpos","p":0.74761232683262,"accept":12823,"reject":61568,"acceptFC":12821,"rejectFC":61539,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG003927_1stpos","p":0.03274445211427462,"accept":19125,"reject":55564,"acceptFC":19104,"rejectFC":55551,"rejectIv":0,"rejectOp":0},
+{"id":"KappaScaler.s:CDS_OG007144_F_1stpos","p":0.722847827884543,"accept":14969,"reject":59581,"acceptFC":14965,"rejectFC":59549,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG007144_F_1stpos","p":0.041018646157899206,"accept":19356,"reject":55163,"acceptFC":19339,"rejectFC":55153,"rejectIv":0,"rejectOp":0},
+{"id":"KappaScaler.s:CDS_OG006959_1stpos","p":0.7659060450456862,"accept":12839,"reject":61654,"acceptFC":12837,"rejectFC":61629,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG006959_1stpos","p":0.02993604627136983,"accept":19501,"reject":55200,"acceptFC":19476,"rejectFC":55188,"rejectIv":0,"rejectOp":0},
+{"id":"KappaScaler.s:CDS_OG006802_1stpos","p":0.748756365883372,"accept":13272,"reject":61246,"acceptFC":13267,"rejectFC":61231,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG006802_1stpos","p":0.033165477434862124,"accept":19217,"reject":55455,"acceptFC":19199,"rejectFC":55443,"rejectIv":0,"rejectOp":0},
+{"id":"KappaScaler.s:CDS_OG002975_F_M_1stpos","p":0.6760661029350185,"accept":15164,"reject":59094,"acceptFC":15160,"rejectFC":59075,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG002975_F_M_1stpos","p":0.0483631010962837,"accept":19305,"reject":55253,"acceptFC":19288,"rejectFC":55244,"rejectIv":0,"rejectOp":0},
+{"id":"KappaScaler.s:CDS_OG004636_F_M_1stpos","p":0.7463261441676734,"accept":13365,"reject":61267,"acceptFC":13360,"rejectFC":61246,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG004636_F_M_1stpos","p":0.03318383825457933,"accept":19349,"reject":55228,"acceptFC":19326,"rejectFC":55215,"rejectIv":0,"rejectOp":0},
+{"id":"KappaScaler.s:CDS_OG003629_1stpos","p":0.7048454850778957,"accept":10547,"reject":63723,"acceptFC":10543,"rejectFC":63707,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG003629_1stpos","p":0.03357663623506414,"accept":18921,"reject":55422,"acceptFC":18908,"rejectFC":55402,"rejectIv":0,"rejectOp":0},
+{"id":"KappaScaler.s:CDS_OG006798_F_1stpos","p":0.708136504229636,"accept":13107,"reject":61493,"acceptFC":13102,"rejectFC":61475,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG006798_F_1stpos","p":0.040650982811830924,"accept":19075,"reject":55283,"acceptFC":19057,"rejectFC":55270,"rejectIv":0,"rejectOp":0},
+{"id":"KappaScaler.s:CDS_OG007244_1stpos","p":0.6652880722239651,"accept":12767,"reject":62124,"acceptFC":12763,"rejectFC":62098,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG007244_1stpos","p":0.045454326862645215,"accept":18944,"reject":55817,"acceptFC":18927,"rejectFC":55810,"rejectIv":0,"rejectOp":0},
+{"id":"KappaScaler.s:CDS_OG005549_F_M_1stpos","p":0.7082244568115057,"accept":15082,"reject":59643,"acceptFC":15074,"rejectFC":59621,"rejectIv":0,"rejectOp":0},
+{"id":"FrequenciesExchanger.s:CDS_OG005549_F_M_1stpos","p":0.0440789805376704,"accept":19234,"reject":55640,"acceptFC":19214,"rejectFC":55627,"rejectIv":0,"rejectOp":0},
+{"id":"ClockRateExchanger","p":0.03725583603521452,"accept":344708,"reject":774651,"acceptFC":344425,"rejectFC":774466,"rejectIv":0,"rejectOp":0},
+{"id":"fastUcldStdevScaler.c:calsim","p":0.9143619393447473,"accept":600191,"reject":3127045,"acceptFC":600159,"rejectFC":3125667,"rejectIv":0,"rejectOp":0},
+{"id":"InternalnodesOperator.c:dna","p":2.231289298516219,"accept":2634437,"reject":4719277,"acceptFC":2632301,"rejectFC":4718515,"rejectIv":0,"rejectOp":0},
+{"id":"RootOperator1.c:dna","p":0.09888126532686514,"accept":12245,"reject":37456,"acceptFC":12237,"rejectFC":37452,"rejectIv":14235,"rejectOp":14235},
+{"id":"RootOperator2.c:dna","p":0.14391420764146515,"accept":17751,"reject":31928,"acceptFC":17729,"rejectFC":31920,"rejectIv":950,"rejectOp":0},
+{"id":"RatesRandomWalk.c:benchmark","p":0.40127847918507,"accept":383561,"reject":1482405,"acceptFC":383469,"rejectFC":1481796,"rejectIv":5612,"rejectOp":5612},
+{"id":"RatesSwapOperator.c:benchmark","p":"NaN","accept":62462,"reject":870188,"acceptFC":62422,"rejectFC":869870,"rejectIv":0,"rejectOp":0},
+{"id":"RatesScale.c:benchmark","p":0.6537076624877298,"accept":181654,"reject":749146,"acceptFC":181566,"rejectFC":748863,"rejectIv":0,"rejectOp":0},
+{"id":"YuleBirthRateScaler.t:dummy","p":0.38621696622885526,"accept":189723,"reject":555531,"acceptFC":189554,"rejectFC":555421,"rejectIv":0,"rejectOp":0},
+{"id":"YuleModelTreeScaler.t:dummy","p":0.9237895609263646,"accept":83945,"reject":1034045,"acceptFC":83940,"rejectFC":1033651,"rejectIv":0,"rejectOp":0},
+{"id":"YuleModelTreeRootScaler.t:dummy","p":0.8916074319412706,"accept":83210,"reject":1033504,"acceptFC":83207,"rejectFC":1033078,"rejectIv":164630,"rejectOp":164630},
+{"id":"YuleModelUniformOperator.t:dummy","p":"NaN","accept":619094,"reject":10567273,"acceptFC":618737,"rejectFC":10563236,"rejectIv":0,"rejectOp":0},
+{"id":"YuleModelSubtreeSlide.t:dummy","p":0.06252697367536046,"accept":132907,"reject":5458659,"acceptFC":132897,"rejectFC":5456535,"rejectIv":1313146,"rejectOp":1313146},
+{"id":"YuleModelNarrow.t:dummy","p":"NaN","accept":6280,"reject":5584142,"acceptFC":6223,"rejectFC":5582053,"rejectIv":0,"rejectOp":0},
+{"id":"YuleModelWide.t:dummy","p":"NaN","accept":28,"reject":1116977,"acceptFC":28,"rejectFC":1116555,"rejectIv":566204,"rejectOp":566204},
+{"id":"YuleModelWilsonBalding.t:dummy","p":"NaN","accept":10,"reject":1119017,"acceptFC":10,"rejectFC":1118599,"rejectIv":116598,"rejectOp":116598}
+]}
+-->

@@ -51,6 +51,16 @@ Remco Bouckaert\textsuperscript{1,2}
 
 
 
+\begin{figure}[!htb]
+\includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_timesettings.pdf}
+\caption{\textbf{Benchmarking settings for computational performance.}
+Settings are compared with the \textit{cat} configuration.
+Horizontal bars are the geometric-mean relative difference under each setting. }
+\end{figure}
+
+
+
+
 
 \begin{figure}[!htb]
 \includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round1_catquant.pdf}
@@ -58,16 +68,6 @@ Remco Bouckaert\textsuperscript{1,2}
 These results show that \emph{cat} does not benefit from adaptive weight sampling. Whereas, adapt and cons both greatly improve the \emph{quant} parameterisation for most datasets, as expected. }
 \end{figure}
 
-
-
-
-
-\begin{figure}[!htb]
-\includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_timesettings.pdf}
-\caption{\textbf{Benchmarking settings for computational performance.}
-Settings are compared with the \textit{cat} configuration.
-Horizontal bars are the geometric-mean relative difference under each setting. }
-\end{figure}
 
 
 

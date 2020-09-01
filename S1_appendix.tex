@@ -56,12 +56,12 @@ Remco Bouckaert\textsuperscript{1,2}
 
 
 
-\section{Linear piecewise approximation}
+\section{Piecewise linear approximation}
 
 In this article we introduced a linear piecewise approximation of the i-CDF (inverse cumulative distribution function) to improve the computational performance of the \textit{quant} parameterisation. 
 Let $\hat{F}^{-1}(\mathcal{R}_i)$ be the piecewise approximation of the i-CDF $F^{-1}(\mathcal{R}_i)$. 
-The approximation is comprised of $n$ pieces (where $n=100$ is fixed).
-Due to the non-linear nature of small and large quantiles in a Log-normal distribution, the first and last pieces are not linear approximations but rather equal to the underlying distribution itself. 
+The approximation consists of $n$ pieces (where $n=100$ is fixed).
+Due to the nonlinear nature of small and large quantiles in a Log-normal distribution, the first and last pieces are not linear approximations but rather equal to the underlying distribution itself. 
 
 
 %$\hat{F}(\mathcal{R}_i)$ be the piecewise approximation of $F(\mathcal{R}_i)$, and let  be its inverse function. 
@@ -69,7 +69,7 @@ Due to the non-linear nature of small and large quantiles in a Log-normal distri
 \begin{align}
 \hat{F}^{-1}(q) = \begin{cases} 
 F^{-1}(q) &\text{ if } q \leq \frac{1}{n} \text{ or } q \geq \frac{n-1}{n} \\ 
-F^{-1}(\floor{v}) + \Big(F^{-1}(\floor{v}+1) - F^{-1}(\floor{v}) \Big) \Big( v - \floor{v} \Big)  &\text{ otherwise} 
+F^{-1}(\floor{v}) + \Big(F^{-1}(\floor{v}+1) - F^{-1}(\floor{v}) \Big) \Big( v - \floor{v} \Big)  &\text{ otherwise}. 
 \end{cases}
 \end{align}
 
@@ -83,7 +83,7 @@ Values from the underlying function $F^{-1}$ are cached, enabling rapid computat
 
 
 Zhang and Drummond 2020 introduced several tree operators for the \textit{real} parameterisation -- including \texttt{ConstantDistance}, \texttt{SimpleDistance}, and \texttt{SmallPulley} \cite{zhang2020improving}.
-In this appendix, these three operators are extended to the  the \textit{quant} parameterisation.
+In this appendix, these three operators are extended to the \textit{quant} parameterisation.
 Following the notation presented in the main article, let $t_i$ be the time of node $i$, let $0 < q_i < 1$ be the rate quantile of node $i$, and let $r_i = \hat{F^{-1}}(q_i)$ be the real rate of node $i$ where $\hat{F^{-1}}$ is the linear approximation of the i-CDF.
 
 
@@ -200,7 +200,7 @@ While \texttt{ConstantDistance} proposes internal node heights, \texttt{SimpleDi
 \textul{\textit{Step 1}}. Propose a new height for $t_\mathcal{X}$:
 
 \begin{align}
-	{t_\mathcal{X}}^\prime \leftarrow t_\mathcal{X} + s\Sigma
+	{t_\mathcal{X}}^\prime \leftarrow t_\mathcal{X} + s\Sigma.
 \end{align}
 
 Ensure that $\max\{t_\mathcal{L}, t_\mathcal{R} \} < {t_\mathcal{X}}^\prime$, and if the constraint is broken then reject the proposal.  \\
@@ -303,7 +303,7 @@ Ensure that $0 < {d_\mathcal{L}}^\prime < d_\mathcal{L} + d_\mathcal{R}$, and if
 	J &= \begin{bmatrix} \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{L}} & \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{R}} \\
 						 \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{L}} & \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{R}} \end{bmatrix} \nonumber \\
 	 &= \begin{bmatrix} \frac{\partial {q_\mathcal{L}}^\prime}{\partial q_\mathcal{L}} & 0 \\
-						 0 & \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{R}} \end{bmatrix}
+						 0 & \frac{\partial {q_\mathcal{R}}^\prime}{\partial q_\mathcal{R}} \end{bmatrix}.
 \end{align}
 
 
@@ -325,7 +325,86 @@ Thus, as its final step, the operator returns $\ln |J|$.
 
 
 
+\clearpage
+\section{CisScale operator}
 
+\texttt{CisScale} was originally introduced by Zhang and Drummond 2020 for the \textit{real} parameterisation (therein named ucldstdevScaleOperator).
+Under the \textit{quant} configuration, the \texttt{CisScale} operator works as follows. \\
+
+\textul{\textit{Step 1}}. Propose a new value for the relaxed clock standard deviation $\sigma$
+
+
+\begin{align}
+	\sigma^\prime \leftarrow \sigma \times e^{s\Sigma}.
+\end{align}
+
+
+\textul{\textit{Step 2}}. Recalculate all branch substitution rate quantiles $q$ such that their rates $r$ remain constant
+
+
+\begin{align}
+	\text{let } & r = \hat{F}^{-1}(q|\sigma) \\ 
+	\text{let } & r^\prime = r\\ 
+	& q^\prime \leftarrow \hat{F}( r^\prime|\sigma^\prime) = \hat{F}( \hat{F}^{-1}(q|\sigma)|\sigma^\prime).
+\end{align}
+
+
+\textul{\textit{Step 3}}. Return the log Hastings-Green ratio of this proposal. 
+If $\Sigma$ was drawn from a symmetric proposal kernel (such as the Bactrian distribution), this is equal to:
+
+\begin{align}
+	|J| &= \log(e^{s\Sigma}) + \log\Big( \frac{\delta }{\delta q} \hat{F}( \hat{F}^{-1}(q|\sigma)|\sigma^\prime) \Big) \\
+	&= s\Sigma + \log D\hat{F}( \hat{F}^{-1}(q|\sigma)|\sigma^\prime) + \log D\hat{F}^{-1}(q|\sigma),
+\end{align}
+
+where derivatives $D\hat{F}$ and $D\hat{F}^{-1}$ can be approximated using either the piecewise linear model or standard numerical libraries. 
+
+\clearpage
+\section{Narrow exchange rates}
+
+
+The \texttt{NarrowExchangeRate} operator is also compatible with rate quantiles.
+This operator behaves the same as presented in the main article however the Hastings-Green ratio requires further augmentation due to changes in dimension throughout the proposal. \\
+
+
+\textul{\textit{Step 1}}. Apply \texttt{NarrowExchange} to the current tree topology as described in the main article. 
+This will return a Hastings ratio $H$ due to the asymmetry of this proposal.  \\
+
+
+\textul{\textit{Step 2}}. Compute the relevant branch rates $r_i$ for $r \in \{A,B,C,D \}$ of the current state from their respective quantile parameters.  \\
+
+\begin{align}
+	r_i = \hat{F}^{-1}(q_i).
+\end{align}
+
+
+\textul{\textit{Step 3}}. Propose new rates and node heights and compute the Hastings-Green ratio of the real-space component of the proposal (e.g. Algorithms 1-2 of the main article).    \\
+
+
+\begin{align}
+	(r_A^\prime, r_B^\prime, r_C^\prime, r_D^\prime, t_D^\prime, |J_r|) \leftarrow \texttt{PROPOSAL}(r_A, r_B, r_C, r_D, t_D).
+\end{align}
+
+
+\textul{\textit{Step 4}}. Transform the rates back into quantiles.
+
+\begin{align}
+	q_i^\prime = \hat{F}(r_i^\prime).
+\end{align}
+
+
+\textul{\textit{Step 5}}. Compute the log Hastings-Green ratio of the interconversion between rates and quantiles.
+
+
+\begin{align}
+	\log|J_q| = \log \hat{F}(q) + \log \hat{F}^{-1}(r^\prime).
+\end{align}
+
+% double logHR = Math.log(pld.getDerivativeAtQuantile(qOld));
+% logHR +=  Math.log(pld.getDerivativeAtQuantileInverse(rNew, qNew));
+
+
+\textul{\textit{Step 6}}. Return the total log Hastings-Green ratio of this proposal: $\log H + \log|J_r| + \log|J_q|$.
 
 \bibliography{references}
 
@@ -333,3 +412,5 @@ Thus, as its final step, the operator returns $\ln |J|$.
 
 
 \end{document}
+
+
