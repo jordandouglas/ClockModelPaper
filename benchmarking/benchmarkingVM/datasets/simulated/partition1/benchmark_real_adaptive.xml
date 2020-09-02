@@ -205,7 +205,7 @@
 
 
 
-		<operator id="AdaptableOperatorSampler.ucldStdev" spec="AdaptableOperatorSampler" weight="10.0">
+		<operator id="orc.operators.AdaptableOperatorSampler.ucldStdev" spec="orc.operators.AdaptableOperatorSampler" weight="10.0">
 
 			<parameter idref="ucldStdev.c:benchmark" />
 
@@ -214,14 +214,14 @@
 			
 			<operator id="UcldStdevRandomWalk.c:benchmark" spec="RealRandomWalkOperator" parameter="@ucldStdev.c:benchmark" weight="1" windowSize="1"/>
 			<operator id="UcldStdevScale.c:benchmark" spec="ScaleOperator" scaleFactor="0.5" parameter="@ucldStdev.c:benchmark" weight="1"/>
-			<operator id="SampleFromPriorOperator.c:ucldStdev" spec="SampleFromPriorOperator" parameter="@ucldStdev.c:benchmark" prior="@Gamma.2" weight="1"/>
+			<operator id="orc.operators.SampleFromPriorOperator.c:ucldStdev" spec="orc.operators.SampleFromPriorOperator" parameter="@ucldStdev.c:benchmark" prior="@Gamma.2" weight="1"/>
 
 
 
 		</operator>
 		
 
-		<operator id="AdaptableOperatorSampler.rates.root" spec="AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="0.3">
+		<operator id="orc.operators.AdaptableOperatorSampler.rates.root" spec="orc.operators.AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="0.3">
 
 			<operator id="RootOperator1.c:dna" spec="consoperators.SimpleDistance" twindowSize="0.02" tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" rates="@rates.c:benchmark"  weight="1"/>
 			<operator id="RootOperator2.c:dna" spec="consoperators.SmallPulley" dwindowSize="0.02" tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" rates="@rates.c:benchmark"  weight="1"/>
@@ -230,7 +230,7 @@
 
 
 
-		<operator id="AdaptableOperatorSampler.rates.internal" spec="AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="29.7">
+		<operator id="orc.operators.AdaptableOperatorSampler.rates.internal" spec="orc.operators.AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="29.7">
 
 
 
@@ -239,7 +239,7 @@
 			<operator id="RatesRandomWalk.c:benchmark" spec="RealRandomWalkOperator" parameter="@rates.c:benchmark" weight="1" windowSize="1"/>
 			
 			<operator id="RatesScale.c:benchmark" spec="ScaleOperator" scaleFactor="0.5" parameter="@rates.c:benchmark" weight="1"/>
-			<operator id="SampleFromPriorOperator.c:benchmark" spec="SampleFromPriorOperator" parameter="@rates.c:benchmark" np="1" prior="@LogNormalDistributionModel.rates" weight="1"/>
+			<operator id="orc.operators.SampleFromPriorOperator.c:benchmark" spec="orc.operators.SampleFromPriorOperator" parameter="@rates.c:benchmark" np="1" prior="@LogNormalDistributionModel.rates" weight="1"/>
 
 
 		</operator>

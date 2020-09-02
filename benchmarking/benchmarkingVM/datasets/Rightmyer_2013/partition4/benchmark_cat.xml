@@ -406,7 +406,7 @@
 							<log idref="treeLikelihood.co1_1stpos"/>
 
 			<log idref="ucldStdev.c:benchmark"/>
-			<log id="TipRates.t:benchmark" spec="inference.TipRateLogger" clock="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
+			<log id="TipRates.t:benchmark" spec="orc.inference.TipRateLogger" clock="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
 			<log id="RateStatLogger" spec="beast.evolution.branchratemodel.RateStatistic" branchratemodel="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
 			<log idref="birthRate.t:benchmark"/>
 		</logger>

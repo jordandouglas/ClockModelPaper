@@ -801,26 +801,26 @@
 
 
 
-		<operator id="AdaptableOperatorSampler.ucldStdev" spec="AdaptableOperatorSampler" weight="10.0">
+		<operator id="orc.operators.AdaptableOperatorSampler.ucldStdev" spec="orc.operators.AdaptableOperatorSampler" weight="10.0">
 
 			<parameter idref="ucldStdev.c:benchmark" />
 			
 			<operator id="UcldStdevRandomWalk.c:benchmark" spec="RealRandomWalkOperator" parameter="@ucldStdev.c:benchmark" weight="1" windowSize="1"/>
 			<operator id="UcldStdevScale.c:benchmark" spec="ScaleOperator" scaleFactor="0.5" parameter="@ucldStdev.c:benchmark" weight="1"/>
-			<operator id="SampleFromPriorOperator.c:ucldStdev" spec="SampleFromPriorOperator" parameter="@ucldStdev.c:benchmark" prior="@Gamma.2" weight="1"/>
+			<operator id="orc.operators.SampleFromPriorOperator.c:ucldStdev" spec="orc.operators.SampleFromPriorOperator" parameter="@ucldStdev.c:benchmark" prior="@Gamma.2" weight="1"/>
 
 
 		</operator>
 
 
 
-		<operator id="AdaptableOperatorSampler.rates.internal" spec="AdaptableOperatorSampler" parameter="@rateCategories.c:benchmark" tree="@Tree.t:benchmark" weight="30">
+		<operator id="orc.operators.AdaptableOperatorSampler.rates.internal" spec="orc.operators.AdaptableOperatorSampler" parameter="@rateCategories.c:benchmark" tree="@Tree.t:benchmark" weight="30">
 
 
 			<operator id="CategoriesRandomWalk.c:benchmark" spec="IntRandomWalkOperator" parameter="@rateCategories.c:benchmark" weight="1.0" windowSize="1"/>
 			<operator id="CategoriesSwapOperator.c:benchmark" spec="SwapOperator" intparameter="@rateCategories.c:benchmark" weight="1.0"/>
 			<operator id="CategoriesUniform.c:benchmark" spec="UniformOperator" parameter="@rateCategories.c:benchmark" weight="1.0"/>
-			<operator id="SampleFromPriorOperator.c:rates" spec="SampleFromPriorOperator" parameter="@rateCategories.c:benchmark" weight="1"/>
+			<operator id="orc.operators.SampleFromPriorOperator.c:rates" spec="orc.operators.SampleFromPriorOperator" parameter="@rateCategories.c:benchmark" weight="1"/>
 
 
 		</operator>
@@ -933,7 +933,7 @@
 							<log idref="treeLikelihood.CDS_OG005549_F_M_1stpos"/>
 
 			<log idref="ucldStdev.c:benchmark"/>
-			<log id="TipRates.t:benchmark" spec="inference.TipRateLogger" clock="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
+			<log id="TipRates.t:benchmark" spec="orc.inference.TipRateLogger" clock="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
 			<log id="RateStatLogger" spec="beast.evolution.branchratemodel.RateStatistic" branchratemodel="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
 			<log idref="birthRate.t:benchmark"/>
 		</logger>

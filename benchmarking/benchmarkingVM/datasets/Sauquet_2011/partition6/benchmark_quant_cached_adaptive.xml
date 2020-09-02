@@ -396,7 +396,7 @@
 
 	
 
-		<operator id="AdaptableOperatorSampler.ucldStdev" spec="AdaptableOperatorSampler" weight="10.0">
+		<operator id="orc.operators.AdaptableOperatorSampler.ucldStdev" spec="orc.operators.AdaptableOperatorSampler" weight="10.0">
 
 			<parameter idref="ucldStdev.c:benchmark" />
 
@@ -404,12 +404,12 @@
 			
 			<operator id="UcldStdevRandomWalk.c:benchmark" spec="RealRandomWalkOperator" parameter="@ucldStdev.c:benchmark" weight="1" windowSize="1"/>
 			<operator id="UcldStdevScale.c:benchmark" spec="ScaleOperator" scaleFactor="0.5" parameter="@ucldStdev.c:benchmark" weight="1"/>
-			<operator id="SampleFromPriorOperator.c:ucldStdev" spec="SampleFromPriorOperator" parameter="@ucldStdev.c:benchmark" prior="@Gamma.2" weight="1"/>
+			<operator id="orc.operators.SampleFromPriorOperator.c:ucldStdev" spec="orc.operators.SampleFromPriorOperator" parameter="@ucldStdev.c:benchmark" prior="@Gamma.2" weight="1"/>
 
 		</operator>
 		
 		
-		<operator id="AdaptableOperatorSampler.rates.root" spec="AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="0.297">
+		<operator id="orc.operators.AdaptableOperatorSampler.rates.root" spec="orc.operators.AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="0.297">
 
 
 			<operator id="RootOperator1.c:dna" spec="consoperators.SimpleDistance" twindowSize="0.02" tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" quantiles="@rates.c:benchmark"  weight="1"/>
@@ -420,7 +420,7 @@
 
 
 
-		<operator id="AdaptableOperatorSampler.rates.internal" spec="AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="29.703">
+		<operator id="orc.operators.AdaptableOperatorSampler.rates.internal" spec="orc.operators.AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="29.703">
 
 
 			<operator id="InternalnodesOperator.c:dna" spec="consoperators.InConstantDistanceOperator" twindowSize="0.02"  tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" quantiles="@rates.c:benchmark"  weight="1"/>
@@ -430,7 +430,7 @@
 			</operator>
 			<operator id="RatesSwapOperator.c:benchmark" spec="SwapOperator" parameter="@rates.c:benchmark" weight="1"/>
 
-			<operator id="SampleFromPriorOperator.c:benchmark" spec="SampleFromPriorOperator" parameter="@rates.c:benchmark" np="1" weight="1"/>
+			<operator id="orc.operators.SampleFromPriorOperator.c:benchmark" spec="orc.operators.SampleFromPriorOperator" parameter="@rates.c:benchmark" np="1" weight="1"/>
 
 		</operator>
 
@@ -498,7 +498,7 @@
 							<log idref="treeLikelihood.its"/>
 
 			<log idref="ucldStdev.c:benchmark"/>
-			<log id="TipRates.t:benchmark" spec="inference.TipRateLogger" clock="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
+			<log id="TipRates.t:benchmark" spec="orc.inference.TipRateLogger" clock="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
 			<log id="RateStatLogger" spec="beast.evolution.branchratemodel.RateStatistic" branchratemodel="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
 			<log idref="birthRate.t:benchmark"/>
 		</logger>

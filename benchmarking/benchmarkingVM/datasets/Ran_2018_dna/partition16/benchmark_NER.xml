@@ -793,7 +793,7 @@
 
 	
 
-		<operator id="AdaptableOperatorSampler.ucldStdev" spec="AdaptableOperatorSampler" weight="10.0">
+		<operator id="orc.operators.AdaptableOperatorSampler.ucldStdev" spec="orc.operators.AdaptableOperatorSampler" weight="10.0">
 
 			<parameter idref="ucldStdev.c:benchmark" />
 
@@ -808,12 +808,12 @@
 			</operator>
 
 
-			<operator id="SampleFromPriorOperator.c:ucldStdev" spec="SampleFromPriorOperator" parameter="@ucldStdev.c:benchmark" prior="@Gamma.2" weight="1"/>
+			<operator id="orc.operators.SampleFromPriorOperator.c:ucldStdev" spec="orc.operators.SampleFromPriorOperator" parameter="@ucldStdev.c:benchmark" prior="@Gamma.2" weight="1"/>
 
 		</operator>
 		
 
-		<operator id="AdaptableOperatorSampler.rates.root" spec="AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="0.4">
+		<operator id="orc.operators.AdaptableOperatorSampler.rates.root" spec="orc.operators.AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="0.4">
 
 			<operator id="RootOperator1.c:dna" spec="consoperators.SimpleDistance" twindowSize="0.005" tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" rates="@rates.c:benchmark"  weight="1">
 				<kernel spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
@@ -828,7 +828,7 @@
 
 
 
-		<operator id="AdaptableOperatorSampler.rates.internal" spec="AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="29.6">
+		<operator id="orc.operators.AdaptableOperatorSampler.rates.internal" spec="orc.operators.AdaptableOperatorSampler" parameter="@rates.c:benchmark" tree="@Tree.t:benchmark" weight="29.6">
 
 
 			<operator id="InternalnodesOperator.c:dna" spec="consoperators.InConstantDistanceOperator" twindowSize="0.005"  tree="@Tree.t:benchmark" clockModel="@RelaxedClock.c:benchmark" rates="@rates.c:benchmark"  weight="1">
@@ -843,7 +843,7 @@
 				<kernelDistribution spec="beast.evolution.operators.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
 			</operator>
 
-			<operator id="SampleFromPriorOperator.c:benchmark" spec="SampleFromPriorOperator" parameter="@rates.c:benchmark" np="1" prior="@LogNormalDistributionModel.rates" weight="1"/>
+			<operator id="orc.operators.SampleFromPriorOperator.c:benchmark" spec="orc.operators.SampleFromPriorOperator" parameter="@rates.c:benchmark" np="1" prior="@LogNormalDistributionModel.rates" weight="1"/>
 
 		</operator>
 
@@ -857,11 +857,11 @@
 		<operator id="YuleModelWilsonBalding.t:dummy" spec="WilsonBalding" tree="@Tree.t:benchmark" weight="3.0"/>
 
 
-		<operator id="AdaptableOperatorSampler.NER" spec="AdaptableOperatorSampler" tree="@Tree.t:benchmark" weight="15">
+		<operator id="orc.operators.AdaptableOperatorSampler.NER" spec="orc.operators.AdaptableOperatorSampler" tree="@Tree.t:benchmark" weight="15">
 
 			<metric spec="beast.evolution.tree.RobinsonsFouldMetric" taxonset="@TaxonSet.benchmark"/>
 			<operator id="YuleModelNarrow.t:dummy" spec="Exchange" tree="@Tree.t:benchmark" weight="1"/>
-			<operator id="NEROperator_nowalk_dAE_dBE_dCE" spec="NERVariants.NEROperator_dAE_dBE_dCE" tree="@Tree.t:benchmark" rates="@rates.c:benchmark" weight="1"/>
+			<operator id="NEROperator_nowalk_dAE_dBE_dCE" spec="orc.ner.NEROperator_dAE_dBE_dCE" tree="@Tree.t:benchmark" rates="@rates.c:benchmark" weight="1"/>
 			
 		</operator>
 
@@ -973,7 +973,7 @@
 							<log idref="treeLikelihood.CDS_OG005549_F_M_1stpos"/>
 
 			<log idref="ucldStdev.c:benchmark"/>
-			<log id="TipRates.t:benchmark" spec="inference.TipRateLogger" clock="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
+			<log id="TipRates.t:benchmark" spec="orc.inference.TipRateLogger" clock="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
 			<log id="RateStatLogger" spec="beast.evolution.branchratemodel.RateStatistic" branchratemodel="@RelaxedClock.c:benchmark" tree="@Tree.t:benchmark"/>
 			<log idref="birthRate.t:benchmark"/>
 		</logger>
