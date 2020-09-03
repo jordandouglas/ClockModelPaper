@@ -260,7 +260,7 @@ This work has produced an operator scheme that is up to 65 times more efficient 
 Finally, we explored variants of the standard narrow exchange operator which are specifically designed for the relaxed clock model.
 In the most extreme case, this new operator traversed tree space 40\% more efficiently than narrow exchange.
 The methodologies introduced are adaptive and highly effective on short as well as long alignments.
-The results are available via the open source optimised relaxed clock (ORC) package for BEAST 2 under the LGPL 2(?) licence (\url{https://github.com/jordandouglas/ORC}).
+The results are available via the open source optimised relaxed clock (ORC) package for BEAST 2 under the GPLv3 licence (\url{https://github.com/jordandouglas/ORC}).
 
 % Please keep the Author Summary between 150 and 200 words
 % Use first person. PLOS ONE authors please skip this step.
@@ -354,12 +354,12 @@ The discussed methods are implemented in the ORC package and compared using BEAS
 
 
 Let $\mathcal{T}$ be a binary rooted time tree with $N$ taxa, and %. Let $L$ be the number of sites within the multiple sequence alignment $D$. 
-$D$ data associated with the tips, like a multiple sequence alignment with $L$ sites, morphological data or geographic locations. 
+data $D$ associated with the tips, such as a multiple sequence alignment with $L$ sites, morphological data or geographic locations. 
 The posterior density of a phylogenetic model is described by
 
 \begin{eqnarray}
 \label{eq:bayesian}
-p(\mathcal{T}, \vec{\mathcal{R}}^{\,}, \sigma, \mu_C, \theta|D) \propto  p(D|\mathcal{T}, r(\vec{\mathcal{R}}^{\,}), \mu_C, \theta) \; p(\mathcal{T}|\theta) \;  p(\vec{\mathcal{R}}^{\,} | \sigma) \; p(\sigma) \; p(\mu_C) \; p(\theta).
+p(\mathcal{T}, \vec{\mathcal{R}}^{\,}, \sigma, \mu_C, \theta|D) \propto  p(D|\mathcal{T}, r(\vec{\mathcal{R}}^{\,}), \mu_C, \theta) \; p(\mathcal{T}|\theta) \;  p(\vec{\mathcal{R}}^{\,} | \sigma) \; p(\sigma) \; p(\mu_C) \; p(\theta)
 \end{eqnarray}
 
 \noindent
@@ -384,7 +384,7 @@ under which the probability of accepting proposed state $x^\prime$ from state $x
 
 \begin{eqnarray}
 \label{eq:MCMC}
-\alpha(x^\prime|x) =  \min\left( 1, \frac{p(x^\prime|D)}{p(x|D)} \; \frac{q(x|x^\prime)}{q(x^\prime|x)} \; |J| \right).
+\alpha(x^\prime|x) =  \min\left( 1, \frac{p(x^\prime|D)}{p(x|D)} \; \frac{q(x|x^\prime)}{q(x^\prime|x)} \; |J| \right)
 \end{eqnarray}
 
 \noindent
@@ -656,7 +656,7 @@ In its final phase, \texttt{AdaptiveOperatorSampler} samples operators (denoted 
 \end{align}
 
 \noindent
-where  $\mathbb{T}(\omega)$ the cumulative computational time spent on each operator, $\mathbb{D}(.)$ a distance function and we use $\Omega = 0.01$ to allow any sub-operator to be sampled regardless of its performance.
+where $\mathbb{T}(\omega)$ is the cumulative computational time spent on each operator, $\mathbb{D}$ is a distance function, and we use $\Omega = 0.01$ to allow any sub-operator to be sampled regardless of its performance.
 The parameters of interest (POI) may be either a set of numerical parameters (such as branch rates or node heights), or it may be the tree itself, but it cannot be both in its current form.
 The distance between state $x_p$ and its (accepted) proposal $x_p^\prime$ with respect to parameter $p$ is determined by
 
@@ -1627,7 +1627,7 @@ Given the overwhelming availability of sequence data, high performance on large 
 In this article, we delved into the highly correlated structure between substitution rates and divergence times of relaxed clock models, in order to develop MCMC operators which traverse its posterior space efficiently.
 We introduced a range of relaxed clock model operators and compared three molecular substitution rate parameterisations.
 These methodologies were compared by constructing phylogenetic models from several empirical datasets and comparing their abilities to converge in a tournament-like protocol (\textbf{Fig \ref{fig:tournament}}).
-The methods introduced are adaptive and treat each dataset differently, and perform never worse than without adaptation. %RB: is the part after the comma true?
+The methods introduced are adaptive and treat each dataset differently, and rarely perform worse than without adaptation. %RB: is the part after the comma true?
 This work has produced an operator configuration which is highly effective  on large alignments and can explore relaxed clock model space up to two orders of magnitude more efficiently than previous setups.
 
 %Averaged across all datasets, this configuration yielded a relaxed clock  mixing rate between 1.2 and 13 times as fast as \textit{cat} and between 1.8 and 7.8 times as fast as cons (\textit{real}), depending on the parameter.

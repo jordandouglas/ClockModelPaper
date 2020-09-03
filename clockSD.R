@@ -51,11 +51,11 @@ s_q0 = plnorm(s_r0, mu, sigma)
 s_q1 = plnorm(s_r0, mu2, sigma2)
 lines(c(s_r0, s_r0), c(0, max(s_q0, s_q1)), lwd = 2, col = "#696969", lty = "1515")
 
-lines(c(0, s_r0), c(s_q0, s_q0), lty = "1515", col = Scols[1], lwd = 2)
-lines(c(0, s_r0), c(s_q1, s_q1), lty = "1515", col = Scols[2], lwd = 2)
+lines(c(0, s_r0), c(s_q0, s_q0), lty = "1515", col = "#696969", lwd = 2)
+lines(c(0, s_r0), c(s_q1, s_q1), lty = "1515", col = "#696969", lwd = 2)
 points(c(s_r0, s_r0), c(s_q0, s_q1), pch = 16, col = Scols)
 
-text(s_r0/2, max(s_q0, s_q1) + 0.01, "New quantiles", adj = c(0.5, 0))
+text(s_r0/2, max(s_q0, s_q1) + 0.02, "New quantiles", adj = c(0.5, 0))
 
 
 
@@ -65,11 +65,11 @@ c_q0 = plnorm(c_r0, mu, sigma)
 c_r1 = qlnorm(c_q0, mu2, sigma2)
 lines(c(0, max(c_r0, c_r1)), c(c_q0, c_q0), lwd = 2, col = "#696969", lty = "1515")
 
-lines(c(c_r0, c_r0), c(0, c_q0), lty = "1515", col = "black", lwd = 2)
-lines(c(c_r1, c_r1), c(0, c_q0), lty = "1515", col = "red", lwd = 2)
-points(c(c_r0, c_r1), c(c_q0, c_q0), pch = 16, col = c("black", "red"))
+lines(c(c_r0, c_r0), c(0, c_q0), lty = "1515", col = "#696969", lwd = 2)
+lines(c(c_r1, c_r1), c(0, c_q0), lty = "1515", col = "#696969", lwd = 2)
+points(c(c_r0, c_r1), c(c_q0, c_q0), pch = 16, col = Scols)
 
-text(max(c_r0, c_r1)/2, c_q0 + 0.01, "New rates", adj = c(0.5, 0))
+text(max(c_r0, c_r1)/2, c_q0 + 0.02, "New rates", adj = c(0.5, 0))
 
 
 
