@@ -37,7 +37,7 @@ par(cex.main = 1.5)
 x = seq(from = 0, to = xmax, by = 0.01)
 
 plot(0, 0, type = "n", lwd = 3, yaxs = "i", axes = F, xlab = "Branch rate $r$", ylab = "$p(r|\\sigma)$",
-main = "Probability density function (Log-Normal)", xlim = c(0, xmax), ylim=c(0, 5))
+main = "Probability density function (log-normal)", xlim = c(0, xmax), ylim=c(0, 5))
 
 
 
@@ -82,7 +82,7 @@ b = 0:(nbins-1)
 
 
 for (i in 1:length(b)) {
-	lines(c(b[i], b[i]), c(0, xmax), lty = "1818", lwd = 0.5)
+	#lines(c(b[i], b[i]), c(0, xmax), lty = "1818", lwd = 0.5)
 }
 
 
@@ -131,7 +131,7 @@ for (i in 1:length(Svals)){
 		
 			r0 = qlnorm(q0, M, S)
 			r1 = qlnorm(q1, M, S)
-			lines(c(q0, q1), c(r0, r1), lwd = 0.6, col = Scols[i], lty = "22")
+			lines(c(q0, q1), c(r0, r1), lwd = 1, col = Scols[i], lty = "22")
 			points(q0, r0, pch = 16, col = Scols[i])
 		
 		}
