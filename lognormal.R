@@ -36,7 +36,7 @@ par(cex.main = 1.5)
 # 1) pdf
 x = seq(from = 0, to = xmax, by = 0.01)
 
-plot(0, 0, type = "n", lwd = 3, yaxs = "i", axes = F, xlab = "Branch rate $r$", ylab = "$p(r|\\sigma)$",
+plot(0, 0, type = "n", lwd = 3, yaxs = "i", axes = F, xlab = "Branch rate $r = r(\\mathcal{R})$", ylab = "$p(r|\\sigma)$",
 main = "Probability density function (log-normal)", xlim = c(0, xmax), ylim=c(0, 5))
 
 

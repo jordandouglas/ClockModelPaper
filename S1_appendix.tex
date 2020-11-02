@@ -8,6 +8,9 @@
 \usepackage{array}
 \usepackage{mhchem}
 \usepackage{mathtools}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
 
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
@@ -50,7 +53,7 @@ Remco Bouckaert\textsuperscript{1,2,3}
 
 
 
-\section*{S1 Appendix: Rate quantiles}
+\section*{S1 Appendix: Rate quantiles and operators }
 
 
 
@@ -403,6 +406,76 @@ This will return a Hastings ratio $H$ due to the asymmetry of this proposal.  \\
 
 
 \textul{\textit{Step 6}}. Return the total log Hastings-Green ratio of this proposal: $\log H + \log|J_r| + \log|J_q|$.
+
+
+
+
+\clearpage
+\section{Summary of proposal kernels}
+
+
+Operators whose proposal kernels are affected by the decision to use a Bactrian kernel, as opposed to a uniform kernel, are specified below.  
+
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{l p{3cm} l l} 
+
+ & Operator(s) & Proposal & Parameter $x$   \\
+   \hline
+ 1 & \texttt{RandomWalk}  & $x^\prime \leftarrow x + s\Sigma$ & $\vec{\mathcal{R}}^{\,}, \sigma$  \\
+  \hline
+ 2 & \texttt{Scale} & $x^\prime \leftarrow x \times e^{s\Sigma}$ & $\vec{\mathcal{R}}^{\,}, \sigma$   \\
+  \hline
+ 3 & \texttt{Interval} & $\begin{array} {rl} &y \leftarrow \frac{1 - x}{x} \times e^{s\Sigma} \\ &x^\prime \leftarrow \frac{y}{y + 1}  \end{array}$ & $\vec{\mathcal{R}}^{\,}$  \\
+  \hline
+ 4 & \texttt{ConstantDistance} \texttt{SimpleDistance} & $x^\prime \leftarrow x + s\Sigma$ & $t$ \\
+ \hline
+ 5 & \texttt{SmallPulley} & $x^\prime \leftarrow x + s\Sigma$ & $\vec{\mathcal{R}}^{\,}$  \\
+ \hline
+6 & \texttt{CisScale}  & $x^\prime \leftarrow x \times e^{s\Sigma}$ & $\sigma$   \\
+\end{tabular}
+\caption{Proposal kernels $q(x^\prime|x)$ of clock model operators.
+ In each operator, $\Sigma$ is drawn from either a $\text{Bactrian}(m)$ or $\text{uniform}$ distribution.  %RB: Uniform on which interval? (-1,1)?
+ The scale size $s$ is tunable.
+ \texttt{ConstantDistance} and \texttt{SimpleDistance} propose tree heights $t$.
+  The \texttt{Interval} operator applies to rate quantiles and respects its domain i.e. $0 < x, x^\prime < 1$. }
+\label{table:bactriankernels}
+\end{table}
+
+
+
+
+
+\clearpage
+\section{Supplementary NER Algorithm}
+
+A second NER algorithm is presented below. This operator was rejected by the screening protocol on simulated data.
+
+\begin{algorithm}
+\caption{The NER$\{ \mathcal{D}_{BC}, \mathcal{D}_{CE} \}$ operator.}
+\begin{algorithmic}[1]
+
+\Procedure{proposal}{$t_A$, $t_B$, $t_C$, $t_D$, $t_E$, $r_A$, $r_B$, $r_C$, $r_D$}     
+
+	\State
+    \State $s\Sigma \leftarrow $ getRandomWalkSize() \Comment{Random walk size is 0 unless this is NERw}
+    \State $t_D^\prime \leftarrow t_D + s\Sigma$ \Comment{Propose new node height for $D$}
+    \State
+    \State $r_A^\prime \leftarrow r_A$ \Comment{Propose new rates}
+    \State $r_B^\prime \leftarrow \frac{r_B(t_D - t_B) + r_D(t_E - t_D) + r_D(t_E - t_D^\prime)}{t_D^\prime - t_B}$
+    \State $r_C^\prime \leftarrow \frac{r_C(t_E - t_C) - r_D(t_E - t_D^\prime)}{t_D^\prime - t_C}$
+    \State $r_D^\prime \leftarrow r_D$
+    \State
+    \State $|J| \leftarrow \frac{(t_D - t_B)(t_E - t_C)}{(t_D^\prime - t_B)(t_D^\prime - t_C)}$ \Comment{Calculate Jacobian determinant}
+    \State \Return $(r_A^\prime, r_B^\prime, r_C^\prime, r_D^\prime, t_D^\prime, |J|)$
+    
+\EndProcedure
+
+\end{algorithmic}
+\label{alg:NER1}
+\end{algorithm}
+
 
 \bibliography{references}
 

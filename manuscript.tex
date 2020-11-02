@@ -253,7 +253,8 @@ Remco Bouckaert\textsuperscript{1,2,3}
 % Methods are best for long alignments
 
 %Molecular clock models are used for dating evolutionary divergence times. 
-Uncorrelated relaxed clock models enable estimation of molecular substitution rates across lineages and are widely used in phylogenetics for dating evolutionary divergence times.
+Relaxed clock models enable estimation of molecular substitution rates across lineages and are widely used in phylogenetics for dating evolutionary divergence times.
+Under the (uncorrelated) relaxed clock model, tree branches are associated with molecular substitution rates which are independently and identically distributed.
 In this article we delved into the internal complexities of the relaxed clock model in order to develop efficient MCMC operators for Bayesian phylogenetic inference.
 We compared three substitution rate parameterisations, introduced an adaptive operator which learns the weights of other operators during MCMC, and we explored how relaxed clock model estimation can benefit from two cutting-edge proposal kernels: the AVMVN and Bactrian kernels.
 This work has produced an operator scheme that is up to 65 times more efficient at exploring continuous relaxed clock parameters compared with previous setups, depending on the dataset. 
@@ -268,7 +269,7 @@ The results are available via the open source optimised relaxed clock (ORC) pack
 \section*{Author summary}
 
 Biological sequences, such as DNA, accumulate mutations over generations. 
-By comparing such sequences in a phylogenetic framework, the evolutionary tree of lifeforms can be inferred.
+By comparing such sequences in a phylogenetic framework, the evolutionary tree of lifeforms can be inferred and historic divergence dates can be estimated.
 With the overwhelming availability of biological sequence data, and the increasing affordability of collecting new data, the development of fast and efficient phylogenetic algorithms is more important than ever.
 In this article we focus on the relaxed clock model, which is very popular in phylogenetics.
 We explored how a range of optimisations can improve the statistical inference of the relaxed clock.
@@ -284,7 +285,7 @@ The methods introduced adapt to the dataset during computation and are highly ef
 
 
 The molecular clock hypothesis states that the evolutionary rates of biological sequences are approximately constant through time \cite{zuckerkandl1962molecular}.
-This assumption forms the basis of phylogenetics, under which the evolutionary trees and divergence dates of life forms are inferred from biological sequences, such as nucleic and amino acids \cite{douzery2003local, drummond2006relaxed}.
+This assumption forms the basis of clock-model-based phylogenetics, under which the evolutionary trees and divergence dates of life forms are inferred from biological sequences, such as nucleic and amino acids \cite{douzery2003local, drummond2006relaxed}.
 In Bayesian phylogenetics, these trees and their associated parameters are estimated as probability distributions \cite{kuhner1995estimating, larget1999markov, mau1999bayesian}. 
 Statistical inference can be performed by the Markov chain Monte Carlo (MCMC) algorithm \cite{metropolis53, hastings70} using platforms such as BEAST \cite{drummond2012bayesian}, BEAST 2 \cite{bouckaert2019beast}, MrBayes \cite{ronquist2012mrbayes}, and RevBayes \cite{hohna2016revbayes}.
 
@@ -300,13 +301,12 @@ In the latter case, a strict clock is probably not suitable.
 This led to the development of relaxed (uncorrelated) clock models, under which each branch in the phylogenetic tree has its own molecular substitution rate  \cite{drummond2006relaxed}.
 Branch rates can be drawn from a range of probability distributions including log-normal, exponential, gamma, and inverse-gamma distributions \cite{drummond2006relaxed, lepage2007general, li2012model}.
 This class of models is widely used, and has aided insight into many recent biological problems, including the 2016 Zika virus outbreak \cite{faria2017establishment} and the COVID-19 pandemic \cite{giovanetti2020first}.
-In the remainder of this paper we will only consider uncorrelated relaxed clock models.
-% is compatible with increasingly prominent multispecies coalescent models \cite{ogilvie2017starBEAST 2}, 
+ 
 
 Finally, although not the focus of this article, the class of correlated clock models assumes some form of auto-correlation between rates over time. 
-The correlation itself can invoke a range of stochastic models, including compound Poisson \cite{huelsenbeck2000compound} and CIR processes \cite{lepage2007general}, or it can exist as a series of local clocks \cite{drummond2010bayesian}. 
-However, due to the correlated and discrete nature of such models, the time required for MCMC to achieve convergence can be cumbersome, particularly for larger datasets \cite{drummond2010bayesian}.  
-
+The correlation itself can invoke a range of stochastic models, including compound Poisson \cite{huelsenbeck2000compound} and CIR processes \cite{lepage2007general}, Bayesian parametric models \cite{thorne1998estimating}, or it can exist as a series of local clocks \cite{yoder2000estimation, drummond2010bayesian}. 
+While these models may be more biologically realistic than uncorrelated models \cite{lepage2007general}, due to their correlated and discrete natures the time required for MCMC to achieve convergence can be cumbersome, particularly for larger datasets \cite{drummond2010bayesian}.  
+In the remainder of this paper we only consider uncorrelated relaxed clock models.
 
 
 With the overwhelming availability of biological sequence data, the development of efficient Bayesian phylogenetic methods is more important than ever. 
@@ -354,7 +354,7 @@ The discussed methods are implemented in the ORC package and compared using BEAS
 
 
 Let $\mathcal{T}$ be a binary rooted time tree with $N$ taxa, and %. Let $L$ be the number of sites within the multiple sequence alignment $D$. 
-data $D$ associated with the tips, such as a multiple sequence alignment with $L$ sites, morphological data or geographic locations. 
+data $D$ associated with the tips, such as a multiple sequence alignment with $L$ sites, morphological data, or geographic locations. 
 The posterior density of a phylogenetic model is described by
 
 \begin{eqnarray}
@@ -363,7 +363,7 @@ p(\mathcal{T}, \vec{\mathcal{R}}^{\,}, \sigma, \mu_C, \theta|D) \propto  p(D|\ma
 \end{eqnarray}
 
 \noindent
-where $\sigma$ and $\mu_C$ represent clock model related parameters, and $p(\mathcal{T}|\theta)$ is the tree prior where $\theta$ describes further unspecified parameters. 
+where $\sigma$ and $\mu_C$ represent clock model related parameters, and $p(\mathcal{T}|\theta)$ is the tree prior where $\theta$ describes parameters related to the tree branching or coalescent process. 
 The tree likelihood $p(D|\mathcal{T}, r(\vec{\mathcal{R}}^{\,}), \mu_C,\theta)$ %is calculated by the tree-pruning algorithm \cite{felsenstein1981evolutionary}, where
 has $\mu_C$ as the overall clock rate and
 $\vec{\mathcal{R}}^{\,}$ is an abstracted vector of branch rates which is transformed into real rates by function $r(\vec{\mathcal{R}}^{\,})$. 
@@ -375,7 +375,7 @@ Three methods of representing rates as $\vec{\mathcal{R}}^{\,}$ are presented in
 
 Let $t_i$ be the height (time) of node $i$.
 Each node $i$ in $\mathcal{T}$, except for the root, is associated with a parental branch length $\tau_i$ (the height difference between $i$ and its parent)  and a parental branch substitution rate $r_i = r(\mathcal{R}_i)$. 
-In a relaxed clock model, each of the $2N-2$ elements in $\vec{\mathcal{R}}^{\,}$ are independently distributed under the prior $p(\vec{\mathcal{R}}^{\,} | \sigma)$.
+In an uncorrelated relaxed clock model, each of the $2N-2$ elements in $\vec{\mathcal{R}}^{\,}$ are independently distributed under the prior $p(\vec{\mathcal{R}}^{\,} | \sigma)$.
 
 
 
@@ -388,7 +388,7 @@ under which the probability of accepting proposed state $x^\prime$ from state $x
 \end{eqnarray}
 
 \noindent
-where $q(a|b)$ is the transition kernel: the probability of proposing state $b$ from state $a$.
+where $q(x^\prime|x)$ is the transition kernel: the probability of proposing state $x^\prime$ from state $x$.
 The ratio between the two $\frac{q(x|x^\prime)}{q(x^\prime|x)}$ is known as the Hastings ratio \cite{hastings70}.
 The determinant of the Jacobian matrix $|J|$, known as the Green ratio, solves the dimension-matching problem for proposals which operate on multiple terms across one or more spaces \cite{green1995reversible, geyer2003metropolis}. 
 %This term is known as the Green ratio. 
@@ -498,7 +498,8 @@ However, the recently developed constant distance operators  -- which are incomp
 \subsubsection*{3. Quantiles}
 
 
-Finally, rates can be parameterised as real numbers describing the rate's quantile with respect to some underlying clock model distribution. Under the  \textit{quant} parameterisation, each of the $2N-2$ elements in $\vec{\mathcal{R}}^{\,}$ are uniformly distributed.
+Finally, rates can be parameterised as real numbers describing the rate's quantile with respect to some underlying clock model distribution \cite{li2012model}.
+ Under the  \textit{quant} parameterisation, each of the $2N-2$ elements in $\vec{\mathcal{R}}^{\,}$ are uniformly distributed.
 
 
 \begin{align}
@@ -546,20 +547,21 @@ Further details on the \textit{quant} piecewise approximation and constant dista
 %Zhang and Drummond 2020 introduced several tree operators for the \textit{real} parameterisation -- including \texttt{Constant Distance}, \texttt{Simple Distance}, and \texttt{Small Pulley}. In this project, we extended these three operators so that they are compatible with the \textit{quant} parameterisation. These are presented in \textbf{\nameref{sect:S1Appendix}}. 
 
 
-\clearpage
+
 \subsection*{Clock model operators}
 \label{sect:clockModelOperators}
 
 The weight of an operator determines the probability of the operator being selected.
 Weights are typically fixed throughout MCMC.
 In BEAST 2, operators can have their own tunable parameter $s$, which determines the step size of the operator.
-This term is learned over the course of the MCMC \cite{rosenthal2011optimal, bouckaert2019beast}. 
+This term is tuned over the course of MCMC by achieving a target acceptance rate, typically 0.234 \cite{roberts1997weak, rosenthal2011optimal, bouckaert2019beast}.
 We define clock model operators as those which generate proposals for either $\vec{\mathcal{R}}^{\,}$ or $\sigma$.
 Pre-existing BEAST 2 clock model operators are summarised in \textbf{Table \ref{table:kernels}}, and further operators are introduced throughout this paper.
 
 
 \begin{table}[h!]
 \centering
+\caption{\textbf{Summary of pre-existing BEAST 2 operators.}}
 \begin{tabular}{l p{4.2cm} l l} 
  Operator & Description & Parameters & Parameterisations  \\
   \hline
@@ -573,16 +575,17 @@ Pre-existing BEAST 2 clock model operators are summarised in \textbf{Table \ref{
  \hline
 \texttt{Uniform} & Resamples one element in the vector from a uniform distribution. & $\vec{\mathcal{R}}^{\,}$  & \textit{cat}, \textit{quant}  \\
  \hline
-\texttt{ConstantDistance} & Adjusts an internal node height and recalculates all incident branch rates such that the genetic distances remain constant \cite{zhang2020improving}.  & $\vec{\mathcal{R}}^{\,}, \mathcal{T}$ & \textit{real}, \textit{quant} \\
+\texttt{ConstantDistance} & Adjusts an internal node height and recalculates all incident branch rates such that the genetic distances remain constant \cite{zhang2020improving}.  & $\vec{\mathcal{R}}^{\,}, t$ & \textit{real}, \textit{quant} \\
  \hline
-\texttt{SimpleDistance} & Applies \texttt{ConstantDistance} to the root node \cite{zhang2020improving}.  & $\vec{\mathcal{R}}^{\,}, \mathcal{T}$ & \textit{real}, \textit{quant} \\
+\texttt{SimpleDistance} & Applies \texttt{ConstantDistance} to the root node \cite{zhang2020improving}.  & $\vec{\mathcal{R}}^{\,}, t$ & \textit{real}, \textit{quant} \\
  \hline
 \texttt{SmallPulley} & Proposes new branch rates incident to the root such that their combined genetic distance is constant  \cite{zhang2020improving}.  & $\vec{\mathcal{R}}^{\,}$ & \textit{real}, \textit{quant} \\
  \hline
 \texttt{CisScale} & Applies \texttt{Scale} to $\sigma$. Then recomputes all rates such that their quantiles are constant (for \textit{real} \cite{zhang2020improving}) or recomputes all quantiles such that their rates are constant (\textit{quant}).  & $\vec{\mathcal{R}}^{\,}, \sigma$ & \textit{real}, \textit{quant} \\
 \end{tabular}
-\caption{Summary of pre-existing BEAST 2 operators, which apply to either branch rates $\vec{\mathcal{R}}^{\,}$ or the clock standard deviation $\sigma$, and the substitution rate parameterisation they apply to.
- \texttt{ConstantDistance} and \texttt{SimpleDistance} also adjust node heights in the tree $\mathcal{T}$. }
+\begin{flushleft} Summary of pre-existing BEAST 2 operators, which apply to either branch rates $\vec{\mathcal{R}}^{\,}$ or the clock standard deviation $\sigma$, and the substitution rate parameterisation they apply to.
+ \texttt{ConstantDistance} and \texttt{SimpleDistance} also adjust node heights $t$.
+ \end{flushleft}
 \label{table:kernels}
 \end{table}
 
@@ -704,6 +707,7 @@ These are summarised in \textbf{Table \ref{table:adaptiveSampling}}.
 
 \begin{table}[h!]
 \centering
+\caption{\bf{Summary of \texttt{AdaptiveOperatorSampler} operators and their parameters of interest (POI).}}
 \begin{tabular}{l l l} 
  Meta-operator & POI & Operators \\
 \hline
@@ -721,22 +725,38 @@ These are summarised in \textbf{Table \ref{table:adaptiveSampling}}.
  \hline
    \multirow{2}{*}{\texttt{AdaptiveOperatorSampler(root)}} & \multirow{2}{*}{$\vec{\mathcal{R}}^{\,}, t$} & \texttt{SimpleDistance($\vec{\mathcal{R}}^{\,}, \mathcal{T}$)}  \\ 
 &&  \texttt{SmallPulley($\vec{\mathcal{R}}^{\,}, t$)}  \\
+\hline
+\hline
+ \multirow{7}{*}{\texttt{AdaptiveOperatorSampler(leaf)}} & \multirow{7}{*}{$\vec{\mathcal{R}}^{\,}_\text{leaf}, t$} & \texttt{ConstantDistance($\vec{\mathcal{R}}^{\,}_\text{leaf}, \mathcal{T}$)}   \\ 
+&& \texttt{LeafAVMVN($\vec{\mathcal{R}}^{\,}_\text{leaf}$)}  \\
+&& \texttt{RandomWalk($\vec{\mathcal{R}}^{\,}_\text{leaf}$)}  \\
+&& \texttt{Scale($\vec{\mathcal{R}}^{\,}_\text{leaf}$)}   \\
+&& \texttt{Interval($\vec{\mathcal{R}}^{\,}_\text{leaf}$)}   \\
+&& \texttt{Swap($\vec{\mathcal{R}}^{\,}_\text{leaf}$)}  \\
+&& \texttt{SampleFromPrior($\vec{\mathcal{R}}^{\,}_\text{leaf}$)} \\
+\hline
+ \multirow{6}{*}{\texttt{AdaptiveOperatorSampler(internal)}} & \multirow{6}{*}{$\vec{\mathcal{R}}^{\,}_\text{int}, t$} & \texttt{ConstantDistance($\vec{\mathcal{R}}^{\,}_\text{int}, \mathcal{T}$)}   \\ 
+&& \texttt{RandomWalk($\vec{\mathcal{R}}^{\,}_\text{int}$)}  \\
+&& \texttt{Scale($\vec{\mathcal{R}}^{\,}_\text{int}$)}   \\
+&& \texttt{Interval($\vec{\mathcal{R}}^{\,}_\text{int}$)}   \\
+&& \texttt{Swap($\vec{\mathcal{R}}^{\,}_\text{int}$)}  \\
+&& \texttt{SampleFromPrior($\vec{\mathcal{R}}^{\,}_\text{int}$)} \\
+\hline
+\hline
+ \multirow{2}{*}{\texttt{AdaptiveOperatorSampler(NER)}} & \multirow{2}{*}{$\mathcal{T}$} & NER$\{  \}$ \\ 
+ && NER$\{ \mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE} \}$ \\
 \end{tabular}
-\caption{Summary of \texttt{AdaptiveOperatorSampler} operators and their parameters of interest (POI).
-Different operators are applicable to different substitution rate parameterisations (\textbf{Table \ref{table:kernels}}). 
+\begin{flushleft}
+Different operators are applicable to different substitution rate parameterisations (\textbf{Table \ref{table:kernels}}).
+Nodes are broken down into regions to enable operators to be weighted according to their dimension.  
 \texttt{AdaptiveOperatorSampler(root)} applies the root-targeting constant distance operators only \cite{zhang2020improving} while \texttt{AdaptiveOperatorSampler($\vec{\mathcal{R}}^{\,}$)} targets all rates and all nodes heights $t$. 
-These two operators are weighted proportionally to the contribution of the root node to the total node count. }
+Nodes are further broken down into leaf rate $\vec{\mathcal{R}}^{\,}_\text{leaf}$ and internal node rate $\vec{\mathcal{R}}^{\,}_\text{int}$ operators.
+This facilitates suitable weighting of the \texttt{LeafAVMVN} operator, which is only applicable to leaf nodes (\textbf{\nameref{AVMVN_sect}}).
+In this setup, the \texttt{RandomWalk($x$)}, \texttt{Scale($x$)}, and \texttt{SampleFromPrior($x$)} operators apply to the corresponding set of branch rates $x$, whereas \texttt{ConstantDistance($x, \mathcal{T}$)} is only applicable to internal nodes which have at least one child of type $x \in \{\vec{\mathcal{R}}^{\,}_\text{leaf}, \vec{\mathcal{R}}^{\,}_\text{int}\}$.
+Finally, the Robinson-Foulds distance between trees before and after every proposal accept is used to train the weights behind \texttt{AdaptiveOperatorSampler(NER)} (see \textbf{\nameref{sect:NER}}). In the special case of NER proposals, the \texttt{RF} distance is always equal to 1. 
+\end{flushleft}
 \label{table:adaptiveSampling}
 \end{table}
-
-%RRB: should the root operator include a tree root scaler?
-
-
-
-%\texttt{AdaptiveOperatorSampler($\sigma$)} samples the clock standard deviation, 
-%\texttt{AdaptiveOperatorSampler($\mathcal{R}$)} samples branch rates and internal node heights,
-%and \texttt{AdaptiveOperatorSampler(root)} samples  
-
 
 
 
@@ -781,39 +801,7 @@ In this case, a target acceptance probability of around 0.3 is optimal.
 
 
 In this article we compare the abilities of uniform and Bactrian(0.95) proposal kernels at estimating clock model parameters. 
-The clock model operators which these proposal kernels apply to are described in \textbf{Table \ref{table:bactriankernels}}.
-
-
-
-
-
-\begin{table}[h!]
-\centering
-\begin{tabular}{l p{3cm} l l} 
-
- & Operator(s) & Proposal & Parameter $x$   \\
-   \hline
- 1 & \texttt{RandomWalk}  & $x^\prime \leftarrow x + s\Sigma$ & $\vec{\mathcal{R}}^{\,}, \sigma$  \\
-  \hline
- 2 & \texttt{Scale} & $x^\prime \leftarrow x \times e^{s\Sigma}$ & $\vec{\mathcal{R}}^{\,}, \sigma$   \\
-  \hline
- 3 & \texttt{Interval} & $\begin{array} {rl} &y \leftarrow \frac{1 - x}{x} \times e^{s\Sigma} \\ &x^\prime \leftarrow \frac{y}{y + 1}  \end{array}$ & $\vec{\mathcal{R}}^{\,}$  \\
-  \hline
- 4 & \texttt{ConstantDistance} \texttt{SimpleDistance} & $x^\prime \leftarrow x + s\Sigma$ & $t$ \\
- \hline
- 5 & \texttt{SmallPulley} & $x^\prime \leftarrow x + s\Sigma$ & $\vec{\mathcal{R}}^{\,}$  \\
- \hline
-6 & \texttt{CisScale}  & $x^\prime \leftarrow x \times e^{s\Sigma}$ & $\sigma$   \\
-\end{tabular}
-\caption{Proposal kernels $q(x^\prime|x)$ of clock model operators.
- In each operator, $\Sigma$ is drawn from either a $\text{Bactrian}(m)$ or $\text{uniform}$ distribution.  %RB: Uniform on which interval? (-1,1)?
- The scale size $s$ is tunable.
- \texttt{ConstantDistance} and \texttt{SimpleDistance} propose tree heights $t$.
-  The \texttt{Interval} operator applies to rate quantiles and respects its domain i.e. $0 < x, x^\prime < 1$. }
-\label{table:bactriankernels}
-\end{table}
-
-% RB: Perhaps add Hastings ratios to the table?
+The clock model operators which these proposal kernels apply to are described in \textbf{\nameref{sect:S1Appendix}}.
 
 
 
@@ -829,7 +817,6 @@ The clock model operators which these proposal kernels apply to are described in
 
 
 \clearpage
-% REMEMBER to define NNI and SPR acronyms in introduction preferably
 \subsection*{Narrow Exchange Rate} \label{sect:NER}
 
 The \texttt{NarrowExchange} operator \cite{drummond2002estimating}, used widely in BEAST \cite{drummond2012bayesian,suchard2018bayesian} and BEAST 2 \cite{bouckaert2019beast}, is similar to nearest neighbour interchange \cite{semple2003phylogenetics}, and works as follows (\textbf{Fig \ref{fig:narrowexchange}}):
@@ -935,34 +922,10 @@ Solving the determinant $|J|$ invokes standard analytical differentiation and li
 \paragraph{3. Automated generation of BEAST 2 operators.} Java class files were generated using string processing. 
 Each class corresponded to a single operator, extended the class of a meta-NER-operator, and consisted of the solutions found in \textbf{1} and the Jacobian determinant found in \textbf{2}. 
 $|J|$ is further augmented if the \textit{quant} parameterisation is employed (\textbf{\nameref{sect:S1Appendix}}).
-Two such operators are expressed in \textbf{Algorithms \ref{alg:NER1} and \ref{alg:NER2}}.
+One such operator is expressed in \textbf{Algorithm \ref{alg:NER2}} and a second in the appendix.
 %RB: what is the purpose of having 2 algorithms -- one (the second one, since that is the one performing well) is enough, no?
 
 
-
-\begin{algorithm}
-\caption{The NER$\{ \mathcal{D}_{BC}, \mathcal{D}_{CE} \}$ operator.}
-\begin{algorithmic}[1]
-
-\Procedure{proposal}{$t_A$, $t_B$, $t_C$, $t_D$, $t_E$, $r_A$, $r_B$, $r_C$, $r_D$}     
-
-	\State
-    \State $s\Sigma \leftarrow $ getRandomWalkSize() \Comment{Random walk size is 0 unless this is NERw}
-    \State $t_D^\prime \leftarrow t_D + s\Sigma$ \Comment{Propose new node height for $D$}
-    \State
-    \State $r_A^\prime \leftarrow r_A$ \Comment{Propose new rates}
-    \State $r_B^\prime \leftarrow \frac{r_B(t_D - t_B) + r_D(t_E - t_D) + r_D(t_E - t_D^\prime)}{t_D^\prime - t_B}$
-    \State $r_C^\prime \leftarrow \frac{r_C(t_E - t_C) - r_D(t_E - t_D^\prime)}{t_D^\prime - t_C}$
-    \State $r_D^\prime \leftarrow r_D$
-    \State
-    \State $|J| \leftarrow \frac{(t_D - t_B)(t_E - t_C)}{(t_D^\prime - t_B)(t_D^\prime - t_C)}$ \Comment{Calculate Jacobian determinant}
-    \State \Return $(r_A^\prime, r_B^\prime, r_C^\prime, r_D^\prime, t_D^\prime, |J|)$
-    
-\EndProcedure
-
-\end{algorithmic}
-\label{alg:NER1}
-\end{algorithm}
 
 
 \begin{algorithm}
@@ -1036,31 +999,16 @@ This effect was most dominant for the NER variants which satisfied distance cons
 
 
 Although there were several operators which behaved equivalently during this initial screening process, we selected $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ to proceed to benchmarking (\textbf{\nameref{sect:results}}).
-Due to the apparent sensitivity of NER operators to the data, we introduce the adaptive operator \texttt{AdaptiveOperatorSampler(NER)} which allows the operator scheme to fall back on the standard \texttt{NarrowExchange} in the event of $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ performing poorly (\textbf{Table \ref{table:adaptiveNER}}).
-
-
-
-
-
-\begin{table}[h!]
-\centering
-\begin{tabular}{l l l} 
- Meta-operator & POI & Operators \\
-\hline
- \multirow{2}{*}{\texttt{AdaptiveOperatorSampler(NER)}} & \multirow{2}{*}{$\mathcal{T}$} & NER$\{  \}$ \\ 
- && NER$\{ \mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE} \}$ \\
-\end{tabular}
-\caption{The adaptive NER operator. 
-The Robinson-Foulds distance between trees before and after every proposal accept is used to train the operator weights. In the special case of NER proposals, the \texttt{RF} distance is always equal to 1. }
-\label{table:adaptiveNER}
-\end{table}
+Due to the apparent sensitivity of NER operators to the data, we introduce the adaptive operator \texttt{AdaptiveOperatorSampler(NER)} which allows the operator scheme to fall back on the standard \texttt{NarrowExchange} in the event of $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ performing poorly (\textbf{Table \ref{table:adaptiveSampling}}).
 
 
 
 
 
 
-\clearpage
+
+
+
 \subsection*{An adaptive leaf rate operator}
 \label{AVMVN_sect}
 
@@ -1120,34 +1068,6 @@ The former employs the \texttt{LeafAVMVN} operator and learns its weight during 
 
 
 
-\begin{table}[h!]
-\centering
-\begin{tabular}{l l l} 
- Meta-operator & POI & Operators \\
-\hline
- \multirow{7}{*}{\texttt{AdaptiveOperatorSampler(leaf)}} & \multirow{7}{*}{$\vec{\mathcal{R}}^{\,}_\text{leaf}, t$} & \texttt{ConstantDistance($\vec{\mathcal{R}}^{\,}_\text{leaf}, \mathcal{T}$)}   \\ 
-&& \texttt{LeafAVMVN($\vec{\mathcal{R}}^{\,}_\text{leaf}$)}  \\
-&& \texttt{RandomWalk($\vec{\mathcal{R}}^{\,}_\text{leaf}$)}  \\
-&& \texttt{Scale($\vec{\mathcal{R}}^{\,}_\text{leaf}$)}   \\
-&& \texttt{Interval($\vec{\mathcal{R}}^{\,}_\text{leaf}$)}   \\
-&& \texttt{Swap($\vec{\mathcal{R}}^{\,}_\text{leaf}$)}  \\
-&& \texttt{SampleFromPrior($\vec{\mathcal{R}}^{\,}_\text{leaf}$)} \\
-\hline
- \multirow{6}{*}{\texttt{AdaptiveOperatorSampler(internal)}} & \multirow{6}{*}{$\vec{\mathcal{R}}^{\,}_\text{int}, t$} & \texttt{ConstantDistance($\vec{\mathcal{R}}^{\,}_\text{int}, \mathcal{T}$)}   \\ 
-&& \texttt{RandomWalk($\vec{\mathcal{R}}^{\,}_\text{int}$)}  \\
-&& \texttt{Scale($\vec{\mathcal{R}}^{\,}_\text{int}$)}   \\
-&& \texttt{Interval($\vec{\mathcal{R}}^{\,}_\text{int}$)}   \\
-&& \texttt{Swap($\vec{\mathcal{R}}^{\,}_\text{int}$)}  \\
-&& \texttt{SampleFromPrior($\vec{\mathcal{R}}^{\,}_\text{int}$)} \\
-\end{tabular}
-\caption{Leaf rate $\vec{\mathcal{R}}^{\,}_\text{leaf}$ and internal node rate $\vec{\mathcal{R}}^{\,}_\text{int}$ operators. 
-This division enables the two meta-operators to be weighted proportionally to the number of nodes (leaves or internal) which they apply to.
-This facilitates incorporation of the  \texttt{LeafAVMVN} operator, which is only applicable to leaf nodes.
-In this setup, the \texttt{RandomWalk($x$)}, \texttt{Scale($x$)}, and \texttt{SampleFromPrior($x$)} operators apply to the corresponding set of branch rates $x$, whereas \texttt{ConstantDistance($x, \mathcal{T}$)} is only applicable to internal nodes which have at least one child of type $x \in \{\vec{\mathcal{R}}^{\,}_\text{leaf}, \vec{\mathcal{R}}^{\,}_\text{int}\}$.}
-\label{table:AVMVNoperators}
-\end{table}
-
-
 
 
 
@@ -1175,6 +1095,7 @@ These are summarised in \textbf{Table \ref{table:newOperators}}.
 
 \begin{table}[h!]
 \centering
+\caption{\bf{Summary of clock model operators introduced throughout this article. }}
 \begin{tabular}{l p{4cm} l} 
  Operator & Description & Parameters  \\
   \hline
@@ -1186,7 +1107,9 @@ These are summarised in \textbf{Table \ref{table:newOperators}}.
   \hline
  \texttt{LeafAVMVN}  & Proposes new rates for all leaves in one move (see \nameref{AVMVN_sect}) \cite{baele2017adaptive}. & $\vec{\mathcal{R}}^{\,}$ \\
 \end{tabular}
-\caption{Summary of clock model operators introduced throughout this article. Pre-existing clock model operators are summarised in \textbf{Table \ref{table:kernels}}}
+\begin{flushleft}
+Pre-existing clock model operators are summarised in \textbf{Table \ref{table:kernels}}
+\end{flushleft}
 \label{table:newOperators}
 \end{table}
 
@@ -1197,6 +1120,7 @@ In \textbf{Table \ref{table:operatorSchemes}}, we define all operator configurat
 
 \begin{table}[h!]
 \centering
+\caption{\bf{Operator configurations and the substitution rate parameterisations which each operator is applicable to.}}
 \begin{tabular}{l l l l l l} 
 Configuration & Operator & Weight & \textit{real} & \textit{cat} & \textit{quant}  \\
   \hline
@@ -1234,13 +1158,13 @@ Configuration & Operator & Weight & \textit{real} & \textit{cat} & \textit{quant
  	\hline
  	\multirow{1}{*}{NER} & \texttt{AdaptiveOperatorSampler(NER)} & $15$ & \checkmark &  & \checkmark  \\
 \end{tabular}
-\caption{Operator configurations and the substitution rate parameterisations which each operator is applicable to. Within each configuration (and substitution rate parameterisation), the weight behind $\vec{\mathcal{R}}^{\,}$ sums to 30, the weight of $\sigma$ is equal to 10, and the weight of NER is equal to 15.
+\begin{flushleft}
+Within each configuration (and substitution rate parameterisation), the weight behind $\vec{\mathcal{R}}^{\,}$ sums to 30, the weight of $\sigma$ is equal to 10, and the weight of NER is equal to 15.
 %There is no cons (\textit{cat}) configuration because the parameterisation is not compatible the constant distance operators.
 Operators which apply to specific node sets (root, internal, leaf, or all)
- are weighted according to leaf count $N$. The adaptive operators are further broken down in \textbf{Tables \ref{table:adaptiveSampling}, \ref{table:adaptiveNER}, and \ref{table:AVMVNoperators}}.
+ are weighted according to leaf count $N$. The adaptive operators are further broken down in \textbf{Table \ref{table:adaptiveSampling}}.
 All other operators (i.e. those which apply to which apply to other terms in the state such as the nucleotide substitution model) are held constant within each dataset.
-} 
-
+\end{flushleft}
 %The total weight of all operators across all parameters was 116 in each MCMC setup.
 %%herefore a weight of 10 corresponds to sampling probability of 0.086, for example.
 \label{table:operatorSchemes}
@@ -1257,7 +1181,7 @@ All other operators (i.e. those which apply to which apply to other terms in the
 
 
 
-To avoid a cross-product explosion, the five targets for clock model improvement were evaluated sequentially in the following order: \textbf{\nameref{sect:adaptiveSampling}}, \textbf{\nameref{sect:rateparams}}, \textbf{\nameref{sect:randomwalks}}, \textbf{\nameref{sect:NER}}, and \textbf{\nameref{AVMVN_sect}}.
+To avoid an intractably large search space, the five targets for clock model improvement were evaluated sequentially in the following order: \textbf{\nameref{sect:adaptiveSampling}}, \textbf{\nameref{sect:rateparams}}, \textbf{\nameref{sect:randomwalks}}, \textbf{\nameref{sect:NER}}, and \textbf{\nameref{AVMVN_sect}}.
 The four operators introduced in these sections are summarised in \textbf{Table \ref{table:newOperators}}.
 The setting which was considered to be the best in each step was then incorporated into the following step. 
 This protocol and its outcomes are summarised in \textbf{Fig \ref{fig:tournament}}.
@@ -1302,6 +1226,7 @@ All methodologies used identical models and operator configurations, except wher
 % https://github.com/roblanf/BenchmarkAlignments
 \begin{table}[h!]
 \centering
+\caption{\bf{Benchmark datasets, sorted in increasing order of taxon count $N$.}}
 \begin{tabular}{l l l l l l l} 
   & $N$ & $P$ & $L$ (kb) & $L_\text{unq}$ (kb) & $\hat{\sigma}$ & \textbf{Description} \\
   \hline
@@ -1328,9 +1253,10 @@ All methodologies used identical models and operator configurations, except wher
 
 
 \end{tabular}
-\caption{Benchmark datasets, sorted in increasing order of taxon count $N$. Number of partitions $P$, total alignment length $L$, and number of unique site patterns $L_\text{unq}$ in the alignment are also specified.
+\begin{flushleft}
+Number of partitions $P$, total alignment length $L$, and number of unique site patterns $L_\text{unq}$ in the alignment are specified.
 Clock standard deviation estimates $\hat\sigma$ are of moderate magnitude, suggesting that most of these datasets are not clock-like.
-}
+\end{flushleft}
 \label{table:datasets}
 \end{table}
 
@@ -1342,6 +1268,7 @@ We compared the nocons, cons, and adapt operator configurations (\textbf{Table \
 nocons contained all of the standard BEAST 2 operator configurations and weightings for \textit{real}, \textit{cat}, and \textit{quant}.
 cons additionally contained (cons)tant distance operators and employed the same operator weighting scheme used previously \cite{zhang2020improving} (\textit{real} and \textit{quant} only). 
 Finally, the adapt configuration combined all of the above applicable operators, as well as the simple-but-bold \texttt{SampleFromPrior} operator, and learned the weights of each operator using the  \texttt{AdaptiveOperatorSampler}.
+
 
 
 
@@ -1381,7 +1308,8 @@ Bottom right: the effect of sequence length $L$ on operator weights learned by \
 \clearpage
 \subsection*{Round 2: The \textit{real} parameterisation yielded the fastest mixing }
 
-We compared the three rate parameterisations described in \textbf{\nameref{sect:rateparams}}. 
+
+In Round 1 we selected the best configuration for each of the three rate parameterisations described in \textbf{\nameref{sect:rateparams}},  and in Round 2 we compared the three to each other.
 adapt (\textit{real}) and adapt (\textit{quant}) both employed constant distance tree operators \cite{zhang2020improving} and both used the \texttt{AdaptiveOperatorSampler} operator to learn clock model operator weights.
 Clock model operators weights were also learned in the adapt (\textit{cat}) configuration.
 
@@ -1397,6 +1325,8 @@ Irrespective of mixing ability, the adapt (\textit{real}) configuration had the 
 
 
 Overall, we determined that \textit{real}, and its associated operators, made the best parameterisation covered here and it proceeded to the following rounds of benchmarking.
+This outcome allowed Rounds 3, 4, and 5 to commence. 
+If \textit{cat} dominated in this round, then the operators benchmarked in Rounds 4 and 5 would not be applicable to the parameterisation and the Bactrian proposal kernel benchmarked in Round 3 would not be applicable to branch rate categories in its present form.
 
 
 
@@ -1428,10 +1358,10 @@ The geometric mean under each configuration, averaged across all 9 datasets, is 
 
 
 We benchmarked the adapt (\textit{real}) configuration with a) standard uniform proposal kernels, and b) Bactrian(0.95) kernels \cite{yang2013searching}.
-These kernels applied to all clock model operators (\textbf{Table \ref{table:bactriankernels}}).
+These kernels applied to all clock model operators.
 These results confirmed that the Bactrian kernel yields faster mixing than the standard uniform kernel (\textbf{Fig \ref{fig:round3Results}}).
 All relevant continuous parameters considered had an ESS/hr, averaged across the 9 datasets, between 15\% and 20\% faster compared with the standard uniform kernel.
-Although the Bactrian proposal made little-to-no difference to the caterpillar dataset (Kawahara et al. 2013 \cite{Kawahara_2013}), every other dataset did in fact benefit.
+Although the Bactrian proposal made little-to-no difference to the caterpillar dataset (Kawahara and Rubinoff 2013 \cite{Kawahara_2013}), every other dataset did in fact benefit.
 Bactrian proposal kernels proceeded to round 4 of the relaxed clock model optimisation protocol. 
 
 
@@ -1460,7 +1390,7 @@ The benchmark datasets are fairly non clock-like and therefore could potentially
 
 Our experiments confirmed that $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ was indeed superior on larger datasets (where $L > 5$kb; \textbf{Fig \ref{fig:round4Results}}).
 While there was no significant difference in the ESS/hr of continuous parameters, $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ did have an acceptance rate 41\% higher than that of the standard \texttt{NarrowExchange} operator in the most extreme case (the bony fish alignment by Broughton et al.\cite{Broughton_2013}).
-The moderate variance in branch substitution rates ($\hat{\sigma} = 0.5$), coupled with a long alignment (7kb), and high topological uncertainty (\textbf{Fig \ref{fig:parameterisationResults}}) made this dataset the perfect target. 
+The moderate variance in branch substitution rates ($\hat{\sigma} = 0.5$), coupled with a long alignment (7kb), and high topological uncertainty (\textbf{Fig \ref{fig:round4Results}}) made this dataset the perfect target. 
 Every acceptance of a branch rearrangement proposal yields a new topology and thus facilitates traversal of tree space. 
 
 
@@ -1473,35 +1403,28 @@ The \texttt{AdaptiveOperatorSampler(NER)} operator proceeded into the final roun
 
 \begin{figure}[!h]
 \includegraphics[width=\textwidth]{benchmarking/benchmarkingVM/ESS_round4.pdf}
+\includegraphics[width=\textwidth]{Figures/broughton.pdf}
 \caption{\textbf{Round 4: benchmarking the NER operators.} 
-The learned weights (left) behind the two NER operators ($\text{NER} \{\}$ and $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$), and the relative difference between their acceptance rates $\alpha$ (right), are presented as functions of sequence length.
-Logistic and logarithmic regression models are shown, respectively. }
+Top: the learned weights (left) behind the two NER operators ($\text{NER} \{\}$ and $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$), and the relative difference between their acceptance rates $\alpha$ (right), are presented as functions of sequence length.
+Logistic and logarithmic regression models are shown, respectively.
+Bottom: maximum clade credibility tree of the bony fish dataset by Broughton et al. 2013 \cite{Broughton_2013}.
+This alignment received the strongest boost from NER, likely due to its high topological uncertainty and branch rate variance.  
+Branches are coloured by substitution rate, the y-axis shows time units, and internal nodes are labelled with posterior clade support.  
+Tree visualised using UglyTrees \cite{uglytrees}.}
 \label{fig:round4Results}
 \end{figure}
 
 
 
 
-\begin{figure}[!h]
-%\includegraphics[width=\textwidth]{Figures/cognato.pdf}
-\includegraphics[width=\textwidth]{Figures/broughton.pdf}
-\caption{\textbf{Maximum clade credibility tree of bony fishes.} 
-Branches are coloured by substitution rate (units: substitutions per site per unit of time) and the y-axis shows time, such that there is on average 1 substitution per unit of time.
-Internal nodes are labelled with posterior clade support. 
-This alignment (Broughton et al. 2013 \cite{Broughton_2013}) received the strongest boost from the $\text{NER}\{\mathcal{D}_{AE}, \mathcal{D}_{BE}, \mathcal{D}_{CE}\}$ operator, likely due to its high topological uncertainty and branch rate variance.   
-Tree generated by UglyTrees \cite{uglytrees}.  }
-\label{fig:parameterisationResults}
-\end{figure}
 
-
-
-
+\clearpage
 \subsection*{Round 5: The AVMVN leaf rate operator was computationally demanding and improved mixing very slightly}
 
 
 We tested the applicability of the AVMVN kernel to leaf rate proposals.
 This operator exploits any correlations which exist between leaf branch substitution rates.
-To do this, we wrapped the \texttt{LeafAVMVN} operator within an \texttt{AdaptiveOperatorSampler} (\textbf{Table \ref{table:AVMVNoperators}}).
+To do this, we wrapped the \texttt{LeafAVMVN} operator within an \texttt{AdaptiveOperatorSampler} (\textbf{Table \ref{table:adaptiveSampling}}).
 The two configurations compared here were a) adapt + Bactrian + NER (\textit{real}) and b) AVMVN + NER + Bactrian + adapt (\textit{real})  (\textbf{Table \ref{table:operatorSchemes}}).
 
 
@@ -1571,7 +1494,7 @@ While this may only be a modest improvement, incorporation of the Bactrian kerne
 
 
 In this article we introduced the family of narrow exchange rate operators (\textbf{Fig \ref{fig:narrowexchange}}).
-These operators are built on top of the narrow exchange operator and are specifically designed for the relaxed clock model, by accounting for the correlation which exists between branch lengths and branch substitution rates. 
+These operators are built on top of the narrow exchange operator and are specifically designed for the (uncorrelated) relaxed clock model, by accounting for the correlation which exists between branch lengths and branch substitution rates. 
 This family consists of 48 variants, each of which conserves a unique subset of genetic distances before and after the proposal. 
 While most of these operators turned out to be worse than narrow exchange, a small subset were more efficient, but only on large datasets.  
 
@@ -1612,6 +1535,24 @@ Given the overwhelming availability of sequence data, high performance on large 
 
 
 
+
+\subsection*{Future outlook}
+
+Based on these experiments, we have corroborated the results of Zhang and Drummond 2020 \cite{zhang2020improving} by showing that the relaxed clock rate parameterisation can be greatly superior to the categories parameterisation.
+However this is conditional on the use of operators. 
+Standard scale operators are ineffective in the real rate space on large datasets and constant distance operators tend to be the same on smaller ones.
+As the categories configuration is the current relaxed clock model default in both BEAST as well as BEAST 2, we therefore recommend researchers make the transition to the real rate parameterisation and employ an operator setup similar to that described in this article.
+
+However, there remain several avenues for improvement.
+First, the use of a Weibull clock model prior, as opposed to a log-normal, could further decrease calculation time due to its closed-form inverse cumulative distribution function.
+Second, the leaf rate AVMVN operator presented in this article could be improved by proposing rates for only a small subset of correlated branch rates per proposal, as opposed to all at once. 
+This would mitigate the computational burden associated with a covariance matrix which grows with the tree size (\textbf{\nameref{AVMVN_sect}}).
+Finally, while our adaptive weighting operator can learn operator weights within parameter spaces, it is not clear how to best assign weights between spaces; the relative weighting between clock model operators and tree topology operators for instance.
+
+
+
+
+\newpage
 \section*{Conclusion}
 
 In this article, we delved into the highly correlated structure between substitution rates and divergence times of relaxed clock models, in order to develop MCMC operators which traverse its posterior space efficiently.
@@ -1642,8 +1583,9 @@ We wish to thank Alexei J. Drummond for his help during conception of the narrow
 
 \paragraph*{S1 Appendix.}
 \label{sect:S1Appendix}
-{\textbf{Rate quantiles.} The linear piecewise approximation used in the \textit{quant} parameterisation is described. 
+{\textbf{Rate quantiles and operators.} The linear piecewise approximation used in the \textit{quant} parameterisation is described. 
 Constant distance tree operators, \texttt{CisScale}, and  \texttt{NarrowExchangeRate} are extended to the \textit{quant} parameterisation. 
+A second NER algorithm is specified.
 
 
 
