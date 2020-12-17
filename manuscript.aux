@@ -1,0 +1,256 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\bibstyle{plos2015}
+\citation{zuckerkandl1962molecular}
+\citation{douzery2003local,drummond2006relaxed}
+\citation{kuhner1995estimating,larget1999markov,mau1999bayesian}
+\citation{metropolis53,hastings70}
+\citation{drummond2012bayesian}
+\citation{bouckaert2019beast}
+\citation{ronquist2012mrbayes}
+\citation{hohna2016revbayes}
+\citation{zuckerkandl1965evolutionary,kuhner1995estimating,larget1999markov}
+\citation{gillespie1994causes,woolfit2009effective,loh2010optimization}
+\citation{drummond2006relaxed}
+\citation{drummond2006relaxed,lepage2007general,li2012model}
+\citation{faria2017establishment}
+\citation{giovanetti2020first}
+\citation{huelsenbeck2000compound}
+\citation{lepage2007general}
+\citation{thorne1998estimating}
+\citation{yoder2000estimation,drummond2010bayesian}
+\citation{lepage2007general}
+\citation{drummond2010bayesian}
+\citation{zhang2020using,meyer2019adaptive,hohna2012guided}
+\citation{altekar2004parallel,muller2019coupled}
+\citation{baele2017adaptive}
+\citation{yang2013searching,thawornwattana2018designing}
+\citation{zhang2020improving}
+\citation{drummond2006relaxed,li2012model,zhang2020improving}
+\citation{yang2013searching}
+\citation{baele2017adaptive}
+\citation{bouckaert2019beast}
+\citation{metropolis53,hastings70,green1995reversible}
+\citation{hastings70}
+\citation{green1995reversible,geyer2003metropolis}
+\citation{gelman2004parameterization}
+\newlabel{sect:models}{{}{3}{Models and Methods}{section*.4}{}}
+\newlabel{eq:bayesian}{{1}{3}{Preliminaries}{equation.0.1}{}}
+\newlabel{eq:MCMC}{{2}{3}{Preliminaries}{equation.0.2}{}}
+\newlabel{sect:rateparams}{{}{3}{Branch rate parameterisations}{section*.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \textbf  {Branch rate parameterisations.} Top left: the prior density of a branch rate $r$ under a Log-normal($-0.5\sigma ^2, \sigma $) distribution (with its mean fixed at 1). The function for transforming $\mathcal  {R}$ into branch rates $r(\mathcal  {R})$ is depicted for \textit  {real} (top right), \textit  {cat} (bottom left), and \textit  {quant} (bottom right). For visualisation purposes, there are only 10 bins/pieces displayed, however in practice we use $2N-2$ bins for \textit  {cat} and 100 pieces for \textit  {quant}. The first and final \textit  {quant} pieces are equal to the underlying function (solid lines) however the pieces in between use linear approximations of this function (dashed lines).\relax }}{3}{figure.caption.7}}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:rateparams}{{1}{3}{\textbf {Branch rate parameterisations.} Top left: the prior density of a branch rate $r$ under a Log-normal($-0.5\sigma ^2, \sigma $) distribution (with its mean fixed at 1). The function for transforming $\mathcal {R}$ into branch rates $r(\mathcal {R})$ is depicted for \textit {real} (top right), \textit {cat} (bottom left), and \textit {quant} (bottom right). For visualisation purposes, there are only 10 bins/pieces displayed, however in practice we use $2N-2$ bins for \textit {cat} and 100 pieces for \textit {quant}. The first and final \textit {quant} pieces are equal to the underlying function (solid lines) however the pieces in between use linear approximations of this function (dashed lines).\relax }{figure.caption.7}{}}
+\citation{zhang2020improving}
+\citation{drummond2006relaxed}
+\citation{zhang2020improving}
+\citation{li2012model}
+\citation{zhang2020improving}
+\citation{roberts1997weak,rosenthal2011optimal,bouckaert2019beast}
+\citation{drummond2006relaxed}
+\citation{zhang2020improving}
+\citation{zhang2020improving}
+\citation{zhang2020improving}
+\citation{zhang2020improving}
+\citation{zhang2020improving}
+\citation{zhang2020improving}
+\newlabel{sect:clockModelOperators}{{}{5}{Clock model operators}{section*.11}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces \textbf  {Summary of pre-existing BEAST 2 operators.}\relax }}{6}{table.caption.12}}
+\newlabel{table:kernels}{{1}{6}{\textbf {Summary of pre-existing BEAST 2 operators.}\relax }{table.caption.12}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {Clock standard deviation scale operators.} The two operators above propose a clock standard deviation $\sigma \rightarrow \sigma ^\prime $. Then, either the new quantiles are such that the rates remain constant (``New quantiles'', above) or the new rates are such that the quantiles remain constant (``New rates''). In the \textit  {real} parameterisation, these two operators are known as \texttt  {Scale} and \texttt  {CisScale}, respectively. Whereas, in \textit  {quant}, they are known as \texttt  {CisScale} and \texttt  {Scale}. \relax }}{6}{figure.caption.13}}
+\newlabel{fig:clockSDoperators}{{2}{6}{\textbf {Clock standard deviation scale operators.} The two operators above propose a clock standard deviation $\sigma \rightarrow \sigma ^\prime $. Then, either the new quantiles are such that the rates remain constant (``New quantiles'', above) or the new rates are such that the quantiles remain constant (``New rates''). In the \textit {real} parameterisation, these two operators are known as \texttt {Scale} and \texttt {CisScale}, respectively. Whereas, in \textit {quant}, they are known as \texttt {CisScale} and \texttt {Scale}. \relax }{figure.caption.13}{}}
+\citation{robinson1981comparison}
+\citation{jukes1969evolution}
+\citation{zhang2020improving}
+\citation{roberts1997weak}
+\citation{bouckaert2019beast,roberts1997weak}
+\citation{yang2013searching,thawornwattana2018designing}
+\newlabel{sect:adaptiveSampling}{{}{7}{Adaptive operator weighting}{section*.14}{}}
+\newlabel{eqn:adaptiveSampler}{{11}{7}{Adaptive operator weighting}{equation.0.11}{}}
+\newlabel{eqn:distanceFunctions}{{12}{7}{Adaptive operator weighting}{equation.0.12}{}}
+\newlabel{sect:randomwalks}{{}{7}{Bactrian proposal kernel}{section*.17}{}}
+\citation{yang2013searching}
+\citation{drummond2002estimating}
+\citation{drummond2012bayesian,suchard2018bayesian}
+\citation{bouckaert2019beast}
+\citation{semple2003phylogenetics}
+\citation{zhang2020improving}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \textbf  {Traversing likelihood space.} The z-axes above are the log-likelihoods of the genetic distance $r \times \tau $ between two simulated nucleic acid sequences of length $L$, under the Jukes-Cantor substitution model \cite  {jukes1969evolution}. Two possible proposals from the current state (white circle) are depicted. These proposals are generated by the \texttt  {RandomWalk} (\texttt  {RW}) and \texttt  {ConstantDistance} (\texttt  {CD}) operators. In the low signal dataset ($L=0.1$kb), both operators can traverse the likelihood space effectively. However, the exact same proposal by \texttt  {RandomWalk} incurs a much larger likelihood penalty in the $L=0.5$kb dataset by ``falling off the ridge'', in contrast to \texttt  {ConstantDistance} which ``walks along the ridge''. This discrepancy is even stronger for larger datasets and thus necessitates the use of operators such as \texttt  {ConstantDistance} which account for correlations between branch lengths and rates. \relax }}{8}{figure.caption.15}}
+\newlabel{fig:landscape}{{3}{8}{\textbf {Traversing likelihood space.} The z-axes above are the log-likelihoods of the genetic distance $r \times \tau $ between two simulated nucleic acid sequences of length $L$, under the Jukes-Cantor substitution model \cite {jukes1969evolution}. Two possible proposals from the current state (white circle) are depicted. These proposals are generated by the \texttt {RandomWalk} (\texttt {RW}) and \texttt {ConstantDistance} (\texttt {CD}) operators. In the low signal dataset ($L=0.1$kb), both operators can traverse the likelihood space effectively. However, the exact same proposal by \texttt {RandomWalk} incurs a much larger likelihood penalty in the $L=0.5$kb dataset by ``falling off the ridge'', in contrast to \texttt {ConstantDistance} which ``walks along the ridge''. This discrepancy is even stronger for larger datasets and thus necessitates the use of operators such as \texttt {ConstantDistance} which account for correlations between branch lengths and rates. \relax }{figure.caption.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces \textbf  {The Bactrian proposal kernel.} The step size made under a Bactrian proposal kernel is equal to $s \Sigma $ where $\Sigma $ is drawn from the above distribution and $s$ is tunable. \relax }}{8}{figure.caption.18}}
+\newlabel{fig:bactrian}{{4}{8}{\textbf {The Bactrian proposal kernel.} The step size made under a Bactrian proposal kernel is equal to $s \Sigma $ where $\Sigma $ is drawn from the above distribution and $s$ is tunable. \relax }{figure.caption.18}{}}
+\newlabel{sect:NER}{{}{8}{Narrow Exchange Rate}{section*.19}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces \textbf  {Depiction of \texttt  {NarrowExchange} and \texttt  {NarrowExchangeRate} operators.} Proposals are denoted by $\mathcal  {T} \rightarrow \mathcal  {T}^\prime $. The vertical axes correspond to node heights $t$. In the bottom figure, branch rates $r$ are indicated by line width and therefore genetic distances are equal to the width of each branch multiplied by its length. In this example, the $\mathcal  {D}_{AE}$ and $\mathcal  {D}_{CE}$ constraints are satisfied. \relax }}{8}{figure.caption.20}}
+\newlabel{fig:narrowexchange}{{5}{8}{\textbf {Depiction of \texttt {NarrowExchange} and \texttt {NarrowExchangeRate} operators.} Proposals are denoted by $\mathcal {T} \rightarrow \mathcal {T}^\prime $. The vertical axes correspond to node heights $t$. In the bottom figure, branch rates $r$ are indicated by line width and therefore genetic distances are equal to the width of each branch multiplied by its length. In this example, the $\mathcal {D}_{AE}$ and $\mathcal {D}_{CE}$ constraints are satisfied. \relax }{figure.caption.20}{}}
+\citation{higham2016matlab}
+\@writefile{toc}{\contentsline {paragraph}{1. Solution finding.}{10}{section*.22}}
+\@writefile{toc}{\contentsline {paragraph}{2. Solving Jacobian determinants.}{10}{section*.23}}
+\@writefile{toc}{\contentsline {paragraph}{3. Automated generation of BEAST 2 operators.}{10}{section*.24}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces The NER$\{ \mathcal  {D}_{AE}, \mathcal  {D}_{BE}, \mathcal  {D}_{CE} \}$ operator.\relax }}{10}{algorithm.1}}
+\newlabel{alg:NER2}{{1}{10}{The NER$\{ \mathcal {D}_{AE}, \mathcal {D}_{BE}, \mathcal {D}_{CE} \}$ operator.\relax }{algorithm.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{4. Screening operators for acceptance rate using simulated data.}{10}{section*.25}}
+\citation{baele2017adaptive,suchard2018bayesian}
+\citation{baele2017adaptive}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces \textbf  {Screening of NER and NERw variants by acceptance rate.} Top left: comparison of NER variants with the null operator $\text  {NER}\{\}$ = \texttt  {NarrowExchange}. Each operator is represented by a single point, uniquely encoded by the point stylings. The number of times each operator is proposed and accepted is compared with that of $\text  {NER}\{\}$, and one-sided z-tests are performed to assess the statistical significance between the two acceptance rates ($p = 0.001$). This process is repeated across $300$ simulated datasets. The axes of each plot are the proportion of these $300$ simulations for which there is evidence that the operator is significantly better than $\text  {NER}\{\}$ (x-axis) or worse than $\text  {NER}\{\}$ (y-axis). Top right: comparison of NER and NERw acceptance rates. Each point is one NER/NERw variant from a single simulation. Bottom: relationship between the acceptance rates $\alpha $ of $\text  {NER}\{\mathcal  {D}_{AE}, \mathcal  {D}_{BE}, \mathcal  {D}_{CE}\}$ and $\text  {NER}\{ \}$ with the clock model standard deviation $\sigma $ and the number of sites $L$. Each point is a single simulation. \relax }}{11}{figure.caption.26}}
+\newlabel{fig:acceptanceRateScreening}{{6}{11}{\textbf {Screening of NER and NERw variants by acceptance rate.} Top left: comparison of NER variants with the null operator $\text {NER}\{\}$ = \texttt {NarrowExchange}. Each operator is represented by a single point, uniquely encoded by the point stylings. The number of times each operator is proposed and accepted is compared with that of $\text {NER}\{\}$, and one-sided z-tests are performed to assess the statistical significance between the two acceptance rates ($p = 0.001$). This process is repeated across $300$ simulated datasets. The axes of each plot are the proportion of these $300$ simulations for which there is evidence that the operator is significantly better than $\text {NER}\{\}$ (x-axis) or worse than $\text {NER}\{\}$ (y-axis). Top right: comparison of NER and NERw acceptance rates. Each point is one NER/NERw variant from a single simulation. Bottom: relationship between the acceptance rates $\alpha $ of $\text {NER}\{\mathcal {D}_{AE}, \mathcal {D}_{BE}, \mathcal {D}_{CE}\}$ and $\text {NER}\{ \}$ with the clock model standard deviation $\sigma $ and the number of sites $L$. Each point is a single simulation. \relax }{figure.caption.26}{}}
+\newlabel{AVMVN_sect}{{}{11}{An adaptive leaf rate operator}{section*.27}{}}
+\citation{suchard2018bayesian}
+\citation{yule1925ii}
+\citation{hasegawa1985dating}
+\citation{ayres2012beagle}
+\citation{muller2019coupled}
+\citation{saitou1987neighbor}
+\citation{baele2017adaptive}
+\newlabel{sect:methods}{{}{12}{Model specification and MCMC settings}{section*.29}{}}
+\citation{Ran_2018,Dornburg_2012,Cognato_2001,Sauquet_2011,Broughton_2013,Kawahara_2013,Rightmyer_2013,Moyle_2016}
+\citation{lanfear2019Github,lanfear2016partitionfinder}
+\citation{Ran_2018}
+\citation{Dornburg_2012}
+\citation{Cognato_2001}
+\citation{Sauquet_2011}
+\citation{Broughton_2013}
+\citation{Kawahara_2013}
+\citation{Rightmyer_2013}
+\citation{Moyle_2016}
+\citation{zhang2020improving}
+\newlabel{sect:results}{{}{13}{Results}{section*.32}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces \textbf  {Protocol for optimising clock model methodologies.} Each area (detailed in \textbf  {\nameref  {sect:models}}) is optimised sequentially, and the best setting from each step is used when optimising the following step.\relax }}{13}{figure.caption.33}}
+\newlabel{fig:tournament}{{7}{13}{\textbf {Protocol for optimising clock model methodologies.} Each area (detailed in \textbf {\nameref {sect:models}}) is optimised sequentially, and the best setting from each step is used when optimising the following step.\relax }{figure.caption.33}{}}
+\citation{zhang2020improving}
+\citation{Ran_2018}
+\citation{yang2013searching}
+\citation{Kawahara_2013}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces \textbf  {Round 1: benchmarking the \texttt  {AdaptiveOperatorSampler} operator.} Top left, top right, bottom left: each plot compares the ESS/hr ($\pm 1$ standard error) across two operator configurations. Bottom right: the effect of sequence length $L$ on operator weights learned by \texttt  {AdaptiveOperatorSampler}. Both sets of observations are fit by logistic regression models. The benchmark datasets are displayed in \textbf  {Table \ref  {table:datasets}}. The \emph  {cat} and \emph  {quant} settings are evaluated in \textbf  {\nameref  {sect:SR_appendix}}. \relax }}{14}{figure.caption.36}}
+\newlabel{fig:round1Results}{{8}{14}{\textbf {Round 1: benchmarking the \texttt {AdaptiveOperatorSampler} operator.} Top left, top right, bottom left: each plot compares the ESS/hr ($\pm 1$ standard error) across two operator configurations. Bottom right: the effect of sequence length $L$ on operator weights learned by \texttt {AdaptiveOperatorSampler}. Both sets of observations are fit by logistic regression models. The benchmark datasets are displayed in \textbf {Table \ref {table:datasets}}. The \emph {cat} and \emph {quant} settings are evaluated in \textbf {\nameref {sect:SR_appendix}}. \relax }{figure.caption.36}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces \textbf  {Round 2: benchmarking substitution rate parameterisations.} Top left, top right, bottom left: the adapt (\textit  {real}), adapt (\textit  {cat}), and adapt (\textit  {quant}) configurations were compared. Bottom right: comparison of the mean tip substitution rate ESS/hr as a function of alignment length $L$. \relax }}{14}{figure.caption.38}}
+\newlabel{fig:round2Results}{{9}{14}{\textbf {Round 2: benchmarking substitution rate parameterisations.} Top left, top right, bottom left: the adapt (\textit {real}), adapt (\textit {cat}), and adapt (\textit {quant}) configurations were compared. Bottom right: comparison of the mean tip substitution rate ESS/hr as a function of alignment length $L$. \relax }{figure.caption.38}{}}
+\citation{Broughton_2013}
+\citation{Broughton_2013}
+\citation{uglytrees}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces \textbf  {Comparison of runtimes across methodologies.} The computational time required for a setting to sample a single state is divided by that of the nocons (\textit  {cat}) configuration. The geometric mean under each configuration, averaged across all 9 datasets, is displayed as a horizontal bar.\relax }}{15}{figure.caption.39}}
+\newlabel{fig:round2Resultsb}{{10}{15}{\textbf {Comparison of runtimes across methodologies.} The computational time required for a setting to sample a single state is divided by that of the nocons (\textit {cat}) configuration. The geometric mean under each configuration, averaged across all 9 datasets, is displayed as a horizontal bar.\relax }{figure.caption.39}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces \textbf  {Round 3: benchmarking the Bactrian kernel.} The ESS/hr ($\pm 1$ s.e.) under the Bactrian configuration, divided by that under the uniform kernel, is shown in the y-axis for each dataset and relevant parameter. Horizontal bars show the geometric mean under each parameter. \relax }}{15}{figure.caption.41}}
+\newlabel{fig:round3Results}{{11}{15}{\textbf {Round 3: benchmarking the Bactrian kernel.} The ESS/hr ($\pm 1$ s.e.) under the Bactrian configuration, divided by that under the uniform kernel, is shown in the y-axis for each dataset and relevant parameter. Horizontal bars show the geometric mean under each parameter. \relax }{figure.caption.41}{}}
+\citation{drummond2006relaxed}
+\citation{zhang2020improving}
+\citation{Ran_2018}
+\citation{haario2001adaptive,vihola2012robust,benson2018adaptive,davis2020blocking}
+\citation{roberts2007coupling}
+\citation{hohna2012guided,meyer2019adaptive}
+\citation{rosenthal2011optimal}
+\citation{thawornwattana2018designing}
+\citation{baele2017adaptive}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces \textbf  {Round 4: benchmarking the NER operators.} Top: the learned weights (left) behind the two NER operators ($\text  {NER} \{\}$ and $\text  {NER}\{\mathcal  {D}_{AE}, \mathcal  {D}_{BE}, \mathcal  {D}_{CE}\}$), and the relative difference between their acceptance rates $\alpha $ (right), are presented as functions of sequence length. Logistic and logarithmic regression models are shown, respectively. Bottom: maximum clade credibility tree of the bony fish dataset by Broughton et al. 2013 \cite  {Broughton_2013}. This alignment received the strongest boost from NER, likely due to its high topological uncertainty and branch rate variance. Branches are coloured by substitution rate, the y-axis shows time units, and internal nodes are labelled with posterior clade support. Tree visualised using UglyTrees \cite  {uglytrees}.\relax }}{16}{figure.caption.43}}
+\newlabel{fig:round4Results}{{12}{16}{\textbf {Round 4: benchmarking the NER operators.} Top: the learned weights (left) behind the two NER operators ($\text {NER} \{\}$ and $\text {NER}\{\mathcal {D}_{AE}, \mathcal {D}_{BE}, \mathcal {D}_{CE}\}$), and the relative difference between their acceptance rates $\alpha $ (right), are presented as functions of sequence length. Logistic and logarithmic regression models are shown, respectively. Bottom: maximum clade credibility tree of the bony fish dataset by Broughton et al. 2013 \cite {Broughton_2013}. This alignment received the strongest boost from NER, likely due to its high topological uncertainty and branch rate variance. Branches are coloured by substitution rate, the y-axis shows time units, and internal nodes are labelled with posterior clade support. Tree visualised using UglyTrees \cite {uglytrees}.\relax }{figure.caption.43}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces \textbf  {Round 5: benchmarking the \texttt  {LeafAVMVN} operator.} See \textbf  {Fig \ref  {fig:round3Results}} caption for figure notation. \relax }}{16}{figure.caption.45}}
+\newlabel{fig:round5Results}{{13}{16}{\textbf {Round 5: benchmarking the \texttt {LeafAVMVN} operator.} See \textbf {Fig \ref {fig:round3Results}} caption for figure notation. \relax }{figure.caption.45}{}}
+\newlabel{sect:discussion}{{}{16}{Discussion}{section*.47}{}}
+\citation{roberts2007coupling}
+\citation{yang2013searching}
+\citation{semple2003phylogenetics}
+\citation{hohna2008clock}
+\citation{simon1998local}
+\citation{jow2002bayesian}
+\citation{lakner2008efficiency}
+\citation{baele2017adaptive}
+\citation{zhang2020improving}
+\citation{zhang2020improving}
+\bibdata{references}
+\bibcite{zuckerkandl1962molecular}{1}
+\bibcite{douzery2003local}{2}
+\bibcite{drummond2006relaxed}{3}
+\bibcite{kuhner1995estimating}{4}
+\bibcite{larget1999markov}{5}
+\bibcite{mau1999bayesian}{6}
+\bibcite{metropolis53}{7}
+\bibcite{hastings70}{8}
+\bibcite{drummond2012bayesian}{9}
+\bibcite{bouckaert2019beast}{10}
+\newlabel{sect:S1Appendix}{{}{19}{S1 Appendix}{section*.55}{}}
+\newlabel{sect:WCSS_appendix}{{}{19}{S2 Appendix}{section*.56}{}}
+\newlabel{sect:SR_appendix}{{}{19}{S1 Fig}{section*.57}{}}
+\bibcite{ronquist2012mrbayes}{11}
+\bibcite{hohna2016revbayes}{12}
+\bibcite{zuckerkandl1965evolutionary}{13}
+\bibcite{gillespie1994causes}{14}
+\bibcite{woolfit2009effective}{15}
+\bibcite{loh2010optimization}{16}
+\bibcite{lepage2007general}{17}
+\bibcite{li2012model}{18}
+\bibcite{faria2017establishment}{19}
+\bibcite{giovanetti2020first}{20}
+\bibcite{huelsenbeck2000compound}{21}
+\bibcite{thorne1998estimating}{22}
+\bibcite{yoder2000estimation}{23}
+\bibcite{drummond2010bayesian}{24}
+\bibcite{zhang2020using}{25}
+\bibcite{meyer2019adaptive}{26}
+\bibcite{hohna2012guided}{27}
+\bibcite{altekar2004parallel}{28}
+\bibcite{muller2019coupled}{29}
+\bibcite{baele2017adaptive}{30}
+\bibcite{yang2013searching}{31}
+\bibcite{thawornwattana2018designing}{32}
+\bibcite{zhang2020improving}{33}
+\bibcite{green1995reversible}{34}
+\bibcite{geyer2003metropolis}{35}
+\bibcite{gelman2004parameterization}{36}
+\bibcite{roberts1997weak}{37}
+\bibcite{rosenthal2011optimal}{38}
+\bibcite{robinson1981comparison}{39}
+\bibcite{jukes1969evolution}{40}
+\bibcite{drummond2002estimating}{41}
+\bibcite{suchard2018bayesian}{42}
+\bibcite{semple2003phylogenetics}{43}
+\bibcite{higham2016matlab}{44}
+\bibcite{yule1925ii}{45}
+\bibcite{hasegawa1985dating}{46}
+\bibcite{ayres2012beagle}{47}
+\bibcite{saitou1987neighbor}{48}
+\bibcite{lanfear2019Github}{49}
+\bibcite{lanfear2016partitionfinder}{50}
+\bibcite{Ran_2018}{51}
+\bibcite{Kawahara_2013}{52}
+\bibcite{Broughton_2013}{53}
+\bibcite{uglytrees}{54}
+\bibcite{Dornburg_2012}{55}
+\bibcite{Cognato_2001}{56}
+\bibcite{Sauquet_2011}{57}
+\bibcite{Rightmyer_2013}{58}
+\bibcite{Moyle_2016}{59}
+\bibcite{haario2001adaptive}{60}
+\bibcite{vihola2012robust}{61}
+\bibcite{benson2018adaptive}{62}
+\bibcite{davis2020blocking}{63}
+\bibcite{roberts2007coupling}{64}
+\bibcite{hohna2008clock}{65}
+\bibcite{simon1998local}{66}
+\bibcite{jow2002bayesian}{67}
+\bibcite{lakner2008efficiency}{68}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces \bf  {Summary of \texttt  {AdaptiveOperatorSampler} operators and their parameters of interest (POI).}\relax }}{24}{table.caption.16}}
+\newlabel{table:adaptiveSampling}{{2}{24}{\bf {Summary of \texttt {AdaptiveOperatorSampler} operators and their parameters of interest (POI).}\relax }{table.caption.16}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces \bf  {Summary of clock model operators introduced throughout this article. }\relax }}{25}{table.caption.30}}
+\newlabel{table:newOperators}{{3}{25}{\bf {Summary of clock model operators introduced throughout this article. }\relax }{table.caption.30}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces \bf  {Operator configurations and the substitution rate parameterisations which each operator is applicable to.}\relax }}{26}{table.caption.31}}
+\newlabel{table:operatorSchemes}{{4}{26}{\bf {Operator configurations and the substitution rate parameterisations which each operator is applicable to.}\relax }{table.caption.31}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces \bf  {Benchmark datasets, sorted in increasing order of taxon count $N$.}\relax }}{27}{table.caption.34}}
+\newlabel{table:datasets}{{5}{27}{\bf {Benchmark datasets, sorted in increasing order of taxon count $N$.}\relax }{table.caption.34}{}}
+\newlabel{LastPage}{{}{27}{}{page.27}{}}
+\xdef\lastpage@lastpage{27}
+\xdef\lastpage@lastpageHy{27}
