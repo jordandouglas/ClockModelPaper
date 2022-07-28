@@ -8,7 +8,9 @@ Douglas, Jordan, Rong Zhang, and Remco Bouckaert. "Adaptive dating and fast prop
 
 
 
-
-
-
 For the BEAST 2 packagage see  https://github.com/jordandouglas/ORC
+
+
+
+
+All experiments were conducted with BEAST 2.6. The XML files are not compatible with 2.7.
